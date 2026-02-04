@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE-OS | Gayrimenkul Yönetim Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        },
+                        dark: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-scrollbar::-webkit-scrollbar { width: 4px; }
+        .sidebar-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+        .gradient-border { background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899); }
+        .glass-effect { backdrop-filter: blur(12px); background: rgba(15, 23, 42, 0.8); }
+        .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .nav-link { transition: all 0.2s ease; }
+        .nav-link:hover { background: rgba(59, 130, 246, 0.1); }
+        .nav-link.active { background: rgba(59, 130, 246, 0.2); border-left: 3px solid #3b82f6; }
+    </style>
+</head>
+<body class="bg-dark-950 text-dark-100 antialiased" x-data="{ 
+    sidebarOpen: true, 
+    darkMode: true, 
+    searchOpen: false, 
+    notificationsOpen: false,
+    currentPage: 'dashboard',
+    mobileMenuOpen: false
+}">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside :class="sidebarOpen ? 'w-72' : 'w-20'" class="fixed inset-y-0 left-0 z-50 flex flex-col bg-dark-900 border-r border-dark-700/50 transition-all duration-300 ease-in-out">
+            <!-- Logo -->
+            <div class="flex items-center h-16 px-4 border-b border-dark-700/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl gradient-border flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">R</span>
+                    </div>
+                    <div x-show="sidebarOpen" x-transition class="flex flex-col">
+                        <span class="text-lg font-bold text-white">RE-OS</span>
+                        <span class="text-xs text-dark-400">Gayrimenkul Yönetim</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto sidebar-scrollbar">
+                <!-- Ana Sayfa -->
+                <a href="#" @click.prevent="currentPage = 'dashboard'" :class="currentPage === 'dashboard' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                    <i class="fas fa-th-large w-5 h-5 mr-3"></i>
+                    <span x-show="sidebarOpen">Kontrol Paneli</span>
+                </a>
+
+                <!-- AI Copilot -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">AI Asistan</p>
+                    <a href="#" @click.prevent="currentPage = 'ai-copilot'" :class="currentPage === 'ai-copilot' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-robot w-5 h-5 mr-3 text-purple-400"></i>
+                        <span x-show="sidebarOpen">Lead-to-Deal AI</span>
+                        <span x-show="sidebarOpen" class="ml-auto px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-400 rounded-full">YENİ</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'call-ai'" :class="currentPage === 'call-ai' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-phone-volume w-5 h-5 mr-3 text-green-400"></i>
+                        <span x-show="sidebarOpen">Arama AI</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'buyer-intent'" :class="currentPage === 'buyer-intent' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-brain w-5 h-5 mr-3 text-pink-400"></i>
+                        <span x-show="sidebarOpen">Alıcı Niyeti</span>
+                    </a>
+                </div>
+
+                <!-- Değerleme -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Değerleme Motoru</p>
+                    <a href="#" @click.prevent="currentPage = 'valuation'" :class="currentPage === 'valuation' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-calculator w-5 h-5 mr-3 text-emerald-400"></i>
+                        <span x-show="sidebarOpen">Fiyat Stratejisi</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'market-trends'" :class="currentPage === 'market-trends' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-chart-line w-5 h-5 mr-3 text-blue-400"></i>
+                        <span x-show="sidebarOpen">Piyasa Trendleri</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'comparables'" :class="currentPage === 'comparables' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-balance-scale w-5 h-5 mr-3 text-amber-400"></i>
+                        <span x-show="sidebarOpen">Emsal Karşılaştırma</span>
+                    </a>
+                </div>
+
+                <!-- Portföy -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Portföy</p>
+                    <a href="#" @click.prevent="currentPage = 'listings'" :class="currentPage === 'listings' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-building w-5 h-5 mr-3 text-cyan-400"></i>
+                        <span x-show="sidebarOpen">İlanlar</span>
+                        <span x-show="sidebarOpen" class="ml-auto px-2 py-0.5 text-xs font-medium bg-cyan-500/20 text-cyan-400 rounded-full">247</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'projects'" :class="currentPage === 'projects' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-city w-5 h-5 mr-3 text-indigo-400"></i>
+                        <span x-show="sidebarOpen">Projeler</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'mls'" :class="currentPage === 'mls' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-share-alt w-5 h-5 mr-3 text-orange-400"></i>
+                        <span x-show="sidebarOpen">MLS Havuzu</span>
+                    </a>
+                </div>
+
+                <!-- CRM -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Müşteri İlişkileri</p>
+                    <a href="#" @click.prevent="currentPage = 'contacts'" :class="currentPage === 'contacts' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-users w-5 h-5 mr-3 text-sky-400"></i>
+                        <span x-show="sidebarOpen">Kişiler</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'leads'" :class="currentPage === 'leads' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-fire w-5 h-5 mr-3 text-red-400"></i>
+                        <span x-show="sidebarOpen">Potansiyel Müşteriler</span>
+                        <span x-show="sidebarOpen" class="ml-auto px-2 py-0.5 text-xs font-medium bg-red-500/20 text-red-400 rounded-full">12</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'deals'" :class="currentPage === 'deals' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-handshake w-5 h-5 mr-3 text-green-400"></i>
+                        <span x-show="sidebarOpen">Satışlar</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'tasks'" :class="currentPage === 'tasks' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-tasks w-5 h-5 mr-3 text-yellow-400"></i>
+                        <span x-show="sidebarOpen">Görevler</span>
+                        <span x-show="sidebarOpen" class="ml-auto px-2 py-0.5 text-xs font-medium bg-yellow-500/20 text-yellow-400 rounded-full">5</span>
+                    </a>
+                </div>
+
+                <!-- Pazarlama -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Pazarlama</p>
+                    <a href="#" @click.prevent="currentPage = 'campaigns'" :class="currentPage === 'campaigns' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-bullhorn w-5 h-5 mr-3 text-fuchsia-400"></i>
+                        <span x-show="sidebarOpen">Kampanyalar</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'websites'" :class="currentPage === 'websites' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-globe w-5 h-5 mr-3 text-teal-400"></i>
+                        <span x-show="sidebarOpen">Web Siteleri</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'portals'" :class="currentPage === 'portals' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-plug w-5 h-5 mr-3 text-violet-400"></i>
+                        <span x-show="sidebarOpen">Portal Entegrasyonları</span>
+                    </a>
+                </div>
+
+                <!-- Raporlar -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Analitik</p>
+                    <a href="#" @click.prevent="currentPage = 'reports'" :class="currentPage === 'reports' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-chart-pie w-5 h-5 mr-3 text-rose-400"></i>
+                        <span x-show="sidebarOpen">Raporlar</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'bi'" :class="currentPage === 'bi' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-chart-bar w-5 h-5 mr-3 text-lime-400"></i>
+                        <span x-show="sidebarOpen">İş Zekası</span>
+                    </a>
+                </div>
+
+                <!-- Ayarlar -->
+                <div class="pt-4">
+                    <p x-show="sidebarOpen" class="px-3 text-xs font-semibold text-dark-500 uppercase tracking-wider mb-2">Sistem</p>
+                    <a href="#" @click.prevent="currentPage = 'settings'" :class="currentPage === 'settings' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-cog w-5 h-5 mr-3 text-gray-400"></i>
+                        <span x-show="sidebarOpen">Ayarlar</span>
+                    </a>
+                    <a href="#" @click.prevent="currentPage = 'users'" :class="currentPage === 'users' ? 'bg-primary-600/20 text-primary-400 border border-primary-500/30' : 'text-dark-300 hover:bg-dark-800 hover:text-white'" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors">
+                        <i class="fas fa-user-cog w-5 h-5 mr-3 text-gray-400"></i>
+                        <span x-show="sidebarOpen">Kullanıcılar</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Kullanıcı Profili -->
+            <div class="p-4 border-t border-dark-700/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center">
+                        <span class="text-white font-semibold">AY</span>
+                    </div>
+                    <div x-show="sidebarOpen" class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">Ahmet Yılmaz</p>
+                        <p class="text-xs text-dark-400 truncate">Broker Yöneticisi</p>
+                    </div>
+                    <button x-show="sidebarOpen" class="p-1.5 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Ana İçerik -->
+        <div :class="sidebarOpen ? 'ml-72' : 'ml-20'" class="flex-1 flex flex-col transition-all duration-300">
+            <!-- Üst Navigasyon -->
+            <header class="sticky top-0 z-40 h-16 bg-dark-900/80 backdrop-blur-xl border-b border-dark-700/50">
+                <div class="flex items-center justify-between h-full px-6">
+                    <div class="flex items-center space-x-4">
+                        <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        
+                        <!-- Arama -->
+                        <div class="relative">
+                            <button @click="searchOpen = true" class="flex items-center space-x-3 px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-400 hover:text-white hover:border-dark-600 transition-colors">
+                                <i class="fas fa-search"></i>
+                                <span class="text-sm">Ara...</span>
+                                <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 text-xs font-medium bg-dark-700 text-dark-400 rounded">⌘K</kbd>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- AI Durumu -->
+                        <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+                            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                            <span class="text-xs font-medium text-emerald-400">AI Aktif</span>
+                        </div>
+
+                        <!-- Hızlı İşlemler -->
+                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="Yeni Ekle">
+                            <i class="fas fa-plus"></i>
+                        </button>
+
+                        <!-- Bildirimler -->
+                        <div class="relative">
+                            <button @click="notificationsOpen = !notificationsOpen" class="relative p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                <i class="fas fa-bell"></i>
+                                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            
+                            <!-- Bildirim Dropdown -->
+                            <div x-show="notificationsOpen" @click.away="notificationsOpen = false" x-transition class="absolute right-0 mt-2 w-80 bg-dark-800 border border-dark-700 rounded-xl shadow-2xl overflow-hidden" style="display: none;">
+                                <div class="p-4 border-b border-dark-700">
+                                    <h3 class="text-sm font-semibold text-white">Bildirimler</h3>
+                                </div>
+                                <div class="max-h-96 overflow-y-auto">
+                                    <a href="#" class="flex items-start p-4 hover:bg-dark-700/50 transition-colors border-b border-dark-700/50">
+                                        <div class="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-fire text-red-400"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-white">Yeni sıcak lead: Mehmet Kaya</p>
+                                            <p class="text-xs text-dark-400 mt-1">5 dakika önce</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="flex items-start p-4 hover:bg-dark-700/50 transition-colors border-b border-dark-700/50">
+                                        <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-check text-green-400"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-white">Satış tamamlandı: Villa #127</p>
+                                            <p class="text-xs text-dark-400 mt-1">1 saat önce</p>
+                                        </div>
+                                    </a>
+                                    <a href="#" class="flex items-start p-4 hover:bg-dark-700/50 transition-colors">
+                                        <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-sync text-blue-400"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-white">Portal senkronizasyonu tamamlandı</p>
+                                            <p class="text-xs text-dark-400 mt-1">2 saat önce</p>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="p-3 border-t border-dark-700">
+                                    <a href="#" class="block text-center text-sm text-primary-400 hover:text-primary-300">Tüm bildirimleri gör</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Karanlık Mod -->
+                        <button @click="darkMode = !darkMode" class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="Tema Değiştir">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Sayfa İçeriği -->
+            <main class="flex-1 overflow-y-auto p-6 bg-dark-950">
+                
+                <!-- KONTROL PANELİ -->
+                <div x-show="currentPage === 'dashboard'">
+                    <!-- Sayfa Başlığı -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">Kontrol Paneli</h1>
+                                <p class="text-dark-400 mt-1">Hoş geldiniz! İşte işletmenizin güncel durumu.</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <select class="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option>Son 7 gün</option>
+                                    <option>Son 30 gün</option>
+                                    <option>Son 90 gün</option>
+                                    <option>Bu yıl</option>
+                                </select>
+                                <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors">
+                                    <i class="fas fa-download mr-2"></i>Dışa Aktar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İstatistik Kartları -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <!-- Toplam İlan -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-building text-cyan-400 text-xl"></i>
+                                </div>
+                                <span class="flex items-center text-sm font-medium text-emerald-400">
+                                    <i class="fas fa-arrow-up mr-1"></i>%12
+                                </span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1">247</h3>
+                            <p class="text-dark-400 text-sm">Aktif İlan</p>
+                        </div>
+
+                        <!-- Sıcak Leadler -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-fire text-red-400 text-xl"></i>
+                                </div>
+                                <span class="flex items-center text-sm font-medium text-emerald-400">
+                                    <i class="fas fa-arrow-up mr-1"></i>%8
+                                </span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1">38</h3>
+                            <p class="text-dark-400 text-sm">Sıcak Lead</p>
+                        </div>
+
+                        <!-- Aktif Satışlar -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-handshake text-green-400 text-xl"></i>
+                                </div>
+                                <span class="flex items-center text-sm font-medium text-red-400">
+                                    <i class="fas fa-arrow-down mr-1"></i>%3
+                                </span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1">12</h3>
+                            <p class="text-dark-400 text-sm">Aktif Satış</p>
+                        </div>
+
+                        <!-- Gelir -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-lira-sign text-purple-400 text-xl"></i>
+                                </div>
+                                <span class="flex items-center text-sm font-medium text-emerald-400">
+                                    <i class="fas fa-arrow-up mr-1"></i>%24
+                                </span>
+                            </div>
+                            <h3 class="text-3xl font-bold text-white mb-1">₺2.4M</h3>
+                            <p class="text-dark-400 text-sm">Aylık Gelir</p>
+                        </div>
+                    </div>
+
+                    <!-- Ana Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Satış Hattı Grafiği -->
+                        <div class="lg:col-span-2 bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-white">Satış Hattı</h2>
+                                <div class="flex items-center space-x-2">
+                                    <button class="px-3 py-1.5 text-xs font-medium bg-primary-600/20 text-primary-400 rounded-lg">Hafta</button>
+                                    <button class="px-3 py-1.5 text-xs font-medium text-dark-400 hover:text-white rounded-lg">Ay</button>
+                                    <button class="px-3 py-1.5 text-xs font-medium text-dark-400 hover:text-white rounded-lg">Yıl</button>
+                                </div>
+                            </div>
+                            <canvas id="pipelineChart" height="300"></canvas>
+                        </div>
+
+                        <!-- AI Copilot Önerileri -->
+                        <div class="bg-gradient-to-br from-purple-900/50 to-dark-900 border border-purple-500/30 rounded-2xl p-6">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-robot text-purple-400"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-semibold text-white">AI Asistan</h2>
+                                    <p class="text-xs text-purple-300">Sizin için akıllı öneriler</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Öneri 1 -->
+                                <div class="bg-dark-800/50 rounded-xl p-4 border border-dark-700/50">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-fire text-red-400 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-white font-medium">Sıcak Lead Uyarısı</p>
+                                            <p class="text-xs text-dark-400 mt-1">Mehmet Kaya Beşiktaş'ta 3 mülk inceledi. Yüksek satın alma niyeti tespit edildi.</p>
+                                            <button class="mt-2 text-xs text-primary-400 hover:text-primary-300">Şimdi İletişime Geç →</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Öneri 2 -->
+                                <div class="bg-dark-800/50 rounded-xl p-4 border border-dark-700/50">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-chart-line text-amber-400 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-white font-medium">Fiyat Optimizasyonu</p>
+                                            <p class="text-xs text-dark-400 mt-1">5 ilan piyasa değerinin %8 üzerinde fiyatlandırılmış. Hızlı satış için düzenleme önerilir.</p>
+                                            <button class="mt-2 text-xs text-primary-400 hover:text-primary-300">İlanları İncele →</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Öneri 3 -->
+                                <div class="bg-dark-800/50 rounded-xl p-4 border border-dark-700/50">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-handshake text-green-400 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-white font-medium">Satış Kapanışı</p>
+                                            <p class="text-xs text-dark-400 mt-1">Ayşe Demir'in satışı %90 hazır. İmza için son sözleşmeyi gönderin.</p>
+                                            <button class="mt-2 text-xs text-primary-400 hover:text-primary-300">Sözleşme Hazırla →</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İkinci Satır -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <!-- Son Leadler -->
+                        <div class="lg:col-span-2 bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-white">Son Potansiyel Müşteriler</h2>
+                                <a href="#" @click.prevent="currentPage = 'leads'" class="text-sm text-primary-400 hover:text-primary-300">Tümünü Gör</a>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr class="text-left text-xs font-medium text-dark-400 uppercase tracking-wider">
+                                            <th class="pb-4">Kişi</th>
+                                            <th class="pb-4">İlgi Alanı</th>
+                                            <th class="pb-4">Puan</th>
+                                            <th class="pb-4">Durum</th>
+                                            <th class="pb-4">İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-dark-700/50">
+                                        <tr>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                                                        <span class="text-white font-medium text-sm">MK</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-medium text-white">Mehmet Kaya</p>
+                                                        <p class="text-xs text-dark-400">mehmet@email.com</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <p class="text-sm text-dark-300">3+1 Daire</p>
+                                                <p class="text-xs text-dark-500">Beşiktaş, İstanbul</p>
+                                            </td>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="w-16 h-2 bg-dark-700 rounded-full overflow-hidden">
+                                                        <div class="w-[85%] h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-emerald-400">85</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded-full">Sıcak</span>
+                                            </td>
+                                            <td class="py-4">
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="Ara">
+                                                    <i class="fas fa-phone"></i>
+                                                </button>
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="WhatsApp">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                                                        <span class="text-white font-medium text-sm">AD</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-medium text-white">Ayşe Demir</p>
+                                                        <p class="text-xs text-dark-400">ayse@email.com</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <p class="text-sm text-dark-300">Villa</p>
+                                                <p class="text-xs text-dark-500">Bodrum, Muğla</p>
+                                            </td>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="w-16 h-2 bg-dark-700 rounded-full overflow-hidden">
+                                                        <div class="w-[72%] h-full bg-gradient-to-r from-amber-500 to-orange-400 rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-amber-400">72</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-500/20 text-amber-400 rounded-full">Ilık</span>
+                                            </td>
+                                            <td class="py-4">
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="Ara">
+                                                    <i class="fas fa-phone"></i>
+                                                </button>
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="WhatsApp">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                                                        <span class="text-white font-medium text-sm">CY</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-medium text-white">Can Yıldız</p>
+                                                        <p class="text-xs text-dark-400">can@email.com</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <p class="text-sm text-dark-300">Ofis</p>
+                                                <p class="text-xs text-dark-500">Levent, İstanbul</p>
+                                            </td>
+                                            <td class="py-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="w-16 h-2 bg-dark-700 rounded-full overflow-hidden">
+                                                        <div class="w-[45%] h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full"></div>
+                                                    </div>
+                                                    <span class="text-sm font-medium text-blue-400">45</span>
+                                                </div>
+                                            </td>
+                                            <td class="py-4">
+                                                <span class="px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">Soğuk</span>
+                                            </td>
+                                            <td class="py-4">
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="Ara">
+                                                    <i class="fas fa-phone"></i>
+                                                </button>
+                                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors" title="WhatsApp">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Görevler -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-white">Bugünkü Görevler</h2>
+                                <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3 p-3 bg-dark-800/50 rounded-xl border border-dark-700/50">
+                                    <input type="checkbox" class="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white">Mehmet Kaya'yı Beşiktaş mülkü için ara</p>
+                                        <p class="text-xs text-dark-400 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>10:00
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-red-500/20 text-red-400 rounded">Yüksek</span>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-dark-800/50 rounded-xl border border-dark-700/50">
+                                    <input type="checkbox" class="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white">Villa #127 için değerleme raporu hazırla</p>
+                                        <p class="text-xs text-dark-400 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>14:00
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-400 rounded">Orta</span>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-dark-800/50 rounded-xl border border-dark-700/50">
+                                    <input type="checkbox" checked class="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-dark-400 line-through">Yeni ilan için fotoğrafları yükle</p>
+                                        <p class="text-xs text-dark-500 mt-1">
+                                            <i class="fas fa-check mr-1"></i>Tamamlandı
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-dark-800/50 rounded-xl border border-dark-700/50">
+                                    <input type="checkbox" class="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white">Ayşe ile mülk gezisi planla</p>
+                                        <p class="text-xs text-dark-400 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>16:30
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-400 rounded">Düşük</span>
+                                </div>
+
+                                <div class="flex items-start space-x-3 p-3 bg-dark-800/50 rounded-xl border border-dark-700/50">
+                                    <input type="checkbox" class="mt-1 w-4 h-4 rounded border-dark-600 bg-dark-700 text-primary-500 focus:ring-primary-500">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-white">MLS havuzu ortaklık talebini incele</p>
+                                        <p class="text-xs text-dark-400 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>17:00
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-400 rounded">Orta</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Üçüncü Satır - Portal İstatistikleri & Piyasa Trendleri -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Portal Performansı -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-white">Portal Performansı</h2>
+                                <span class="text-xs text-dark-400">Son 30 gün</span>
+                            </div>
+
+                            <div class="space-y-4">
+                                <!-- Sahibinden -->
+                                <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                            <span class="text-orange-400 font-bold text-sm">S</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-white">Sahibinden</p>
+                                            <p class="text-xs text-dark-400">124 aktif ilan</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-semibold text-white">12.4K</p>
+                                        <p class="text-xs text-emerald-400">+%18 görüntülenme</p>
+                                    </div>
+                                </div>
+
+                                <!-- Hepsiemlak -->
+                                <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                            <span class="text-blue-400 font-bold text-sm">H</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-white">Hepsiemlak</p>
+                                            <p class="text-xs text-dark-400">98 aktif ilan</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-semibold text-white">8.7K</p>
+                                        <p class="text-xs text-emerald-400">+%12 görüntülenme</p>
+                                    </div>
+                                </div>
+
+                                <!-- Emlakjet -->
+                                <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                            <span class="text-purple-400 font-bold text-sm">E</span>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-white">Emlakjet</p>
+                                            <p class="text-xs text-dark-400">76 aktif ilan</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-semibold text-white">5.2K</p>
+                                        <p class="text-xs text-red-400">-%3 görüntülenme</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Piyasa Trendleri -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-lg font-semibold text-white">Piyasa Trendleri</h2>
+                                <select class="px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-lg text-dark-300 text-xs focus:outline-none">
+                                    <option>İstanbul</option>
+                                    <option>Ankara</option>
+                                    <option>İzmir</option>
+                                </select>
+                            </div>
+
+                            <canvas id="marketChart" height="200"></canvas>
+
+                            <div class="grid grid-cols-3 gap-4 mt-6">
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-white">₺42K</p>
+                                    <p class="text-xs text-dark-400">Ort. Fiyat/m²</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-emerald-400">+%8.5</p>
+                                    <p class="text-xs text-dark-400">Aylık Değişim</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-white">45</p>
+                                    <p class="text-xs text-dark-400">Ort. Satış Süresi (Gün)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- İLANLAR SAYFASI -->
+                <div x-show="currentPage === 'listings'" style="display: none;">
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">İlanlar</h1>
+                                <p class="text-dark-400 mt-1">Tüm gayrimenkul ilanlarınızı yönetin</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="px-4 py-2 bg-dark-800 border border-dark-700 text-dark-300 rounded-xl text-sm font-medium hover:bg-dark-700 transition-colors">
+                                    <i class="fas fa-filter mr-2"></i>Filtrele
+                                </button>
+                                <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Yeni İlan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İlan Kartları -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- İlan 1 -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden card-hover">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop" alt="Daire" class="w-full h-48 object-cover">
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-green-500 text-white rounded-full">Satılık</span>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-dark-900/80 text-white rounded-full">
+                                        <i class="fas fa-eye mr-1"></i>1.2K
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-dark-400">Daire</span>
+                                    <span class="text-xs text-primary-400">RE-2024-001</span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white mb-2">Beşiktaş'ta Deniz Manzaralı 3+1</h3>
+                                <p class="text-sm text-dark-400 mb-4">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>Beşiktaş, İstanbul
+                                </p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center space-x-4 text-xs text-dark-400">
+                                        <span><i class="fas fa-bed mr-1"></i>3</span>
+                                        <span><i class="fas fa-bath mr-1"></i>2</span>
+                                        <span><i class="fas fa-ruler-combined mr-1"></i>145 m²</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-4 border-t border-dark-700/50">
+                                    <p class="text-xl font-bold text-white">₺4.500.000</p>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- İlan 2 -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden card-hover">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=250&fit=crop" alt="Villa" class="w-full h-48 object-cover">
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-green-500 text-white rounded-full">Satılık</span>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-dark-900/80 text-white rounded-full">
+                                        <i class="fas fa-eye mr-1"></i>856
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-dark-400">Villa</span>
+                                    <span class="text-xs text-primary-400">RE-2024-002</span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white mb-2">Bodrum'da Havuzlu Lüks Villa</h3>
+                                <p class="text-sm text-dark-400 mb-4">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>Bodrum, Muğla
+                                </p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center space-x-4 text-xs text-dark-400">
+                                        <span><i class="fas fa-bed mr-1"></i>5</span>
+                                        <span><i class="fas fa-bath mr-1"></i>4</span>
+                                        <span><i class="fas fa-ruler-combined mr-1"></i>320 m²</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-4 border-t border-dark-700/50">
+                                    <p class="text-xl font-bold text-white">₺18.500.000</p>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- İlan 3 -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden card-hover">
+                            <div class="relative">
+                                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=250&fit=crop" alt="Ofis" class="w-full h-48 object-cover">
+                                <div class="absolute top-3 left-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-blue-500 text-white rounded-full">Kiralık</span>
+                                </div>
+                                <div class="absolute top-3 right-3">
+                                    <span class="px-2.5 py-1 text-xs font-medium bg-dark-900/80 text-white rounded-full">
+                                        <i class="fas fa-eye mr-1"></i>432
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-5">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-dark-400">Ofis</span>
+                                    <span class="text-xs text-primary-400">RE-2024-003</span>
+                                </div>
+                                <h3 class="text-lg font-semibold text-white mb-2">Levent'te A+ Plaza Ofis</h3>
+                                <p class="text-sm text-dark-400 mb-4">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>Levent, İstanbul
+                                </p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center space-x-4 text-xs text-dark-400">
+                                        <span><i class="fas fa-door-open mr-1"></i>8 Oda</span>
+                                        <span><i class="fas fa-ruler-combined mr-1"></i>450 m²</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-4 border-t border-dark-700/50">
+                                    <p class="text-xl font-bold text-white">₺85.000<span class="text-sm text-dark-400">/ay</span></p>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="p-2 text-dark-400 hover:text-white rounded-lg hover:bg-dark-800 transition-colors">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEĞERLEME SAYFASI -->
+                <div x-show="currentPage === 'valuation'" style="display: none;">
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">Fiyat Stratejisi</h1>
+                                <p class="text-dark-400 mt-1">AI destekli gayrimenkul değerleme motoru</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Değerleme Formu -->
+                        <div class="lg:col-span-1 bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                            <h2 class="text-lg font-semibold text-white mb-6">Mülk Bilgileri</h2>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-dark-300 mb-2">Mülk Tipi</label>
+                                    <select class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <option>Daire</option>
+                                        <option>Villa</option>
+                                        <option>Ofis</option>
+                                        <option>Arsa</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-dark-300 mb-2">Konum</label>
+                                    <input type="text" placeholder="İlçe, Mahalle" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">m²</label>
+                                        <input type="number" placeholder="145" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">Oda Sayısı</label>
+                                        <select class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option>1+1</option>
+                                            <option>2+1</option>
+                                            <option selected>3+1</option>
+                                            <option>4+1</option>
+                                            <option>5+1</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-dark-300 mb-2">Bina Yaşı</label>
+                                    <input type="number" placeholder="5" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-dark-300 mb-2">Kat</label>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <input type="number" placeholder="Bulunduğu" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                        <input type="number" placeholder="Toplam" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                </div>
+                                
+                                <button class="w-full px-4 py-3 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white rounded-xl text-sm font-medium transition-all">
+                                    <i class="fas fa-calculator mr-2"></i>Değerleme Yap
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Değerleme Sonuçları -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Fiyat Aralığı -->
+                            <div class="bg-gradient-to-br from-emerald-900/30 to-dark-900 border border-emerald-500/30 rounded-2xl p-6">
+                                <div class="flex items-center space-x-3 mb-6">
+                                    <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-chart-line text-emerald-400 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-semibold text-white">Tahmini Değer Aralığı</h2>
+                                        <p class="text-xs text-emerald-300">AI tarafından hesaplandı • %92 güven oranı</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-6">
+                                    <div class="text-center p-4 bg-dark-800/50 rounded-xl">
+                                        <p class="text-sm text-dark-400 mb-2">Minimum</p>
+                                        <p class="text-2xl font-bold text-white">₺4.2M</p>
+                                    </div>
+                                    <div class="text-center p-4 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
+                                        <p class="text-sm text-emerald-300 mb-2">Önerilen</p>
+                                        <p class="text-3xl font-bold text-emerald-400">₺4.5M</p>
+                                    </div>
+                                    <div class="text-center p-4 bg-dark-800/50 rounded-xl">
+                                        <p class="text-sm text-dark-400 mb-2">Maksimum</p>
+                                        <p class="text-2xl font-bold text-white">₺4.8M</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-6 p-4 bg-dark-800/50 rounded-xl">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-dark-400">m² Fiyatı</span>
+                                        <span class="text-sm font-medium text-white">₺31.034</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-400">Bölge Ortalaması</span>
+                                        <span class="text-sm font-medium text-emerald-400">+%8 üzerinde</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Emsal Karşılaştırma -->
+                            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-6">Emsal Karşılaştırma</h2>
+                                
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-4">
+                                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=60&h=60&fit=crop" class="w-12 h-12 rounded-lg object-cover">
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Beşiktaş, 3+1, 140m²</p>
+                                                <p class="text-xs text-dark-400">500m uzaklıkta • 2 ay önce satıldı</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-semibold text-white">₺4.350.000</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-4">
+                                            <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=60&h=60&fit=crop" class="w-12 h-12 rounded-lg object-cover">
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Beşiktaş, 3+1, 150m²</p>
+                                                <p class="text-xs text-dark-400">800m uzaklıkta • 1 ay önce satıldı</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-semibold text-white">₺4.750.000</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-4">
+                                            <img src="https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=60&h=60&fit=crop" class="w-12 h-12 rounded-lg object-cover">
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Beşiktaş, 3+1, 135m²</p>
+                                                <p class="text-xs text-dark-400">1.2km uzaklıkta • 3 hafta önce satıldı</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-lg font-semibold text-white">₺4.100.000</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Önerileri -->
+                            <div class="bg-gradient-to-br from-purple-900/30 to-dark-900 border border-purple-500/30 rounded-2xl p-6">
+                                <div class="flex items-center space-x-3 mb-4">
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-lightbulb text-purple-400"></i>
+                                    </div>
+                                    <h2 class="text-lg font-semibold text-white">AI Önerileri</h2>
+                                </div>
+                                
+                                <div class="space-y-3">
+                                    <div class="flex items-start space-x-3">
+                                        <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+                                        <p class="text-sm text-dark-300">Deniz manzarası fiyatı %15-20 artırabilir. Fotoğraflarda manzarayı ön plana çıkarın.</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <i class="fas fa-check-circle text-emerald-400 mt-1"></i>
+                                        <p class="text-sm text-dark-300">Bölgede son 3 ayda fiyatlar %8 arttı. Şu an satış için uygun zaman.</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <i class="fas fa-exclamation-circle text-amber-400 mt-1"></i>
+                                        <p class="text-sm text-dark-300">Benzer mülkler ortalama 45 günde satılıyor. Hızlı satış için ₺4.3M önerilir.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LEADLER SAYFASI -->
+                <div x-show="currentPage === 'leads'" style="display: none;">
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">Potansiyel Müşteriler</h1>
+                                <p class="text-dark-400 mt-1">AI puanlı lead yönetimi</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button class="px-4 py-2 bg-dark-800 border border-dark-700 text-dark-300 rounded-xl text-sm font-medium hover:bg-dark-700 transition-colors">
+                                    <i class="fas fa-filter mr-2"></i>Filtrele
+                                </button>
+                                <button class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Yeni Lead
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lead Kartları -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Sıcak Lead -->
+                        <div class="bg-dark-900 border border-red-500/30 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded-full">🔥 Sıcak</span>
+                                <span class="text-2xl font-bold text-emerald-400">85</span>
+                            </div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                                    <span class="text-white font-semibold">MK</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Mehmet Kaya</h3>
+                                    <p class="text-sm text-dark-400">mehmet@email.com</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-home w-5 mr-2 text-dark-500"></i>
+                                    3+1 Daire, Beşiktaş
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-lira-sign w-5 mr-2 text-dark-500"></i>
+                                    ₺4M - ₺5M bütçe
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-clock w-5 mr-2 text-dark-500"></i>
+                                    Son aktivite: 2 saat önce
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 pt-4 border-t border-dark-700/50">
+                                <button class="flex-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-phone mr-1"></i>Ara
+                                </button>
+                                <button class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ilık Lead -->
+                        <div class="bg-dark-900 border border-amber-500/30 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-amber-500/20 text-amber-400 rounded-full">🌡️ Ilık</span>
+                                <span class="text-2xl font-bold text-amber-400">72</span>
+                            </div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                                    <span class="text-white font-semibold">AD</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Ayşe Demir</h3>
+                                    <p class="text-sm text-dark-400">ayse@email.com</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-home w-5 mr-2 text-dark-500"></i>
+                                    Villa, Bodrum
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-lira-sign w-5 mr-2 text-dark-500"></i>
+                                    ₺15M - ₺20M bütçe
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-clock w-5 mr-2 text-dark-500"></i>
+                                    Son aktivite: 1 gün önce
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 pt-4 border-t border-dark-700/50">
+                                <button class="flex-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-phone mr-1"></i>Ara
+                                </button>
+                                <button class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Soğuk Lead -->
+                        <div class="bg-dark-900 border border-blue-500/30 rounded-2xl p-6 card-hover">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">❄️ Soğuk</span>
+                                <span class="text-2xl font-bold text-blue-400">45</span>
+                            </div>
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                                    <span class="text-white font-semibold">CY</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Can Yıldız</h3>
+                                    <p class="text-sm text-dark-400">can@email.com</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-building w-5 mr-2 text-dark-500"></i>
+                                    Ofis, Levent
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-lira-sign w-5 mr-2 text-dark-500"></i>
+                                    ₺50K - ₺100K/ay kira
+                                </div>
+                                <div class="flex items-center text-sm text-dark-300">
+                                    <i class="fas fa-clock w-5 mr-2 text-dark-500"></i>
+                                    Son aktivite: 5 gün önce
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 pt-4 border-t border-dark-700/50">
+                                <button class="flex-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-phone mr-1"></i>Ara
+                                </button>
+                                <button class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fab fa-whatsapp mr-1"></i>WhatsApp
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI COPILOT SAYFASI -->
+                <div x-show="currentPage === 'ai-copilot'" style="display: none;">
+                    <div class="mb-8">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-white">Lead-to-Deal AI</h1>
+                                <p class="text-dark-400 mt-1">Satış sürecinizi AI ile optimize edin</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- AI Chat -->
+                        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden">
+                            <div class="p-4 border-b border-dark-700/50 bg-gradient-to-r from-purple-900/50 to-dark-900">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-robot text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-semibold text-white">AI Asistan</h2>
+                                        <p class="text-xs text-purple-300">Çevrimiçi • Yanıt süresi: ~2sn</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="h-96 overflow-y-auto p-4 space-y-4">
+                                <!-- AI Mesajı -->
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-robot text-purple-400 text-sm"></i>
+                                    </div>
+                                    <div class="bg-dark-800 rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+                                        <p class="text-sm text-dark-200">Merhaba! Ben RE-OS AI Asistanınızım. Size nasıl yardımcı olabilirim?</p>
+                                        <p class="text-xs text-dark-500 mt-2">10:30</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Kullanıcı Mesajı -->
+                                <div class="flex items-start space-x-3 justify-end">
+                                    <div class="bg-primary-600 rounded-2xl rounded-tr-none p-4 max-w-[80%]">
+                                        <p class="text-sm text-white">Mehmet Kaya için en uygun mülkleri önerir misin?</p>
+                                        <p class="text-xs text-primary-200 mt-2">10:31</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- AI Yanıtı -->
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-robot text-purple-400 text-sm"></i>
+                                    </div>
+                                    <div class="bg-dark-800 rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+                                        <p class="text-sm text-dark-200 mb-3">Mehmet Kaya'nın profilini analiz ettim. İşte en uygun 3 mülk:</p>
+                                        <div class="space-y-2">
+                                            <div class="p-2 bg-dark-700/50 rounded-lg">
+                                                <p class="text-sm text-white">🏠 Beşiktaş 3+1 Deniz Manzaralı</p>
+                                                <p class="text-xs text-emerald-400">%94 eşleşme</p>
+                                            </div>
+                                            <div class="p-2 bg-dark-700/50 rounded-lg">
+                                                <p class="text-sm text-white">🏠 Etiler 3+1 Rezidans</p>
+                                                <p class="text-xs text-emerald-400">%87 eşleşme</p>
+                                            </div>
+                                            <div class="p-2 bg-dark-700/50 rounded-lg">
+                                                <p class="text-sm text-white">🏠 Bebek 2+1 Boğaz Manzaralı</p>
+                                                <p class="text-xs text-amber-400">%78 eşleşme</p>
+                                            </div>
+                                        </div>
+                                        <p class="text-xs text-dark-500 mt-2">10:31</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 border-t border-dark-700/50">
+                                <div class="flex items-center space-x-3">
+                                    <input type="text" placeholder="Mesajınızı yazın..." class="flex-1 px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <button class="p-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Önerileri -->
+                        <div class="space-y-6">
+                            <!-- Bugünkü Öncelikler -->
+                            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-4">Bugünkü Öncelikler</h2>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-phone text-red-400"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Mehmet Kaya'yı ara</p>
+                                                <p class="text-xs text-dark-400">Sıcak lead - 3 mülk inceledi</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs text-red-400">Acil</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-signature text-amber-400"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Ayşe Demir sözleşmesi</p>
+                                                <p class="text-xs text-dark-400">İmza için hazır</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs text-amber-400">Bugün</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar text-blue-400"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Mülk gezisi planla</p>
+                                                <p class="text-xs text-dark-400">3 müşteri bekliyor</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs text-blue-400">Bu hafta</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Satış Tahminleri -->
+                            <div class="bg-gradient-to-br from-emerald-900/30 to-dark-900 border border-emerald-500/30 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-4">Bu Ay Satış Tahmini</h2>
+                                <div class="text-center mb-4">
+                                    <p class="text-4xl font-bold text-emerald-400">₺8.2M</p>
+                                    <p class="text-sm text-dark-400 mt-1">Tahmini komisyon: ₺164K</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-dark-400">Kapanma olasılığı yüksek</span>
+                                        <span class="text-emerald-400">3 satış</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-dark-400">Görüşme aşamasında</span>
+                                        <span class="text-amber-400">5 satış</span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-dark-400">Erken aşama</span>
+                                        <span class="text-blue-400">8 satış</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AYARLAR SAYFASI -->
+                <div x-show="currentPage === 'settings'" style="display: none;">
+                    <div class="mb-8">
+                        <h1 class="text-2xl font-bold text-white">Ayarlar</h1>
+                        <p class="text-dark-400 mt-1">Sistem ayarlarını yönetin</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Genel Ayarlar -->
+                            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-6">Genel Ayarlar</h2>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">Şirket Adı</label>
+                                        <input type="text" value="RE-OS Gayrimenkul" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">E-posta</label>
+                                        <input type="email" value="info@reos.com.tr" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">Telefon</label>
+                                        <input type="tel" value="+90 212 555 0000" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-dark-300 mb-2">Dil</label>
+                                        <select class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option selected>Türkçe</option>
+                                            <option>English</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Portal Entegrasyonları -->
+                            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-6">Portal Entegrasyonları</h2>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                                <span class="text-orange-400 font-bold">S</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Sahibinden</p>
+                                                <p class="text-xs text-emerald-400">Bağlı</p>
+                                            </div>
+                                        </div>
+                                        <button class="px-3 py-1.5 bg-dark-700 text-dark-300 rounded-lg text-sm hover:bg-dark-600 transition-colors">Ayarlar</button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                                <span class="text-blue-400 font-bold">H</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Hepsiemlak</p>
+                                                <p class="text-xs text-emerald-400">Bağlı</p>
+                                            </div>
+                                        </div>
+                                        <button class="px-3 py-1.5 bg-dark-700 text-dark-300 rounded-lg text-sm hover:bg-dark-600 transition-colors">Ayarlar</button>
+                                    </div>
+                                    <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                                <span class="text-purple-400 font-bold">E</span>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-white">Emlakjet</p>
+                                                <p class="text-xs text-dark-400">Bağlı değil</p>
+                                            </div>
+                                        </div>
+                                        <button class="px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 transition-colors">Bağla</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sağ Panel -->
+                        <div class="space-y-6">
+                            <!-- Bildirim Ayarları -->
+                            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-6">Bildirimler</h2>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">E-posta bildirimleri</span>
+                                        <button class="w-12 h-6 bg-primary-600 rounded-full relative">
+                                            <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">SMS bildirimleri</span>
+                                        <button class="w-12 h-6 bg-dark-700 rounded-full relative">
+                                            <span class="absolute left-1 top-1 w-4 h-4 bg-dark-400 rounded-full"></span>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">Push bildirimleri</span>
+                                        <button class="w-12 h-6 bg-primary-600 rounded-full relative">
+                                            <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Ayarları -->
+                            <div class="bg-gradient-to-br from-purple-900/30 to-dark-900 border border-purple-500/30 rounded-2xl p-6">
+                                <h2 class="text-lg font-semibold text-white mb-6">AI Ayarları</h2>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">Otomatik lead puanlama</span>
+                                        <button class="w-12 h-6 bg-purple-600 rounded-full relative">
+                                            <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">AI önerileri</span>
+                                        <button class="w-12 h-6 bg-purple-600 rounded-full relative">
+                                            <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-dark-300">Otomatik değerleme</span>
+                                        <button class="w-12 h-6 bg-purple-600 rounded-full relative">
+                                            <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diğer sayfalar için placeholder -->
+                <div x-show="!['dashboard', 'listings', 'valuation', 'leads', 'ai-copilot', 'settings'].includes(currentPage)" style="display: none;">
+                    <div class="flex flex-col items-center justify-center h-96">
+                        <div class="w-20 h-20 bg-dark-800 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fas fa-tools text-dark-500 text-3xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-white mb-2">Sayfa Yapım Aşamasında</h2>
+                        <p class="text-dark-400 text-center max-w-md">Bu sayfa henüz geliştirme aşamasındadır. Yakında kullanıma sunulacaktır.</p>
+                        <button @click="currentPage = 'dashboard'" class="mt-6 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-medium transition-colors">
+                            Kontrol Paneline Dön
+                        </button>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Arama Modal -->
+    <div x-show="searchOpen" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+        <div class="min-h-screen px-4 text-center">
+            <div class="fixed inset-0 bg-dark-950/80 backdrop-blur-sm" @click="searchOpen = false"></div>
+            <div class="inline-block w-full max-w-2xl my-16 text-left align-middle transition-all transform bg-dark-900 border border-dark-700 shadow-2xl rounded-2xl">
+                <div class="flex items-center px-4 border-b border-dark-700">
+                    <i class="fas fa-search text-dark-400"></i>
+                    <input type="text" placeholder="İlan, kişi veya satış ara..." class="flex-1 px-4 py-4 bg-transparent text-white placeholder-dark-400 focus:outline-none">
+                    <kbd class="px-2 py-1 text-xs font-medium bg-dark-800 text-dark-400 rounded">ESC</kbd>
+                </div>
+                <div class="p-4">
+                    <p class="text-xs font-medium text-dark-500 uppercase tracking-wider mb-3">Hızlı İşlemler</p>
+                    <div class="space-y-2">
+                        <a href="#" @click.prevent="currentPage = 'listings'; searchOpen = false" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:bg-dark-800 rounded-lg">
+                            <i class="fas fa-plus w-5 mr-3 text-primary-400"></i>
+                            Yeni İlan Ekle
+                        </a>
+                        <a href="#" @click.prevent="currentPage = 'leads'; searchOpen = false" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:bg-dark-800 rounded-lg">
+                            <i class="fas fa-user-plus w-5 mr-3 text-green-400"></i>
+                            Yeni Kişi Ekle
+                        </a>
+                        <a href="#" @click.prevent="currentPage = 'valuation'; searchOpen = false" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:bg-dark-800 rounded-lg">
+                            <i class="fas fa-calculator w-5 mr-3 text-amber-400"></i>
+                            Değerleme Yap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Satış Hattı Grafiği
+        const pipelineCtx = document.getElementById('pipelineChart').getContext('2d');
+        new Chart(pipelineCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Yeni Lead', 'İletişim', 'Gezinti', 'Pazarlık', 'Sözleşme', 'Kapandı'],
+                datasets: [{
+                    label: 'Satışlar',
+                    data: [24, 18, 12, 8, 5, 3],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(217, 70, 239, 0.8)',
+                        'rgba(16, 185, 129, 0.8)'
+                    ],
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.5)'
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Piyasa Trendleri Grafiği
+        const marketCtx = document.getElementById('marketChart').getContext('2d');
+        new Chart(marketCtx, {
+            type: 'line',
+            data: {
+                labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz'],
+                datasets: [{
+                    label: 'Fiyat/m²',
+                    data: [35000, 36500, 38000, 39500, 41000, 42000],
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.5)'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            callback: function(value) {
+                                return '₺' + (value / 1000) + 'K';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
