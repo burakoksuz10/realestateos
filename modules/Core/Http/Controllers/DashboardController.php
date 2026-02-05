@@ -125,6 +125,10 @@ class DashboardController extends Controller
                 if (!$user->isAdmin()) {
                     $q->where('assigned_to', $user->id);
                 }
+            }])->with(['deals' => function ($q) use ($user) {
+                if (!$user->isAdmin()) {
+                    $q->where('assigned_to', $user->id);
+                }
             }]);
         }])->where('is_default', true)->first();
 

@@ -54,5 +54,5 @@ Route::put('settings/password', [SettingsController::class, 'updatePassword'])->
 
 // Audit Logs
 Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
-Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
 Route::get('audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
+Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');

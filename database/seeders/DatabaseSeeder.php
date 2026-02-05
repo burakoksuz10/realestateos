@@ -99,7 +99,7 @@ class DatabaseSeeder extends Seeder
 
         // Create Super Admin User
         $superAdminUser = \App\Models\User::firstOrCreate(
-            ['email' => 'admin@reos.com'],
+            ['email' => 'admin@recrm.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
 
         // Create Demo Agent
         $agentUser = \App\Models\User::firstOrCreate(
-            ['email' => 'agent@reos.com'],
+            ['email' => 'agent@recrm.com'],
             [
                 'name' => 'Demo Danışman',
                 'password' => Hash::make('password'),
@@ -294,7 +294,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('Database seeded successfully!');
-        $this->command->info('Admin Login: admin@reos.com / password');
-        $this->command->info('Agent Login: agent@reos.com / password');
+        $this->command->info('Admin Login: admin@recrm.com / password');
+        $this->command->info('Agent Login: agent@recrm.com / password');
     }
 }

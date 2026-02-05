@@ -144,8 +144,12 @@
                 <div class="w-32 text-sm font-medium text-gray-700 dark:text-gray-300">{{ $stage['name'] }}</div>
                 <div class="flex-1 mx-4">
                     <div class="w-full bg-gray-200 dark:bg-dark-700 rounded-full h-8 relative overflow-hidden">
-                        <div class="h-8 rounded-full flex items-center justify-end pr-3 transition-all duration-500" 
-                             style="width: {{ max(($stage['count'] / max(array_column($pipelineData, 'count'))) * 100, 10) }}%; background-color: {{ $stage['color'] ?? '#0ea5e9' }}">
+                        @php
+                            $maxCount = max(array_column($pipelineData, 'count') ?: [1]);
+                            $percentage = $maxCount > 0 ? max(($stage['count'] / $maxCount) * 100, 10) : 10;
+                        @endphp
+                        <div class="h-8 rounded-full flex items-center justify-end pr-3 transition-all duration-500"
+                             style="width: {{ $percentage }}%; background-color: {{ $stage['color'] ?? '#0ea5e9' }}">
                             <span class="text-xs font-medium text-white">{{ $stage['count'] }}</span>
                         </div>
                     </div>

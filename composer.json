@@ -1,7 +1,7 @@
 {
-    "name": "reos/real-estate-os",
+    "name": "recrm/real-estate-crm",
     "type": "project",
-    "description": "RE-OS - Ultra Professional Real Estate Management System with AI Copilot",
+    "description": "ReCRM - Ultra Professional Real Estate CRM System with AI Copilot",
     "keywords": ["laravel", "real-estate", "crm", "ai", "copilot"],
     "license": "proprietary",
     "require": {
@@ -14,8 +14,8 @@
         "spatie/laravel-medialibrary": "^11.0",
         "spatie/laravel-translatable": "^6.6",
         "stancl/tenancy": "^3.8",
-        "openai-php/laravel": "^0.8",
-        "barryvdh/laravel-dompdf": "^2.0",
+        "openai-php/client": "^0.10",
+        "barryvdh/laravel-dompdf": "^3.0",
         "maatwebsite/excel": "^3.1",
         "intervention/image": "^3.0",
         "twilio/sdk": "^7.0",

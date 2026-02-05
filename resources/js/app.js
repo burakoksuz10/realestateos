@@ -12,7 +12,7 @@ window.Sortable = Sortable;
 Alpine.start();
 
 // Global utilities
-window.REOS = {
+window.ReCRM = {
     // Format currency
     formatCurrency(amount, currency = 'TRY') {
         const symbols = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' };
@@ -136,4 +136,4 @@ document.querySelectorAll('[data-tooltip]').forEach(el => {
     });
 });
 
-console.log('🏠 RE-OS initialized');
+console.log('🏠 ReCRM initialized');

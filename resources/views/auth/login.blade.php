@@ -43,7 +43,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                         </div>
-                        <span class="text-2xl font-bold">RE-OS</span>
+                        <span class="text-2xl font-bold">ReCRM</span>
                     </div>
                 </div>
 
@@ -74,7 +74,7 @@
                 </div>
 
                 <div class="flex items-center space-x-4 text-sm text-white/50">
-                    <span>© 2024 RE-OS</span>
+                    <span>© 2024 ReCRM</span>
                     <span>•</span>
                     <a href="#" class="hover:text-white">Gizlilik</a>
                     <span>•</span>
@@ -93,7 +93,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
                     </div>
-                    <span class="text-2xl font-bold text-white">RE-OS</span>
+                    <span class="text-2xl font-bold text-white">ReCRM</span>
                 </div>
 
                 <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
@@ -152,7 +152,7 @@
 
                     <div class="mt-8 pt-6 border-t border-white/10 text-center">
                         <p class="text-sm text-slate-400">
-                            Demo hesabı: <span class="text-white">admin@reos.com</span> / <span class="text-white">password</span>
+                            Demo hesabı: <span class="text-white">admin@recrm.com</span> / <span class="text-white">password</span>
                         </p>
                     </div>
                 </div>

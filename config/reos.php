@@ -4,11 +4,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | RE-OS Configuration
+    | ReCRM Configuration
     |--------------------------------------------------------------------------
     |
-    | This file contains all the configuration options for the RE-OS
-    | Real Estate Operating System.
+    | This file contains all the configuration options for the ReCRM
+    | Real Estate CRM System.
     |
     */
 

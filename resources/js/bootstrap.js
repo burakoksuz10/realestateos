@@ -18,19 +18,19 @@ window.axios.interceptors.response.use(
         }
         
         if (error.response?.status === 403) {
-            window.REOS?.notify('error', 'Yetkisiz İşlem', 'Bu işlem için yetkiniz bulunmuyor.');
+            window.ReCRM?.notify('error', 'Yetkisiz İşlem', 'Bu işlem için yetkiniz bulunmuyor.');
         }
         
         if (error.response?.status === 422) {
             const errors = error.response.data.errors;
             if (errors) {
                 const firstError = Object.values(errors)[0][0];
-                window.REOS?.notify('error', 'Doğrulama Hatası', firstError);
+                window.ReCRM?.notify('error', 'Doğrulama Hatası', firstError);
             }
         }
         
         if (error.response?.status >= 500) {
-            window.REOS?.notify('error', 'Sunucu Hatası', 'Bir hata oluştu. Lütfen tekrar deneyin.');
+            window.ReCRM?.notify('error', 'Sunucu Hatası', 'Bir hata oluştu. Lütfen tekrar deneyin.');
         }
         
         return Promise.reject(error);
