@@ -185,6 +185,27 @@
             <span x-show="sidebarOpen" x-cloak class="ml-3">Ofisler</span>
         </a>
 
+        <!-- Social Media -->
+        <a href="{{ route('admin.social-media.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.social-media.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Sosyal Medya</span>
+        </a>
+
+        <!-- Advertising -->
+        <a href="{{ route('admin.advertising.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.advertising.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Reklamlar</span>
+        </a>
+
         <!-- Integrations -->
         <a href="{{ route('admin.integrations.index') }}" 
            class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200

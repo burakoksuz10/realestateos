@@ -59,4 +59,35 @@ class SettingsController extends Controller
     {
         return view('core::settings.billing');
     }
+
+    public function profile(Request $request)
+    {
+        return view('core::settings.index');
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $request->user()->id,
+        ]);
+
+        $request->user()->update($validated);
+
+        return back()->with('success', 'Profil başarıyla güncellendi.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $request->user()->update([
+            'password' => bcrypt($request->password),
+        ]);
+
+        return back()->with('success', 'Şifre başarıyla güncellendi.');
+    }
 }

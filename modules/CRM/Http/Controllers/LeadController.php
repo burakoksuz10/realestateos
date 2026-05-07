@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\CRM\Models\Lead;
 use Modules\CRM\Models\Contact;
+use Modules\CRM\Models\Pipeline;
 
 class LeadController extends Controller
 {
@@ -254,5 +255,79 @@ class LeadController extends Controller
         ]);
 
         return back()->with('success', 'Lead kaybedildi olarak işaretlendi.');
+    }
+
+    public function kanban(Request $request)
+    {
+        $user = $request->user();
+
+        $pipeline = Pipeline::with(['stages.leads' => function ($query) use ($user) {
+            if (!$user->isAdmin()) {
+                $query->where('assigned_to', $user->id);
+            }
+            $query->with(['contact', 'assignedTo']);
+        }])->where('type', 'lead')->where('is_default', true)->first();
+
+        if (!$pipeline) {
+            $pipeline = Pipeline::with(['stages.leads'])->where('type', 'lead')->first();
+        }
+
+        $pipelines = Pipeline::where('type', 'lead')->get();
+
+        return view('crm::leads.kanban', compact('pipeline', 'pipelines'));
+    }
+
+    public function assign(Request $request, Lead $lead)
+    {
+        $validated = $request->validate([
+            'assigned_to' => 'required|exists:users,id',
+        ]);
+
+        $lead->update(['assigned_to' => $validated['assigned_to']]);
+
+        $user = \App\Models\User::find($validated['assigned_to']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead başarıyla atandı.',
+            'assigned_to' => ['id' => $user->id, 'name' => $user->name],
+        ]);
+    }
+
+    public function moveStage(Request $request, Lead $lead)
+    {
+        $validated = $request->validate([
+            'stage_id' => 'required|exists:pipeline_stages,id',
+        ]);
+
+        $lead->update(['stage_id' => $validated['stage_id']]);
+
+        return response()->json(['success' => true, 'lead' => $lead->fresh()]);
+    }
+
+    public function qualify(Request $request, Lead $lead)
+    {
+        $request->validate([
+            'qualification_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $lead->update([
+            'is_qualified' => true,
+            'status' => 'qualified',
+            'qualification_notes' => $request->qualification_notes,
+        ]);
+
+        return back()->with('success', 'Lead nitelikli olarak işaretlendi.');
+    }
+
+    public function suggestions(Lead $lead)
+    {
+        $suggestions = $lead->ai_suggestions ?? [
+            'Müşteri ile takip görüşmesi planlayın.',
+            'Bütçeye uygun ilanları paylaşın.',
+            'Tercih edilen bölgelerde yeni ilanları gönderin.',
+        ];
+
+        return response()->json(['success' => true, 'suggestions' => $suggestions]);
     }
 }

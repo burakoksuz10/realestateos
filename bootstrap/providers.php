@@ -14,4 +14,6 @@ return [
     Modules\Integrations\Providers\IntegrationsServiceProvider::class,
     Modules\Websites\Providers\WebsitesServiceProvider::class,
     Modules\BI\Providers\BIServiceProvider::class,
+    Modules\SocialMedia\Providers\SocialMediaServiceProvider::class,
+    Modules\Advertising\Providers\AdvertisingServiceProvider::class,
 ];

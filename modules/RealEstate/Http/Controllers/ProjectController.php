@@ -136,4 +136,11 @@ class ProjectController extends Controller
         return redirect()->route('admin.projects.index')
             ->with('success', 'Proje başarıyla silindi.');
     }
+
+    public function toggleFeatured(Project $project)
+    {
+        $project->update(['is_featured' => !$project->is_featured]);
+
+        return back()->with('success', $project->is_featured ? 'Proje öne çıkarıldı.' : 'Proje öne çıkarmadan kaldırıldı.');
+    }
 }
