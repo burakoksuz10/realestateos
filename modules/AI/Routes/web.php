@@ -5,6 +5,7 @@ use Modules\AI\Http\Controllers\ValuationController;
 use Modules\AI\Http\Controllers\ContentController;
 use Modules\AI\Http\Controllers\CopilotController;
 use Modules\AI\Http\Controllers\TranslationController;
+use Modules\AI\Http\Controllers\NewsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,3 +38,8 @@ Route::post('copilot/chat', [CopilotController::class, 'chat'])->name('copilot.c
 Route::post('translate', [TranslationController::class, 'translate'])->name('translate');
 Route::post('translate/listing/{listing}', [TranslationController::class, 'translateListing'])->name('translate.listing');
 Route::post('translate/detect', [TranslationController::class, 'detectLanguage'])->name('translate.detect');
+
+// News
+Route::get('news', [NewsController::class, 'index'])->name('news.index');
+Route::post('news/fetch', [NewsController::class, 'fetch'])->name('news.fetch');
+Route::delete('news/{article}', [NewsController::class, 'destroy'])->name('news.destroy');

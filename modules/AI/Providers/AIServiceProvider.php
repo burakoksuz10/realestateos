@@ -10,6 +10,7 @@ use Modules\AI\Services\ContentService;
 use Modules\AI\Services\TranslationService;
 use Modules\AI\Services\MatchingService;
 use Modules\AI\Services\CopilotService;
+use Modules\AI\Services\NewsService;
 
 class AIServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,10 @@ class AIServiceProvider extends ServiceProvider
 
         $this->app->singleton(CopilotService::class, function ($app) {
             return new CopilotService($app->make(AIService::class));
+        });
+
+        $this->app->singleton(NewsService::class, function ($app) {
+            return new NewsService();
         });
     }
 

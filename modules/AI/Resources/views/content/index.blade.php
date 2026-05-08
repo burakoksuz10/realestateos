@@ -7,20 +7,20 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white">AI Content Generator</h1>
-            <p class="text-dark-400 mt-1">Generate professional property descriptions and marketing content</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">AI Content Generator</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">Generate professional property descriptions and marketing content</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Content Generator Form -->
-        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
-            <h2 class="text-lg font-semibold text-white mb-6">Generate Content</h2>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Generate Content</h2>
             <form action="{{ route('ai.content.generate') }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Content Type</label>
-                    <select name="content_type" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Content Type</label>
+                    <select name="content_type" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <option value="listing_description">Listing Description</option>
                         <option value="social_media">Social Media Post</option>
                         <option value="email">Email Template</option>
@@ -30,8 +30,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Select Listing (Optional)</label>
-                    <select name="listing_id" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Select Listing (Optional)</label>
+                    <select name="listing_id" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <option value="">-- Select a listing --</option>
                         @foreach($listings ?? [] as $listing)
                         <option value="{{ $listing->id }}">{{ $listing->title }}</option>
@@ -40,35 +40,35 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Property Details</label>
-                    <textarea name="property_details" rows="4" placeholder="Enter property details: type, size, rooms, features, location..." class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Property Details</label>
+                    <textarea name="property_details" rows="4" placeholder="Enter property details: type, size, rooms, features, location..." class="w-full px-4 py-2.5 bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Tone</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Tone</label>
                     <div class="flex flex-wrap gap-2">
                         <label class="inline-flex items-center">
                             <input type="radio" name="tone" value="professional" checked class="sr-only peer">
-                            <span class="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Professional</span>
+                            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Professional</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="tone" value="luxury" class="sr-only peer">
-                            <span class="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Luxury</span>
+                            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Luxury</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="tone" value="friendly" class="sr-only peer">
-                            <span class="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Friendly</span>
+                            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Friendly</span>
                         </label>
                         <label class="inline-flex items-center">
                             <input type="radio" name="tone" value="urgent" class="sr-only peer">
-                            <span class="px-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Urgent</span>
+                            <span class="px-4 py-2 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-600 dark:text-dark-300 peer-checked:bg-primary-600/20 peer-checked:border-primary-500/30 peer-checked:text-primary-400 cursor-pointer transition-colors">Urgent</span>
                         </label>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Language</label>
-                    <select name="language" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Language</label>
+                    <select name="language" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
                         <option value="tr">Turkish</option>
                         <option value="en">English</option>
                         <option value="de">German</option>
@@ -90,16 +90,16 @@
 
         <!-- Generated Content -->
         <div class="space-y-6">
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-lg font-semibold text-white">Generated Content</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Generated Content</h2>
                     <div class="flex items-center space-x-2">
-                        <button class="p-2 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors" title="Copy">
+                        <button class="p-2 text-gray-500 dark:text-dark-400 hover:text-white hover:bg-gray-200 dark:hover:bg-dark-700 rounded-lg transition-colors" title="Copy">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
                         </button>
-                        <button class="p-2 text-dark-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors" title="Regenerate">
+                        <button class="p-2 text-gray-500 dark:text-dark-400 hover:text-white hover:bg-gray-200 dark:hover:bg-dark-700 rounded-lg transition-colors" title="Regenerate">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
@@ -107,8 +107,8 @@
                     </div>
                 </div>
 
-                <div class="bg-dark-800/50 rounded-xl p-4 min-h-[300px]">
-                    <p class="text-dark-400 text-center py-12">
+                <div class="bg-gray-50 dark:bg-dark-800/50 rounded-xl p-4 min-h-[300px]">
+                    <p class="text-gray-500 dark:text-dark-400 text-center py-12">
                         Generated content will appear here...
                     </p>
                 </div>
@@ -116,23 +116,23 @@
 
             <!-- Quick Templates -->
             <div class="bg-gradient-to-br from-purple-900/30 to-dark-900 border border-purple-500/30 rounded-2xl p-6">
-                <h3 class="text-lg font-semibold text-white mb-4">Quick Templates</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Templates</h3>
                 <div class="grid grid-cols-2 gap-3">
-                    <button class="p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-xl text-left transition-colors">
+                    <button class="p-3 bg-gray-50 dark:bg-dark-800/50 hover:bg-gray-200 dark:bg-dark-700/50 rounded-xl text-left transition-colors">
                         <p class="text-white font-medium text-sm">New Listing</p>
-                        <p class="text-dark-400 text-xs">Announce new property</p>
+                        <p class="text-gray-500 dark:text-dark-400 text-xs">Announce new property</p>
                     </button>
-                    <button class="p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-xl text-left transition-colors">
+                    <button class="p-3 bg-gray-50 dark:bg-dark-800/50 hover:bg-gray-200 dark:bg-dark-700/50 rounded-xl text-left transition-colors">
                         <p class="text-white font-medium text-sm">Price Reduced</p>
-                        <p class="text-dark-400 text-xs">Price drop announcement</p>
+                        <p class="text-gray-500 dark:text-dark-400 text-xs">Price drop announcement</p>
                     </button>
-                    <button class="p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-xl text-left transition-colors">
+                    <button class="p-3 bg-gray-50 dark:bg-dark-800/50 hover:bg-gray-200 dark:bg-dark-700/50 rounded-xl text-left transition-colors">
                         <p class="text-white font-medium text-sm">Open House</p>
-                        <p class="text-dark-400 text-xs">Event invitation</p>
+                        <p class="text-gray-500 dark:text-dark-400 text-xs">Event invitation</p>
                     </button>
-                    <button class="p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-xl text-left transition-colors">
+                    <button class="p-3 bg-gray-50 dark:bg-dark-800/50 hover:bg-gray-200 dark:bg-dark-700/50 rounded-xl text-left transition-colors">
                         <p class="text-white font-medium text-sm">Just Sold</p>
-                        <p class="text-dark-400 text-xs">Success story</p>
+                        <p class="text-gray-500 dark:text-dark-400 text-xs">Success story</p>
                     </button>
                 </div>
             </div>

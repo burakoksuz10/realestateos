@@ -15,7 +15,7 @@
             <option>Bu Ay</option>
             <option>Bu Yıl</option>
         </select>
-        <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30">
+        <button class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white bg-gradient-to-r from-sky-400 to-blue-600 rounded-xl hover:from-sky-500 hover:to-blue-700 transition-colors shadow-lg shadow-blue-500/25">
             <svg class="w-4 h-4 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
@@ -32,7 +32,7 @@
     <div class="bg-white dark:bg-dark-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-dark-700">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Lead</p>
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Toplam Potansiyel Müşteri</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($stats['total_leads']) }}</p>
                 <div class="flex items-center mt-2">
                     <span class="text-sm font-medium {{ $stats['new_leads_today'] > 0 ? 'text-green-600' : 'text-gray-500' }}">
@@ -40,15 +40,15 @@
                     </span>
                 </div>
             </div>
-            <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
-                <svg class="w-7 h-7 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-14 h-14 bg-primary-100 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center">
+                <svg class="w-7 h-7 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
             </div>
         </div>
         <div class="mt-4 flex items-center text-sm">
             <span class="text-red-500 font-medium">{{ $stats['hot_leads'] }}</span>
-            <span class="text-gray-500 dark:text-gray-400 ml-1">sıcak lead</span>
+            <span class="text-gray-500 dark:text-gray-400 ml-1">sıcak potansiyel müşteri</span>
         </div>
     </div>
 
@@ -150,7 +150,7 @@
                         @endphp
                         <div class="h-8 rounded-full flex items-center justify-end pr-3 transition-all duration-500"
                              style="width: {{ $percentage }}%; background-color: {{ $stage['color'] ?? '#0ea5e9' }}">
-                            <span class="text-xs font-medium text-white">{{ $stage['count'] }}</span>
+                            <span class="text-xs font-medium text-gray-900 dark:text-white">{{ $stage['count'] }}</span>
                         </div>
                     </div>
                 </div>
@@ -221,12 +221,12 @@
             @forelse($recentActivities as $activity)
             <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-                    {{ $activity->type_color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30' : 
-                       ($activity->type_color === 'green' ? 'bg-green-100 dark:bg-green-900/30' : 
-                       ($activity->type_color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-gray-100 dark:bg-dark-700')) }}">
-                    <svg class="w-4 h-4 {{ $activity->type_color === 'blue' ? 'text-blue-600' : 
-                                          ($activity->type_color === 'green' ? 'text-green-600' : 
-                                          ($activity->type_color === 'purple' ? 'text-purple-600' : 'text-gray-600')) }}" 
+                    {{ $activity->type_color === 'blue' ? 'bg-primary-100 dark:bg-primary-900/20' :
+                       ($activity->type_color === 'green' ? 'bg-green-100 dark:bg-green-900/30' :
+                       ($activity->type_color === 'purple' ? 'bg-violet-100 dark:bg-violet-900/20' : 'bg-gray-100 dark:bg-dark-700')) }}">
+                    <svg class="w-4 h-4 {{ $activity->type_color === 'blue' ? 'text-primary-600 dark:text-primary-400' :
+                                          ($activity->type_color === 'green' ? 'text-green-600 dark:text-green-400' :
+                                          ($activity->type_color === 'purple' ? 'text-violet-600 dark:text-violet-400' : 'text-gray-600 dark:text-gray-400')) }}" 
                          fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         @if($activity->type === 'call')
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -257,7 +257,7 @@
     </div>
 
     <!-- AI Copilot Suggestions -->
-    <div class="bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl p-6 shadow-lg text-white">
+    <div class="bg-gradient-to-br from-violet-600 to-primary-600 rounded-2xl p-6 shadow-lg text-white shadow-violet-600/20">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -285,7 +285,7 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm font-medium">3 sıcak lead takip bekliyor</p>
+                        <p class="text-sm font-medium">3 sıcak potansiyel müşteri takip bekliyor</p>
                         <p class="text-xs text-white/70 mt-1">Son 24 saatte yanıt verilmedi</p>
                     </div>
                 </div>
@@ -320,7 +320,7 @@
             </div>
         </div>
 
-        <a href="{{ route('admin.ai.copilot.index') }}" 
+        <a href="{{ route('admin.ai.copilot.index') }}"
            class="mt-6 w-full inline-flex items-center justify-center px-4 py-3 bg-white text-primary-600 font-medium rounded-xl hover:bg-white/90 transition-colors">
             AI Copilot'u Aç
             <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -329,6 +329,55 @@
         </a>
     </div>
 </div>
+
+<!-- News Widget -->
+@php
+    $latestNews = \App\Models\NewsArticle::latest()->take(4)->get();
+@endphp
+@if($latestNews->isNotEmpty())
+<div class="bg-white dark:bg-dark-800 rounded-2xl shadow-sm border border-gray-100 dark:border-dark-700">
+    <div class="p-5 border-b border-gray-100 dark:border-dark-700 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/20 dark:to-blue-900/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Emlak Haberleri</h3>
+                <p class="text-xs text-gray-400">AI destekli · Her 3 saatte güncellenir</p>
+            </div>
+        </div>
+        <a href="{{ route('admin.ai.news.index') }}" class="text-xs text-primary-600 dark:text-primary-400 hover:underline font-medium">Tümünü Gör →</a>
+    </div>
+    <div class="divide-y divide-gray-100 dark:divide-dark-700">
+        @foreach($latestNews as $news)
+        <div class="p-4 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-dark-700/50 transition-colors">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                    @php
+                    $catColors = ['piyasa'=>'blue','yatirim'=>'green','konut'=>'orange','ticari'=>'purple','mevzuat'=>'red','teknoloji'=>'cyan','genel'=>'gray'];
+                    $catLabels = ['piyasa'=>'Piyasa','yatirim'=>'Yatırım','konut'=>'Konut','ticari'=>'Ticari','mevzuat'=>'Mevzuat','teknoloji'=>'Teknoloji','genel'=>'Genel'];
+                    $c = $catColors[$news->category] ?? 'gray';
+                    @endphp
+                    <span class="px-1.5 py-0.5 text-xs rounded bg-{{ $c }}-100 dark:bg-{{ $c }}-900/30 text-{{ $c }}-700 dark:text-{{ $c }}-400">{{ $catLabels[$news->category] ?? 'Genel' }}</span>
+                    <span class="text-xs text-gray-400">{{ $news->published_at?->diffForHumans() }}</span>
+                </div>
+                <a href="{{ $news->url }}" target="_blank" rel="noopener" class="text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 transition-colors">
+                    {{ $news->title }}
+                </a>
+                @if($news->ai_summary)
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{{ $news->ai_summary }}</p>
+                @endif
+            </div>
+            @if($news->image_url)
+            <img src="{{ $news->image_url }}" alt="" class="w-14 h-14 rounded-lg object-cover flex-shrink-0">
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')

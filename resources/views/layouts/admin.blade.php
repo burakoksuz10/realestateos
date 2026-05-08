@@ -194,7 +194,7 @@
                     </svg>
                     <input type="text" 
                            class="w-full pl-12 pr-4 py-4 text-lg bg-transparent border-0 border-b border-gray-200 dark:border-dark-700 focus:ring-0 focus:border-primary-500 dark:text-white"
-                           placeholder="İlan, müşteri veya lead ara..."
+                           placeholder="İlan, müşteri veya potansiyel müşteri ara..."
                            x-ref="searchInput"
                            @keydown.enter="performSearch()">
                 </div>

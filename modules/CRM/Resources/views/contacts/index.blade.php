@@ -10,7 +10,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Müşteri ve iş ortaklarınızı yönetin</p>
         </div>
         <div class="flex items-center space-x-3">
-            <a href="{{ route('admin.contacts.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+            <a href="{{ route('admin.contacts.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 text-white rounded-xl hover:from-sky-500 hover:to-blue-700 transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -85,7 +85,7 @@
                             </svg>
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Henüz kişi yok</h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-6">İlk kişinizi ekleyerek başlayın.</p>
-                            <a href="{{ route('admin.contacts.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+                            <a href="{{ route('admin.contacts.create') }}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 text-white rounded-xl hover:from-sky-500 hover:to-blue-700 transition-colors">
                                 Yeni Kişi Ekle
                             </a>
                         </td>

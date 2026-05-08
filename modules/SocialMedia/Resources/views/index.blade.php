@@ -9,17 +9,17 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-white">Sosyal Medya</h1>
-            <p class="text-dark-400 mt-1">Instagram ve Facebook gönderilerinizi planlayın ve yönetin</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Sosyal Medya</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">Instagram ve Facebook gönderilerinizi planlayın ve yönetin</p>
         </div>
         <div class="flex items-center gap-3">
             <button @click="showPlanModal = true"
-                class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
+                class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 AI İçerik Planı
             </button>
             <button @click="openCreateModal()"
-                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
+                class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Yeni Gönderi
             </button>
@@ -28,30 +28,30 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-            <p class="text-dark-400 text-sm">Toplam Gönderi</p>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+            <p class="text-gray-500 dark:text-dark-400 text-sm">Toplam Gönderi</p>
             <p class="text-2xl font-bold text-white mt-1">{{ $stats['total'] }}</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-            <p class="text-dark-400 text-sm">Yayınlanan</p>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+            <p class="text-gray-500 dark:text-dark-400 text-sm">Yayınlanan</p>
             <p class="text-2xl font-bold text-green-400 mt-1">{{ $stats['published'] }}</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-            <p class="text-dark-400 text-sm">Planlanmış</p>
-            <p class="text-2xl font-bold text-blue-400 mt-1">{{ $stats['scheduled'] }}</p>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+            <p class="text-gray-500 dark:text-dark-400 text-sm">Planlanmış</p>
+            <p class="text-2xl font-bold text-primary-600 dark:text-primary-400 mt-1">{{ $stats['scheduled'] }}</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-            <p class="text-dark-400 text-sm">Taslak</p>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+            <p class="text-gray-500 dark:text-dark-400 text-sm">Taslak</p>
             <p class="text-2xl font-bold text-yellow-400 mt-1">{{ $stats['draft'] }}</p>
         </div>
     </div>
 
     <!-- Filter Tabs -->
-    <div class="flex items-center gap-2 bg-dark-900 border border-dark-700/50 rounded-2xl p-1 w-fit">
+    <div class="flex items-center gap-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-1 w-fit">
         @foreach(['all' => 'Tümü', 'planlandi' => 'Planlandı', 'draft' => 'Taslak', 'yayinlandi' => 'Yayınlandı', 'hata' => 'Hata'] as $key => $label)
         <button
             @click="filter = '{{ $key }}'"
-            :class="filter === '{{ $key }}' ? 'bg-dark-700 text-white' : 'text-dark-400 hover:text-white'"
+            :class="filter === '{{ $key }}' ? 'bg-gray-200 dark:bg-dark-700 text-white' : 'text-gray-500 dark:text-dark-400 hover:text-white'"
             class="px-4 py-2 rounded-xl text-sm font-medium transition-colors">
             {{ $label }}
         </button>
@@ -61,7 +61,7 @@
     <!-- Posts Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         <template x-for="post in filteredPosts" :key="post.id">
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5 flex flex-col gap-4">
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5 flex flex-col gap-4">
                 <!-- Post Header -->
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
@@ -91,18 +91,18 @@
                 </div>
 
                 <!-- Media Preview -->
-                <div x-show="post.media_url" class="w-full h-40 bg-dark-800 rounded-xl overflow-hidden">
+                <div x-show="post.media_url" class="w-full h-40 bg-gray-100 dark:bg-dark-800 rounded-xl overflow-hidden">
                     <img :src="post.media_url" class="w-full h-full object-cover" :alt="post.caption">
                 </div>
-                <div x-show="!post.media_url" class="w-full h-32 bg-dark-800 rounded-xl flex items-center justify-center">
+                <div x-show="!post.media_url" class="w-full h-32 bg-gray-100 dark:bg-dark-800 rounded-xl flex items-center justify-center">
                     <svg class="w-8 h-8 text-dark-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
 
                 <!-- Caption -->
-                <p class="text-dark-300 text-sm leading-relaxed line-clamp-3" x-text="post.caption || 'Altyazı yok'"></p>
+                <p class="text-gray-600 dark:text-dark-300 text-sm leading-relaxed line-clamp-3" x-text="post.caption || 'Altyazı yok'"></p>
 
                 <!-- Scheduled date -->
-                <div x-show="post.scheduled_at" class="flex items-center gap-2 text-xs text-dark-400">
+                <div x-show="post.scheduled_at" class="flex items-center gap-2 text-xs text-gray-500 dark:text-dark-400">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span x-text="formatDate(post.scheduled_at)"></span>
                 </div>
@@ -110,7 +110,7 @@
                 <!-- Actions -->
                 <div class="flex items-center gap-2 pt-1">
                     <button @click="openEditModal(post)"
-                        class="flex-1 px-3 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
+                        class="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Düzenle
                     </button>
@@ -130,30 +130,30 @@
         <!-- Empty state -->
         <div x-show="filteredPosts.length === 0" class="md:col-span-2 xl:col-span-3 py-16 text-center">
             <svg class="w-12 h-12 text-dark-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <p class="text-dark-400 font-medium">Bu filtrede gönderi bulunamadı</p>
-            <button @click="openCreateModal()" class="mt-3 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm transition-colors">İlk Gönderiyi Oluştur</button>
+            <p class="text-gray-500 dark:text-dark-400 font-medium">Bu filtrede gönderi bulunamadı</p>
+            <button @click="openCreateModal()" class="mt-3 px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl text-sm transition-colors">İlk Gönderiyi Oluştur</button>
         </div>
     </div>
 
     <!-- Create/Edit Post Modal -->
     <div x-show="showPostModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70" @click="showPostModal = false"></div>
-        <div class="relative bg-dark-900 border border-dark-700/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-dark-700/50 flex items-center justify-between sticky top-0 bg-dark-900">
-                <h2 class="text-lg font-semibold text-white" x-text="editingPost ? 'Gönderi Düzenle' : 'Yeni Gönderi'"></h2>
-                <button @click="showPostModal = false" class="text-dark-400 hover:text-white transition-colors">
+        <div class="relative bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-dark-700/50 flex items-center justify-between sticky top-0 bg-white dark:bg-dark-900">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingPost ? 'Gönderi Düzenle' : 'Yeni Gönderi'"></h2>
+                <button @click="showPostModal = false" class="text-gray-500 dark:text-dark-400 hover:text-white transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="p-6 space-y-5">
                 <!-- Platform -->
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Platform</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Platform</label>
                     <div class="grid grid-cols-3 gap-2">
                         @foreach(['instagram' => 'Instagram', 'facebook' => 'Facebook', 'both' => 'Her İkisi'] as $pkey => $plabel)
                         <button
                             @click="form.platform = '{{ $pkey }}'"
-                            :class="form.platform === '{{ $pkey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-dark-700 text-dark-400 hover:border-dark-600'"
+                            :class="form.platform === '{{ $pkey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-gray-200 dark:border-dark-700 text-gray-500 dark:text-dark-400 hover:border-dark-600'"
                             class="px-3 py-2 border rounded-xl text-sm transition-colors">
                             {{ $plabel }}
                         </button>
@@ -163,12 +163,12 @@
 
                 <!-- Content Type -->
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">İçerik Tipi</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">İçerik Tipi</label>
                     <div class="grid grid-cols-3 gap-2">
                         @foreach(['post' => 'Gönderi', 'story' => 'Hikaye', 'reel' => 'Reel'] as $ckey => $clabel)
                         <button
                             @click="form.content_type = '{{ $ckey }}'"
-                            :class="form.content_type === '{{ $ckey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-dark-700 text-dark-400 hover:border-dark-600'"
+                            :class="form.content_type === '{{ $ckey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-gray-200 dark:border-dark-700 text-gray-500 dark:text-dark-400 hover:border-dark-600'"
                             class="px-3 py-2 border rounded-xl text-sm transition-colors">
                             {{ $clabel }}
                         </button>
@@ -179,7 +179,7 @@
                 <!-- Caption -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-sm font-medium text-dark-300">Altyazı</label>
+                        <label class="text-sm font-medium text-gray-600 dark:text-dark-300">Altyazı</label>
                         <button @click="generateCaption()" :disabled="aiCaptionLoading"
                             class="text-xs px-3 py-1.5 bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 rounded-lg transition-colors flex items-center gap-1.5 disabled:opacity-50">
                             <svg x-show="!aiCaptionLoading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -189,42 +189,42 @@
                     </div>
                     <textarea x-model="form.caption" rows="5"
                         placeholder="Gönderi altyazınızı yazın veya AI ile oluşturun..."
-                        class="w-full px-4 py-3 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"></textarea>
+                        class="w-full px-4 py-3 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none text-sm"></textarea>
                     <p class="text-xs text-dark-500 mt-1" x-text="(form.caption?.length || 0) + '/2200 karakter'"></p>
                 </div>
 
                 <!-- Media URL -->
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Görsel URL (isteğe bağlı)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Görsel URL (isteğe bağlı)</label>
                     <input type="url" x-model="form.media_url"
                         placeholder="https://..."
-                        class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                 </div>
 
                 <!-- Status & Scheduled Date -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Durum</label>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Durum</label>
                         <select x-model="form.status"
-                            class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                             <option value="draft">Taslak</option>
                             <option value="planlandi">Planla</option>
                         </select>
                     </div>
                     <div x-show="form.status === 'planlandi'">
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Planlanan Tarih</label>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Planlanan Tarih</label>
                         <input type="datetime-local" x-model="form.scheduled_at"
-                            class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                     </div>
                 </div>
 
                 <!-- Error -->
                 <div x-show="formError" class="p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm" x-text="formError"></div>
             </div>
-            <div class="p-6 border-t border-dark-700/50 flex items-center justify-end gap-3">
-                <button @click="showPostModal = false" class="px-5 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors text-sm">İptal</button>
+            <div class="p-6 border-t border-gray-200 dark:border-dark-700/50 flex items-center justify-end gap-3">
+                <button @click="showPostModal = false" class="px-5 py-2.5 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors text-sm">İptal</button>
                 <button @click="savePost()" :disabled="saving"
-                    class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors text-sm flex items-center gap-2 disabled:opacity-50">
+                    class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors text-sm flex items-center gap-2 disabled:opacity-50">
                     <svg x-show="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     <span x-text="editingPost ? 'Güncelle' : 'Kaydet'"></span>
                 </button>
@@ -235,18 +235,18 @@
     <!-- AI Content Plan Modal -->
     <div x-show="showPlanModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70" @click="showPlanModal = false"></div>
-        <div class="relative bg-dark-900 border border-dark-700/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div class="p-6 border-b border-dark-700/50 flex items-center justify-between sticky top-0 bg-dark-900">
-                <h2 class="text-lg font-semibold text-white">AI Aylık İçerik Planı</h2>
-                <button @click="showPlanModal = false" class="text-dark-400 hover:text-white">
+        <div class="relative bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-dark-700/50 flex items-center justify-between sticky top-0 bg-white dark:bg-dark-900">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">AI Aylık İçerik Planı</h2>
+                <button @click="showPlanModal = false" class="text-gray-500 dark:text-dark-400 hover:text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="p-6 space-y-5">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Ton</label>
-                        <select x-model="planForm.tone" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Ton</label>
+                        <select x-model="planForm.tone" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                             <option value="profesyonel">Profesyonel</option>
                             <option value="samimi">Samimi</option>
                             <option value="enerjik">Enerjik</option>
@@ -254,27 +254,27 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Ay</label>
-                        <input type="month" x-model="planForm.month" class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Ay</label>
+                        <input type="month" x-model="planForm.month" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                     </div>
                 </div>
 
-                <div x-show="!planResult && !planLoading" class="bg-dark-800 rounded-xl p-4 text-center">
+                <div x-show="!planResult && !planLoading" class="bg-gray-100 dark:bg-dark-800 rounded-xl p-4 text-center">
                     <svg class="w-10 h-10 text-dark-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                    <p class="text-dark-400 text-sm">Planı oluşturmak için butona tıklayın. AI, aylık içerik takvimi hazırlayacak.</p>
+                    <p class="text-gray-500 dark:text-dark-400 text-sm">Planı oluşturmak için butona tıklayın. AI, aylık içerik takvimi hazırlayacak.</p>
                 </div>
 
                 <div x-show="planLoading" class="py-8 text-center">
                     <svg class="w-8 h-8 animate-spin text-primary-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                    <p class="text-dark-400 text-sm">AI içerik planı hazırlanıyor...</p>
+                    <p class="text-gray-500 dark:text-dark-400 text-sm">AI içerik planı hazırlanıyor...</p>
                 </div>
 
-                <div x-show="planResult" class="bg-dark-800 rounded-xl p-4">
-                    <pre class="text-dark-300 text-xs whitespace-pre-wrap leading-relaxed" x-text="planResult"></pre>
+                <div x-show="planResult" class="bg-gray-100 dark:bg-dark-800 rounded-xl p-4">
+                    <pre class="text-gray-600 dark:text-dark-300 text-xs whitespace-pre-wrap leading-relaxed" x-text="planResult"></pre>
                 </div>
             </div>
-            <div class="p-6 border-t border-dark-700/50 flex items-center justify-end gap-3">
-                <button @click="showPlanModal = false" class="px-5 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors text-sm">Kapat</button>
+            <div class="p-6 border-t border-gray-200 dark:border-dark-700/50 flex items-center justify-end gap-3">
+                <button @click="showPlanModal = false" class="px-5 py-2.5 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors text-sm">Kapat</button>
                 <button @click="generatePlan()" :disabled="planLoading"
                     class="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors text-sm flex items-center gap-2 disabled:opacity-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -336,11 +336,11 @@ function sosyalMedia() {
         statusClass(status) {
             const map = {
                 draft: 'bg-yellow-500/20 text-yellow-400',
-                planlandi: 'bg-blue-500/20 text-blue-400',
+                planlandi: 'bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400',
                 yayinlandi: 'bg-green-500/20 text-green-400',
                 hata: 'bg-red-500/20 text-red-400',
             };
-            return map[status] || 'bg-dark-700 text-dark-400';
+            return map[status] || 'bg-gray-200 dark:bg-dark-700 text-gray-500 dark:text-dark-400';
         },
 
         formatDate(value) {

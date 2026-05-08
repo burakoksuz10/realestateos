@@ -21,9 +21,9 @@ Route::get('contacts/{contact}/activities', [ContactController::class, 'activiti
 Route::post('contacts/import', [ContactController::class, 'import'])->name('contacts.import');
 Route::get('contacts/export', [ContactController::class, 'export'])->name('contacts.export');
 
-// Leads
-Route::resource('leads', LeadController::class);
+// Leads (static routes must come before the resource to avoid {lead} wildcard conflicts)
 Route::get('leads/kanban', [LeadController::class, 'kanban'])->name('leads.kanban');
+Route::resource('leads', LeadController::class);
 Route::post('leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
 Route::post('leads/{lead}/assign', [LeadController::class, 'assign'])->name('leads.assign');
 Route::post('leads/{lead}/move-stage', [LeadController::class, 'moveStage'])->name('leads.move-stage');

@@ -97,14 +97,16 @@ class LeadController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:50',
-            'source_type' => 'required|string',
+            'source' => 'nullable|string',
+            'interest_type' => 'nullable|string|in:buy,rent,sell,invest',
+            'property_type' => 'nullable|string',
+            'priority' => 'nullable|in:low,medium,high,urgent',
+            'status' => 'nullable|in:new,contacted,qualified,proposal',
             'assigned_to' => 'required|exists:users,id',
             'notes' => 'nullable|string',
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0',
-            'preferred_locations' => 'nullable|array',
-            'property_type' => 'nullable|string',
-            'listing_type' => 'nullable|in:sale,rent',
+            'preferred_locations' => 'nullable|string',
         ]);
 
         // Create or find contact
@@ -117,25 +119,30 @@ class LeadController extends Controller
             ]
         );
 
+        // Parse preferred locations from comma-separated text
+        $preferredLocations = [];
+        if (!empty($validated['preferred_locations'])) {
+            $preferredLocations = array_values(array_filter(array_map('trim', explode(',', $validated['preferred_locations']))));
+        }
+
         // Create lead
         $lead = Lead::create([
             'contact_id' => $contact->id,
-            'source_type' => $validated['source_type'],
+            'source' => $validated['source'] ?? null,
+            'interest_type' => $validated['interest_type'] ?? null,
+            'property_type' => $validated['property_type'] ?? null,
             'assigned_to' => $validated['assigned_to'],
-            'status' => 'new',
+            'status' => $validated['status'] ?? 'new',
+            'priority' => $validated['priority'] ?? 'medium',
             'score' => 50,
             'notes' => $validated['notes'] ?? null,
-            'requirements' => [
-                'budget_min' => $validated['budget_min'] ?? null,
-                'budget_max' => $validated['budget_max'] ?? null,
-                'preferred_locations' => $validated['preferred_locations'] ?? [],
-                'property_type' => $validated['property_type'] ?? null,
-                'listing_type' => $validated['listing_type'] ?? null,
-            ],
+            'budget_min' => $validated['budget_min'] ?? null,
+            'budget_max' => $validated['budget_max'] ?? null,
+            'preferred_locations' => $preferredLocations,
         ]);
 
         return redirect()->route('admin.leads.show', $lead)
-            ->with('success', 'Lead başarıyla oluşturuldu.');
+            ->with('success', 'Potansiyel müşteri başarıyla oluşturuldu.');
     }
 
     /**
@@ -183,32 +190,40 @@ class LeadController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|in:new,contacted,qualified,proposal,negotiation,converted,lost',
+            'priority' => 'nullable|in:low,medium,high,urgent',
             'assigned_to' => 'required|exists:users,id',
+            'source' => 'nullable|string',
+            'interest_type' => 'nullable|string|in:buy,rent,sell,invest',
+            'property_type' => 'nullable|string',
             'score' => 'nullable|integer|min:0|max:100',
             'notes' => 'nullable|string',
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0',
-            'preferred_locations' => 'nullable|array',
-            'property_type' => 'nullable|string',
-            'listing_type' => 'nullable|in:sale,rent',
+            'preferred_locations' => 'nullable|string',
         ]);
+
+        // Parse preferred locations from comma-separated text
+        $preferredLocations = [];
+        if (!empty($validated['preferred_locations'])) {
+            $preferredLocations = array_values(array_filter(array_map('trim', explode(',', $validated['preferred_locations']))));
+        }
 
         $lead->update([
             'status' => $validated['status'],
+            'priority' => $validated['priority'] ?? $lead->priority,
             'assigned_to' => $validated['assigned_to'],
+            'source' => $validated['source'] ?? $lead->source,
+            'interest_type' => $validated['interest_type'] ?? $lead->interest_type,
+            'property_type' => $validated['property_type'] ?? $lead->property_type,
             'score' => $validated['score'] ?? $lead->score,
             'notes' => $validated['notes'],
-            'requirements' => [
-                'budget_min' => $validated['budget_min'] ?? null,
-                'budget_max' => $validated['budget_max'] ?? null,
-                'preferred_locations' => $validated['preferred_locations'] ?? [],
-                'property_type' => $validated['property_type'] ?? null,
-                'listing_type' => $validated['listing_type'] ?? null,
-            ],
+            'budget_min' => $validated['budget_min'] ?? null,
+            'budget_max' => $validated['budget_max'] ?? null,
+            'preferred_locations' => $preferredLocations,
         ]);
 
         return redirect()->route('admin.leads.show', $lead)
-            ->with('success', 'Lead başarıyla güncellendi.');
+            ->with('success', 'Potansiyel müşteri başarıyla güncellendi.');
     }
 
     /**
@@ -219,7 +234,7 @@ class LeadController extends Controller
         $lead->delete();
 
         return redirect()->route('admin.leads.index')
-            ->with('success', 'Lead başarıyla silindi.');
+            ->with('success', 'Potansiyel müşteri başarıyla silindi.');
     }
 
     /**
@@ -236,7 +251,7 @@ class LeadController extends Controller
         $deal = $lead->convertToDeal($validated);
 
         return redirect()->route('admin.deals.show', $deal)
-            ->with('success', 'Lead başarıyla fırsata dönüştürüldü.');
+            ->with('success', 'Potansiyel müşteri başarıyla fırsata dönüştürüldü.');
     }
 
     /**
@@ -254,7 +269,7 @@ class LeadController extends Controller
             'lost_at' => now(),
         ]);
 
-        return back()->with('success', 'Lead kaybedildi olarak işaretlendi.');
+        return back()->with('success', 'Potansiyel müşteri kaybedildi olarak işaretlendi.');
     }
 
     public function kanban(Request $request)
@@ -289,7 +304,7 @@ class LeadController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Lead başarıyla atandı.',
+            'message' => 'Potansiyel müşteri başarıyla atandı.',
             'assigned_to' => ['id' => $user->id, 'name' => $user->name],
         ]);
     }
@@ -317,7 +332,7 @@ class LeadController extends Controller
             'qualification_notes' => $request->qualification_notes,
         ]);
 
-        return back()->with('success', 'Lead nitelikli olarak işaretlendi.');
+        return back()->with('success', 'Potansiyel müşteri nitelikli olarak işaretlendi.');
     }
 
     public function suggestions(Lead $lead)

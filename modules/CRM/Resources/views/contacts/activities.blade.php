@@ -4,15 +4,15 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white">Aktivite Geçmişi</h1>
-            <p class="text-dark-400 mt-1">{{ $contact->full_name }}</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Aktivite Geçmişi</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">{{ $contact->full_name }}</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.activities.create', ['contact_id' => $contact->id]) }}" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors flex items-center">
+            <a href="{{ route('admin.activities.create', ['contact_id' => $contact->id]) }}" class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Aktivite Ekle
             </a>
-            <a href="{{ route('admin.contacts.show', $contact) }}" class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors flex items-center">
+            <a href="{{ route('admin.contacts.show', $contact) }}" class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Geri
             </a>
@@ -21,16 +21,16 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div class="lg:col-span-3">
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden">
-                <div class="p-5 border-b border-dark-700/50 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-white">Tüm Aktiviteler</h2>
-                    <span class="text-sm text-dark-400">{{ $activities->total() }} kayıt</span>
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl overflow-hidden">
+                <div class="p-5 border-b border-gray-200 dark:border-dark-700/50 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Tüm Aktiviteler</h2>
+                    <span class="text-sm text-gray-500 dark:text-dark-400">{{ $activities->total() }} kayıt</span>
                 </div>
                 <div class="divide-y divide-dark-700/50">
                     @forelse($activities as $activity)
                     @php
                         $typeColors = [
-                            'call' => 'bg-blue-500/20 text-blue-400',
+                            'call' => 'bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400',
                             'email' => 'bg-purple-500/20 text-purple-400',
                             'meeting' => 'bg-green-500/20 text-green-400',
                             'note' => 'bg-yellow-500/20 text-yellow-400',
@@ -50,7 +50,7 @@
                             'note' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
                             'task' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
                         ];
-                        $colorClass = $typeColors[$activity->type] ?? 'bg-dark-700 text-dark-300';
+                        $colorClass = $typeColors[$activity->type] ?? 'bg-gray-200 dark:bg-dark-700 text-gray-600 dark:text-dark-300';
                         $icon = $typeIcons[$activity->type] ?? 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
                     @endphp
                     <div class="flex items-start gap-4 p-5">
@@ -62,7 +62,7 @@
                                 <div>
                                     <p class="text-white font-medium">{{ $activity->title }}</p>
                                     @if($activity->description)
-                                    <p class="text-dark-400 text-sm mt-1">{{ $activity->description }}</p>
+                                    <p class="text-gray-500 dark:text-dark-400 text-sm mt-1">{{ $activity->description }}</p>
                                     @endif
                                     <div class="flex items-center gap-3 mt-2">
                                         <span class="text-xs px-2 py-0.5 rounded-full {{ $colorClass }}">{{ $typeLabels[$activity->type] ?? $activity->type }}</span>
@@ -84,12 +84,12 @@
                     @empty
                     <div class="p-12 text-center">
                         <svg class="w-12 h-12 text-dark-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <p class="text-dark-400 text-sm">Henüz aktivite kaydı bulunmuyor.</p>
+                        <p class="text-gray-500 dark:text-dark-400 text-sm">Henüz aktivite kaydı bulunmuyor.</p>
                     </div>
                     @endforelse
                 </div>
                 @if($activities->hasPages())
-                <div class="p-4 border-t border-dark-700/50">
+                <div class="p-4 border-t border-gray-200 dark:border-dark-700/50">
                     {{ $activities->links() }}
                 </div>
                 @endif
@@ -97,26 +97,26 @@
         </div>
 
         <div class="space-y-4">
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-                <h3 class="text-sm font-medium text-dark-400 uppercase tracking-wider mb-4">Özet</h3>
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-4">Özet</h3>
                 <div class="space-y-3">
                     @foreach(['call' => 'Arama', 'email' => 'E-posta', 'meeting' => 'Toplantı', 'note' => 'Not', 'task' => 'Görev'] as $type => $label)
                     <div class="flex items-center justify-between">
-                        <span class="text-dark-400 text-sm">{{ $label }}</span>
+                        <span class="text-gray-500 dark:text-dark-400 text-sm">{{ $label }}</span>
                         <span class="text-white font-semibold text-sm">{{ $activities->where('type', $type)->count() }}</span>
                     </div>
                     @endforeach
                 </div>
             </div>
 
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
-                <h3 class="text-sm font-medium text-dark-400 uppercase tracking-wider mb-4">Hızlı İşlemler</h3>
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-4">Hızlı İşlemler</h3>
                 <div class="space-y-2">
-                    <a href="{{ route('admin.contacts.show', $contact) }}" class="flex items-center gap-2 text-sm text-dark-300 hover:text-white transition-colors">
+                    <a href="{{ route('admin.contacts.show', $contact) }}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-300 hover:text-white transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                         Kişi Detayı
                     </a>
-                    <a href="{{ route('admin.contacts.edit', $contact) }}" class="flex items-center gap-2 text-sm text-dark-300 hover:text-white transition-colors">
+                    <a href="{{ route('admin.contacts.edit', $contact) }}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-300 hover:text-white transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Kişiyi Düzenle
                     </a>

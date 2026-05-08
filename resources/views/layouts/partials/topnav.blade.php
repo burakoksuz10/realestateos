@@ -26,7 +26,7 @@
             <!-- Quick Actions -->
             <div class="hidden lg:flex items-center space-x-2">
                 <a href="{{ route('admin.listings.create') }}" 
-                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/30">
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-sky-400 to-blue-600 rounded-xl hover:from-sky-500 hover:to-blue-700 transition-colors shadow-lg shadow-blue-500/25">
                     <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
@@ -76,13 +76,13 @@
                         <!-- Notification items -->
                         <div class="p-4 hover:bg-gray-50 dark:hover:bg-dark-700 cursor-pointer">
                             <div class="flex items-start space-x-3">
-                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex-shrink-0 w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Yeni lead geldi</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Yeni potansiyel müşteri geldi</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Ahmet Yılmaz - Kadıköy'de 3+1 daire arıyor</p>
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">5 dakika önce</p>
                                 </div>

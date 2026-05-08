@@ -6,8 +6,8 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white">Bildirim Ayarları</h1>
-            <p class="text-dark-400 mt-1">Bildirim tercihlerinizi yönetin</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bildirim Ayarları</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">Bildirim tercihlerinizi yönetin</p>
         </div>
     </div>
 
@@ -21,8 +21,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
                 <!-- Email Notifications -->
-                <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-6">E-posta Bildirimleri</h2>
+                <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">E-posta Bildirimleri</h2>
                     <div class="space-y-4">
                         @php
                         $items = [
@@ -34,14 +34,14 @@
                         ];
                         @endphp
                         @foreach($items as $item)
-                        <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-800/50 rounded-xl">
                             <div>
                                 <p class="text-white font-medium text-sm">{{ $item['label'] }}</p>
-                                <p class="text-dark-400 text-xs">{{ $item['desc'] }}</p>
+                                <p class="text-gray-500 dark:text-dark-400 text-xs">{{ $item['desc'] }}</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="notifications[{{ $item['key'] }}]" value="1" checked class="sr-only peer">
-                                <div class="w-10 h-6 bg-dark-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                <div class="w-10 h-6 bg-gray-200 dark:bg-dark-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>
                         @endforeach
@@ -49,8 +49,8 @@
                 </div>
 
                 <!-- In-App Notifications -->
-                <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
-                    <h2 class="text-lg font-semibold text-white mb-6">Uygulama İçi Bildirimler</h2>
+                <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Uygulama İçi Bildirimler</h2>
                     <div class="space-y-4">
                         @php
                         $appItems = [
@@ -61,14 +61,14 @@
                         ];
                         @endphp
                         @foreach($appItems as $item)
-                        <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-800/50 rounded-xl">
                             <div>
                                 <p class="text-white font-medium text-sm">{{ $item['label'] }}</p>
-                                <p class="text-dark-400 text-xs">{{ $item['desc'] }}</p>
+                                <p class="text-gray-500 dark:text-dark-400 text-xs">{{ $item['desc'] }}</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="notifications[{{ $item['key'] }}]" value="1" checked class="sr-only peer">
-                                <div class="w-10 h-6 bg-dark-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                <div class="w-10 h-6 bg-gray-200 dark:bg-dark-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
                             </label>
                         </div>
                         @endforeach
@@ -78,17 +78,17 @@
 
             <!-- Sidebar -->
             <div class="space-y-6">
-                <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
-                    <h2 class="text-sm font-medium text-dark-400 uppercase tracking-wider mb-4">Ayarlar Menüsü</h2>
+                <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+                    <h2 class="text-sm font-medium text-gray-500 dark:text-dark-400 uppercase tracking-wider mb-4">Ayarlar Menüsü</h2>
                     <nav class="space-y-1">
-                        <a href="{{ route('admin.settings.index') }}" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors">Genel</a>
-                        <a href="{{ route('admin.settings.notifications') }}" class="flex items-center px-3 py-2 text-sm text-white bg-dark-800 rounded-lg font-medium">Bildirimler</a>
-                        <a href="{{ route('admin.settings.integrations') }}" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors">Entegrasyonlar</a>
-                        <a href="{{ route('admin.settings.billing') }}" class="flex items-center px-3 py-2 text-sm text-dark-300 hover:text-white hover:bg-dark-800 rounded-lg transition-colors">Faturalama</a>
+                        <a href="{{ route('admin.settings.index') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-dark-300 hover:text-white hover:bg-gray-100 dark:bg-dark-800 rounded-lg transition-colors">Genel</a>
+                        <a href="{{ route('admin.settings.notifications') }}" class="flex items-center px-3 py-2 text-sm text-white bg-gray-100 dark:bg-dark-800 rounded-lg font-medium">Bildirimler</a>
+                        <a href="{{ route('admin.settings.integrations') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-dark-300 hover:text-white hover:bg-gray-100 dark:bg-dark-800 rounded-lg transition-colors">Entegrasyonlar</a>
+                        <a href="{{ route('admin.settings.billing') }}" class="flex items-center px-3 py-2 text-sm text-gray-600 dark:text-dark-300 hover:text-white hover:bg-gray-100 dark:bg-dark-800 rounded-lg transition-colors">Faturalama</a>
                     </nav>
                 </div>
-                <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
-                    <button type="submit" class="w-full px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
+                <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+                    <button type="submit" class="w-full px-4 py-2.5 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white font-medium rounded-xl transition-colors">
                         Kaydet
                     </button>
                 </div>

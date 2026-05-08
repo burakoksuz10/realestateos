@@ -3,13 +3,18 @@
 namespace Modules\Core\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        return view('core::settings.index');
+        $openaiKey = Setting::get('openai_api_key', '');
+        $openaiModel = Setting::get('openai_model', 'gpt-4o-mini');
+        $newsEnabled = Setting::get('news_enabled', '1');
+
+        return view('core::settings.index', compact('openaiKey', 'openaiModel', 'newsEnabled'));
     }
 
     public function general()
@@ -20,16 +25,23 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'company_name' => 'nullable|string|max:255',
-            'company_email' => 'nullable|email|max:255',
-            'company_phone' => 'nullable|string|max:50',
+            'company_name'    => 'nullable|string|max:255',
+            'company_email'   => 'nullable|email|max:255',
+            'company_phone'   => 'nullable|string|max:50',
             'company_address' => 'nullable|string',
-            'timezone' => 'nullable|string',
-            'currency' => 'nullable|string|size:3',
-            'language' => 'nullable|string|size:2',
+            'timezone'        => 'nullable|string',
+            'currency'        => 'nullable|string|size:3',
+            'language'        => 'nullable|string|size:2',
+            'openai_api_key'  => 'nullable|string|max:255',
+            'openai_model'    => 'nullable|string|max:100',
+            'news_enabled'    => 'nullable|boolean',
         ]);
 
-        // Save settings logic here
+        foreach (['openai_api_key', 'openai_model', 'news_enabled'] as $key) {
+            if (array_key_exists($key, $validated)) {
+                Setting::set($key, $validated[$key] ?? '');
+            }
+        }
 
         return back()->with('success', 'Ayarlar başarıyla güncellendi.');
     }
@@ -41,10 +53,10 @@ class SettingsController extends Controller
 
     public function updateNotifications(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'email_notifications' => 'boolean',
-            'push_notifications' => 'boolean',
-            'sms_notifications' => 'boolean',
+            'push_notifications'  => 'boolean',
+            'sms_notifications'   => 'boolean',
         ]);
 
         return back()->with('success', 'Bildirim ayarları güncellendi.');
@@ -68,7 +80,7 @@ class SettingsController extends Controller
     public function updateProfile(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name'  => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $request->user()->id,
         ]);
 
@@ -81,12 +93,10 @@ class SettingsController extends Controller
     {
         $request->validate([
             'current_password' => 'required|current_password',
-            'password' => 'required|string|min:8|confirmed',
+            'password'         => 'required|string|min:8|confirmed',
         ]);
 
-        $request->user()->update([
-            'password' => bcrypt($request->password),
-        ]);
+        $request->user()->update(['password' => bcrypt($request->password)]);
 
         return back()->with('success', 'Şifre başarıyla güncellendi.');
     }

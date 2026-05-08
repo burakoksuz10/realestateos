@@ -6,22 +6,22 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white">Aktivite Zaman Çizelgesi</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Aktivite Zaman Çizelgesi</h1>
             @if(isset($contact))
-            <p class="text-dark-400 mt-1">{{ $contact->first_name }} {{ $contact->last_name }}</p>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">{{ $contact->first_name }} {{ $contact->last_name }}</p>
             @elseif(isset($lead))
-            <p class="text-dark-400 mt-1">Lead #{{ $lead->id }}</p>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">Pot. Müşteri #{{ $lead->id }}</p>
             @elseif(isset($deal))
-            <p class="text-dark-400 mt-1">{{ $deal->title }}</p>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">{{ $deal->title }}</p>
             @endif
         </div>
-        <a href="{{ url()->previous() }}" class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors flex items-center">
+        <a href="{{ url()->previous() }}" class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Geri
         </a>
     </div>
 
-    <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+    <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
         @forelse($activities ?? [] as $activity)
         @php
         $typeColors = ['call' => 'blue', 'email' => 'green', 'meeting' => 'purple', 'showing' => 'orange', 'note' => 'gray', 'task_completed' => 'teal', 'whatsapp' => 'emerald'];
@@ -42,7 +42,7 @@
                     </svg>
                 </div>
                 @if(!$loop->last)
-                <div class="w-px flex-1 bg-dark-700/50 mt-2"></div>
+                <div class="w-px flex-1 bg-gray-200 dark:bg-dark-700/50 mt-2"></div>
                 @endif
             </div>
             <div class="flex-1 pb-6 last:pb-0">
@@ -51,10 +51,10 @@
                     <span class="px-2 py-0.5 bg-{{ $color }}-500/20 text-{{ $color }}-400 text-xs rounded-full">{{ $typeLabels[$activity->type] ?? $activity->type }}</span>
                 </div>
                 @if($activity->description)
-                <p class="text-dark-300 text-sm mb-2">{{ $activity->description }}</p>
+                <p class="text-gray-600 dark:text-dark-300 text-sm mb-2">{{ $activity->description }}</p>
                 @endif
                 @if($activity->outcome)
-                <p class="text-dark-400 text-sm italic">Sonuç: {{ $activity->outcome }}</p>
+                <p class="text-gray-500 dark:text-dark-400 text-sm italic">Sonuç: {{ $activity->outcome }}</p>
                 @endif
                 <div class="flex items-center gap-3 mt-2">
                     <span class="text-dark-500 text-xs">{{ $activity->user->name ?? '-' }}</span>
@@ -65,7 +65,7 @@
         </div>
         @empty
         <div class="text-center py-12">
-            <p class="text-dark-400">Henüz aktivite kaydı bulunmuyor.</p>
+            <p class="text-gray-500 dark:text-dark-400">Henüz aktivite kaydı bulunmuyor.</p>
         </div>
         @endforelse
     </div>

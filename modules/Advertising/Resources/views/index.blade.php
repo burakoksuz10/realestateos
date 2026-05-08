@@ -6,18 +6,18 @@
     <!-- Header -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-white">Müşteri Getirme Merkezi</h1>
-            <p class="text-dark-400 mt-1">Meta reklamlarını randevu, mesaj ve müşteri maliyeti üzerinden yönetin.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Müşteri Getirme Merkezi</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">Meta reklamlarını randevu, mesaj ve müşteri maliyeti üzerinden yönetin.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <button @click="syncMeta()" :disabled="syncing"
-                class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors flex items-center gap-2 text-sm disabled:opacity-50">
+                class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center gap-2 text-sm disabled:opacity-50">
                 <svg x-show="!syncing" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 <svg x-show="syncing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                 Meta Sync
             </button>
             <button @click="showCreateModal = true"
-                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
+                class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Kampanya Kur
             </button>
@@ -26,27 +26,27 @@
 
     <!-- Metrics Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <div class="bg-dark-900 border border-dark-700/50 border-l-4 border-l-fuchsia-500 rounded-2xl p-5">
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 border-l-4 border-l-fuchsia-500 rounded-2xl p-5">
             <svg class="w-5 h-5 text-fuchsia-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             <p class="text-xl font-bold text-white">{{ number_format($totals['harcama'], 0, ',', '.') }} ₺</p>
             <p class="text-xs text-dark-500 mt-0.5">30 gün harcama</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 border-l-4 border-l-emerald-500 rounded-2xl p-5">
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 border-l-4 border-l-emerald-500 rounded-2xl p-5">
             <svg class="w-5 h-5 text-emerald-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             <p class="text-xl font-bold text-white">{{ number_format($totals['result_count']) }}</p>
             <p class="text-xs text-dark-500 mt-0.5">Toplam sonuç</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 border-l-4 border-l-blue-500 rounded-2xl p-5">
-            <svg class="w-5 h-5 text-blue-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 border-l-4 border-l-blue-500 rounded-2xl p-5">
+            <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             <p class="text-xl font-bold text-white">{{ number_format($totals['cost_per_result'], 0, ',', '.') }} ₺</p>
             <p class="text-xs text-dark-500 mt-0.5">Sonuç maliyeti</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 border-l-4 border-l-cyan-500 rounded-2xl p-5">
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 border-l-4 border-l-cyan-500 rounded-2xl p-5">
             <svg class="w-5 h-5 text-cyan-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
             <p class="text-xl font-bold text-white">{{ number_format($totals['erisme']) }}</p>
             <p class="text-xs text-dark-500 mt-0.5">Erişim</p>
         </div>
-        <div class="bg-dark-900 border border-dark-700/50 border-l-4 border-l-amber-500 rounded-2xl p-5">
+        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 border-l-4 border-l-amber-500 rounded-2xl p-5">
             <svg class="w-5 h-5 text-amber-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
             <p class="text-xl font-bold text-white">{{ $totals['avg_health'] }}/100</p>
             <p class="text-xs text-dark-500 mt-0.5">Reklam sağlık skoru</p>
@@ -56,10 +56,10 @@
     <!-- Chart + Best Campaign -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <!-- Chart -->
-        <div class="xl:col-span-2 bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+        <div class="xl:col-span-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
             <div class="mb-5">
                 <h2 class="font-semibold text-white">Performans Akışı</h2>
-                <p class="text-sm text-dark-400">Harcama ve sonuçlar (son 30 gün)</p>
+                <p class="text-sm text-gray-500 dark:text-dark-400">Harcama ve sonuçlar (son 30 gün)</p>
             </div>
             @if($dailyMetrics->count() > 0)
             <div class="h-48 flex items-end gap-1" id="chart-container">
@@ -71,7 +71,7 @@
                     $height = round(($metric->harcama / $maxHarcama) * 100);
                 @endphp
                 <div class="flex-1 flex flex-col items-center gap-1 group relative">
-                    <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-dark-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap hidden group-hover:block z-10">
+                    <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-200 dark:bg-dark-700 text-white text-xs px-2 py-1 rounded whitespace-nowrap hidden group-hover:block z-10">
                         {{ number_format($metric->harcama, 0, ',', '.') }} ₺
                     </div>
                     <div class="w-full rounded-t-sm bg-violet-500/60 hover:bg-violet-500 transition-colors" style="height: {{ $height }}%"></div>
@@ -86,7 +86,7 @@
             <div class="h-48 flex items-center justify-center text-center">
                 <div>
                     <svg class="w-10 h-10 text-dark-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    <p class="text-dark-400 font-medium text-sm">Henüz metrik yok</p>
+                    <p class="text-gray-500 dark:text-dark-400 font-medium text-sm">Henüz metrik yok</p>
                     <p class="text-dark-500 text-xs">Kampanya yayınlandıktan sonra veriler burada görünür.</p>
                 </div>
             </div>
@@ -96,14 +96,14 @@
         <!-- Right column -->
         <div class="space-y-4">
             <!-- Automation principle -->
-            <div class="bg-gradient-to-br from-slate-800 to-dark-900 border border-dark-700/50 rounded-2xl p-5">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-800 dark:to-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
                 <div class="flex items-start gap-3">
                     <div class="p-2 rounded-lg bg-white/10">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
                     </div>
                     <div>
                         <h2 class="font-semibold text-white text-sm">Otomasyon Kurgusu</h2>
-                        <p class="text-xs text-dark-400 mt-1.5 leading-relaxed">
+                        <p class="text-xs text-gray-500 dark:text-dark-400 mt-1.5 leading-relaxed">
                             Yeni kampanyalar geniş hedefleme, otomatik yerleşim ve düşük maliyet odaklı teklif stratejisiyle hazırlanır.
                         </p>
                     </div>
@@ -125,7 +125,7 @@
             </div>
 
             <!-- Best campaign -->
-            <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-5">
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
                 <h2 class="font-semibold text-white text-sm mb-3">En İyi Fırsat</h2>
                 @php
                     $bestCampaign = $campaigns
@@ -137,7 +137,7 @@
                 <p class="text-xs text-dark-500">En düşük sonuç maliyeti</p>
                 <p class="font-semibold text-white mt-1">{{ $bestCampaign->name }}</p>
                 <div class="flex items-center justify-between mt-3">
-                    <span class="text-xs text-dark-400">maliyet/sonuç</span>
+                    <span class="text-xs text-gray-500 dark:text-dark-400">maliyet/sonuç</span>
                     <span class="font-bold text-emerald-400">{{ number_format($bestCampaign->totals['cost_per_result'], 0, ',', '.') }} ₺</span>
                 </div>
                 @else
@@ -148,17 +148,17 @@
     </div>
 
     <!-- Campaigns -->
-    <div class="bg-dark-900 border border-dark-700/50 rounded-2xl p-6">
+    <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
             <div>
                 <h2 class="font-semibold text-white">Kampanyalar</h2>
-                <p class="text-sm text-dark-400">Her kampanyayı sonuç maliyeti ve sağlık skoruyla takip edin.</p>
+                <p class="text-sm text-gray-500 dark:text-dark-400">Her kampanyayı sonuç maliyeti ve sağlık skoruyla takip edin.</p>
             </div>
             <div class="flex flex-wrap gap-2">
                 @foreach(['tumu' => 'Tümü', 'randevu' => 'Randevu', 'mesaj' => 'Mesaj', 'tanitim' => 'Tanıtım', 'etkilesim' => 'Etkileşim', 'trafik' => 'Web Ziyareti'] as $fkey => $flabel)
                 <button
                     @click="filterHedef = '{{ $fkey }}'"
-                    :class="filterHedef === '{{ $fkey }}' ? 'bg-dark-600 text-white' : 'bg-dark-800 text-dark-400 hover:text-white'"
+                    :class="filterHedef === '{{ $fkey }}' ? 'bg-dark-600 text-white' : 'bg-gray-100 dark:bg-dark-800 text-gray-500 dark:text-dark-400 hover:text-white'"
                     class="px-3 py-1.5 rounded-full text-xs transition-colors">
                     {{ $flabel }}
                 </button>
@@ -169,9 +169,9 @@
         @if($campaigns->count() === 0)
         <div class="py-16 text-center">
             <svg class="w-12 h-12 text-dark-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            <p class="text-dark-400 font-medium">Henüz kampanya kurulmamış</p>
+            <p class="text-gray-500 dark:text-dark-400 font-medium">Henüz kampanya kurulmamış</p>
             <p class="text-dark-500 text-sm mt-1">İlk kampanyayı 3 dakikada hazırlayabilirsiniz.</p>
-            <button @click="showCreateModal = true" class="mt-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm transition-colors">Kampanya Kur</button>
+            <button @click="showCreateModal = true" class="mt-4 px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl text-sm transition-colors">Kampanya Kur</button>
         </div>
         @else
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -188,17 +188,17 @@
                 $hedefColors = [
                     'randevu' => ['border' => 'border-emerald-200/20', 'bg' => 'bg-emerald-500/20', 'text' => 'text-emerald-400'],
                     'mesaj' => ['border' => 'border-green-200/20', 'bg' => 'bg-green-500/20', 'text' => 'text-green-400'],
-                    'tanitim' => ['border' => 'border-blue-200/20', 'bg' => 'bg-blue-500/20', 'text' => 'text-blue-400'],
+                    'tanitim' => ['border' => 'border-blue-200/20', 'bg' => 'bg-primary-100 dark:bg-primary-500/20', 'text' => 'text-primary-600 dark:text-primary-400'],
                     'etkilesim' => ['border' => 'border-rose-200/20', 'bg' => 'bg-rose-500/20', 'text' => 'text-rose-400'],
                     'trafik' => ['border' => 'border-cyan-200/20', 'bg' => 'bg-cyan-500/20', 'text' => 'text-cyan-400'],
                 ];
                 $hc = $hedefColors[$campaign->hedef] ?? $hedefColors['randevu'];
                 $healthLabel = $campaign->health_score >= 85 ? ['Çok iyi', 'bg-emerald-500/20 text-emerald-400']
-                    : ($campaign->health_score >= 70 ? ['Sağlıklı', 'bg-blue-500/20 text-blue-400']
+                    : ($campaign->health_score >= 70 ? ['Sağlıklı', 'bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400']
                     : ($campaign->health_score >= 55 ? ['İzlenmeli', 'bg-amber-500/20 text-amber-400']
                     : ['Eksik kurgu', 'bg-red-500/20 text-red-400']));
             @endphp
-            <div class="rounded-xl border {{ $hc['border'] }} border-dark-700/50 p-4 hover:border-dark-600 transition-colors"
+            <div class="rounded-xl border {{ $hc['border'] }} border-gray-200 dark:border-dark-700/50 p-4 hover:border-dark-600 transition-colors"
                 x-show="filterHedef === 'tumu' || filterHedef === '{{ $campaign->hedef }}'">
                 <!-- Campaign header -->
                 <div class="flex items-start justify-between gap-3 mb-4">
@@ -208,28 +208,28 @@
                         </div>
                         <div>
                             <h3 class="font-semibold text-white text-sm">{{ $campaign->name }}</h3>
-                            <p class="text-xs text-dark-400 mt-0.5">
+                            <p class="text-xs text-gray-500 dark:text-dark-400 mt-0.5">
                                 {{ ['randevu' => 'Randevu Talebi', 'mesaj' => 'Mesaj', 'tanitim' => 'Tanıtım', 'etkilesim' => 'Etkileşim', 'trafik' => 'Web Ziyareti'][$campaign->hedef] ?? $campaign->hedef }}
                             </p>
                         </div>
                     </div>
-                    <span class="text-xs px-2 py-1 rounded-full {{ $campaign->durum === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-dark-700 text-dark-400' }}">
+                    <span class="text-xs px-2 py-1 rounded-full {{ $campaign->durum === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-gray-200 dark:bg-dark-700 text-gray-500 dark:text-dark-400' }}">
                         {{ $campaign->durum === 'ACTIVE' ? 'Yayında' : 'Taslak' }}
                     </span>
                 </div>
 
                 <!-- Metrics -->
                 <div class="grid grid-cols-3 gap-2 mb-4">
-                    <div class="bg-dark-800 rounded-lg p-3">
-                        <p class="text-xs text-dark-400">Harcama</p>
+                    <div class="bg-gray-100 dark:bg-dark-800 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 dark:text-dark-400">Harcama</p>
                         <p class="font-semibold text-white text-sm">{{ number_format($campaignMetricsTotal['harcama'], 0, ',', '.') }} ₺</p>
                     </div>
-                    <div class="bg-dark-800 rounded-lg p-3">
-                        <p class="text-xs text-dark-400">Sonuç</p>
+                    <div class="bg-gray-100 dark:bg-dark-800 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 dark:text-dark-400">Sonuç</p>
                         <p class="font-semibold text-white text-sm">{{ number_format($campaignMetricsTotal['result_count']) }}</p>
                     </div>
-                    <div class="bg-dark-800 rounded-lg p-3">
-                        <p class="text-xs text-dark-400">Maliyet</p>
+                    <div class="bg-gray-100 dark:bg-dark-800 rounded-lg p-3">
+                        <p class="text-xs text-gray-500 dark:text-dark-400">Maliyet</p>
                         <p class="font-semibold text-white text-sm">{{ $campaignMetricsTotal['result_count'] > 0 ? number_format($campaignMetricsTotal['cost_per_result'], 0, ',', '.') . ' ₺' : '-' }}</p>
                     </div>
                 </div>
@@ -242,7 +242,7 @@
                     <div class="flex items-center gap-2">
                         <button
                             @click="toggleCampaign({{ $campaign->id }}, '{{ $campaign->durum }}')"
-                            class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 text-dark-300 transition-colors"
+                            class="p-2 rounded-lg bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-600 dark:text-dark-300 transition-colors"
                             title="{{ $campaign->durum === 'ACTIVE' ? 'Duraklat' : 'Başlat' }}">
                             @if($campaign->durum === 'ACTIVE')
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -294,26 +294,26 @@
     <!-- Create Campaign Modal -->
     <div x-show="showCreateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70" @click="showCreateModal = false"></div>
-        <div class="relative bg-dark-900 border border-dark-700/50 rounded-2xl w-full max-w-lg">
-            <div class="p-6 border-b border-dark-700/50 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-white">Kampanya Kur</h2>
-                <button @click="showCreateModal = false" class="text-dark-400 hover:text-white">
+        <div class="relative bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl w-full max-w-lg">
+            <div class="p-6 border-b border-gray-200 dark:border-dark-700/50 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Kampanya Kur</h2>
+                <button @click="showCreateModal = false" class="text-gray-500 dark:text-dark-400 hover:text-white">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Kampanya Adı *</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Kampanya Adı *</label>
                     <input type="text" x-model="createForm.name" placeholder="ör. Bahar Dönemi İlan Kampanyası"
-                        class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-dark-300 mb-2">Kampanya Hedefi</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Kampanya Hedefi</label>
                     <div class="grid grid-cols-2 gap-2">
                         @foreach(['randevu' => 'Randevu Talebi', 'mesaj' => 'Mesaj', 'tanitim' => 'Tanıtım', 'etkilesim' => 'Etkileşim', 'trafik' => 'Web Ziyareti'] as $hkey => $hlabel)
                         <button
                             @click="createForm.hedef = '{{ $hkey }}'"
-                            :class="createForm.hedef === '{{ $hkey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-dark-700 text-dark-400 hover:border-dark-600'"
+                            :class="createForm.hedef === '{{ $hkey }}' ? 'border-primary-500 bg-primary-600/20 text-primary-400' : 'border-gray-200 dark:border-dark-700 text-gray-500 dark:text-dark-400 hover:border-dark-600'"
                             class="px-3 py-2 border rounded-xl text-xs transition-colors text-left">
                             {{ $hlabel }}
                         </button>
@@ -322,22 +322,22 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Günlük Bütçe (₺)</label>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Günlük Bütçe (₺)</label>
                         <input type="number" x-model="createForm.budget" min="0" step="10"
-                            class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-dark-300 mb-2">Şehir</label>
-                        <input type="text" x-model="createForm.city" placeholder="ör. İstanbul"
-                            class="w-full px-4 py-2.5 bg-dark-800 border border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Şehir</label>
+                        <input type="text" x-model="createForm.city" placeholder="ör. Samsun"
+                            class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                     </div>
                 </div>
                 <div x-show="createError" class="p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm" x-text="createError"></div>
             </div>
-            <div class="p-6 border-t border-dark-700/50 flex items-center justify-end gap-3">
-                <button @click="showCreateModal = false" class="px-5 py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors text-sm">İptal</button>
+            <div class="p-6 border-t border-gray-200 dark:border-dark-700/50 flex items-center justify-end gap-3">
+                <button @click="showCreateModal = false" class="px-5 py-2.5 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors text-sm">İptal</button>
                 <button @click="createCampaign()" :disabled="creating"
-                    class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors text-sm flex items-center gap-2 disabled:opacity-50">
+                    class="px-5 py-2.5 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors text-sm flex items-center gap-2 disabled:opacity-50">
                     <svg x-show="creating" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     Kampanya Oluştur
                 </button>
@@ -348,12 +348,12 @@
     <!-- Confirm Delete Modal -->
     <div x-show="confirmDelete" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70" @click="confirmDelete = null"></div>
-        <div class="relative bg-dark-900 border border-dark-700/50 rounded-2xl p-6 w-full max-w-sm text-center">
+        <div class="relative bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6 w-full max-w-sm text-center">
             <svg class="w-10 h-10 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.07 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
             <h3 class="text-white font-semibold">Kampanyayı Sil</h3>
-            <p class="text-dark-400 text-sm mt-2">Bu kampanyayı silmek istediğinizden emin misiniz?</p>
+            <p class="text-gray-500 dark:text-dark-400 text-sm mt-2">Bu kampanyayı silmek istediğinizden emin misiniz?</p>
             <div class="flex items-center justify-center gap-3 mt-5">
-                <button @click="confirmDelete = null" class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl text-sm transition-colors">Vazgeç</button>
+                <button @click="confirmDelete = null" class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl text-sm transition-colors">Vazgeç</button>
                 <button @click="deleteCampaign(confirmDelete)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm transition-colors">Sil</button>
             </div>
         </div>

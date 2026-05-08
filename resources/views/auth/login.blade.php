@@ -28,7 +28,7 @@
         }
     </script>
 </head>
-<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 font-sans antialiased">
+<body class="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 font-sans antialiased">
     <div class="min-h-full flex">
         <!-- Left Side - Branding -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
@@ -53,7 +53,7 @@
                         <span class="text-primary-400">Yapay Zeka</span> ile Yönetin
                     </h1>
                     <p class="text-lg text-white/70 max-w-md">
-                        Lead yönetimi, değerleme, pazarlama otomasyonu ve daha fazlası. 
+                        Potansiyel müşteri yönetimi, değerleme, pazarlama otomasyonu ve daha fazlası.
                         Tek platformda tüm emlak operasyonlarınız.
                     </p>
                     
@@ -99,7 +99,7 @@
                 <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
                     <div class="text-center mb-8">
                         <h2 class="text-2xl font-bold text-white">Hoş Geldiniz</h2>
-                        <p class="text-slate-400 mt-2">Hesabınıza giriş yapın</p>
+                        <p class="text-gray-400 mt-2">Hesabınıza giriş yapın</p>
                     </div>
 
                     @if ($errors->any())
@@ -112,27 +112,27 @@
                         @csrf
                         
                         <div>
-                            <label for="email" class="block text-sm font-medium text-slate-300 mb-2">E-posta</label>
+                            <label for="email" class="block text-sm font-medium text-gray-300 mb-2">E-posta</label>
                             <input type="email" 
                                    id="email" 
                                    name="email" 
                                    value="{{ old('email') }}"
                                    required 
                                    autofocus
-                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                    placeholder="ornek@email.com">
                         </div>
 
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <label for="password" class="block text-sm font-medium text-slate-300">Şifre</label>
+                                <label for="password" class="block text-sm font-medium text-gray-300">Şifre</label>
                                 <a href="{{ route('password.request') }}" class="text-sm text-primary-400 hover:text-primary-300">Şifremi Unuttum</a>
                             </div>
                             <input type="password" 
                                    id="password" 
                                    name="password" 
                                    required
-                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                   class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                    placeholder="••••••••">
                         </div>
 
@@ -141,24 +141,24 @@
                                    id="remember" 
                                    name="remember"
                                    class="w-4 h-4 rounded border-white/20 bg-white/5 text-primary-600 focus:ring-primary-500 focus:ring-offset-0">
-                            <label for="remember" class="ml-2 text-sm text-slate-400">Beni hatırla</label>
+                            <label for="remember" class="ml-2 text-sm text-gray-400">Beni hatırla</label>
                         </div>
 
                         <button type="submit" 
-                                class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-primary-600/30 hover:shadow-primary-600/40">
+                                class="w-full py-3 px-4 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35">
                             Giriş Yap
                         </button>
                     </form>
 
                     <div class="mt-8 pt-6 border-t border-white/10 text-center">
-                        <p class="text-sm text-slate-400">
+                        <p class="text-sm text-gray-400">
                             Demo hesabı: <span class="text-white">admin@recrm.com</span> / <span class="text-white">password</span>
                         </p>
                     </div>
                 </div>
 
-                <p class="mt-8 text-center text-sm text-slate-500">
-                    Hesabınız yok mu? 
+                <p class="mt-8 text-center text-sm text-gray-500">
+                    Hesabınız yok mu?
                     <a href="#" class="text-primary-400 hover:text-primary-300 font-medium">İletişime geçin</a>
                 </p>
             </div>

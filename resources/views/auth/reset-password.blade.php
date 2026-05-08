@@ -13,7 +13,7 @@
         }
     </script>
 </head>
-<body class="h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 font-sans antialiased flex items-center justify-center p-8">
+<body class="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 font-sans antialiased flex items-center justify-center p-8">
     <div class="w-full max-w-md">
         <div class="flex items-center justify-center space-x-3 mb-8">
             <div class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center">
@@ -27,7 +27,7 @@
         <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10">
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-white">Yeni Şifre Belirle</h2>
-                <p class="text-slate-400 mt-2 text-sm">Hesabınız için yeni bir şifre oluşturun.</p>
+                <p class="text-gray-400 mt-2 text-sm">Hesabınız için yeni bir şifre oluşturun.</p>
             </div>
 
             @if ($errors->any())
@@ -43,33 +43,33 @@
                 <input type="hidden" name="token" value="{{ $token }}">
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-slate-300 mb-2">E-posta Adresi</label>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">E-posta Adresi</label>
                     <input type="email" id="email" name="email" value="{{ old('email', $email ?? '') }}" required
-                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="ornek@email.com">
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Yeni Şifre</label>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Yeni Şifre</label>
                     <input type="password" id="password" name="password" required
-                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="En az 8 karakter">
                 </div>
 
                 <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-slate-300 mb-2">Şifre Tekrarı</label>
+                    <label for="password_confirmation" class="block text-sm font-medium text-gray-300 mb-2">Şifre Tekrarı</label>
                     <input type="password" id="password_confirmation" name="password_confirmation" required
-                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                         placeholder="Şifrenizi tekrar girin">
                 </div>
 
-                <button type="submit" class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-primary-600/30">
+                <button type="submit" class="w-full py-3 px-4 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25">
                     Şifreyi Güncelle
                 </button>
             </form>
         </div>
 
-        <p class="mt-6 text-center text-sm text-slate-500">
+        <p class="mt-6 text-center text-sm text-gray-500">
             <a href="{{ route('login') }}" class="text-primary-400 hover:text-primary-300 font-medium">← Giriş sayfasına dön</a>
         </p>
     </div>

@@ -6,37 +6,37 @@
 <div class="space-y-6" x-data="taskCalendar()">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white">Görev Takvimi</h1>
-            <p class="text-dark-400 mt-1" x-text="monthName + ' ' + currentYear"></p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Görev Takvimi</h1>
+            <p class="text-gray-500 dark:text-dark-400 mt-1" x-text="monthName + ' ' + currentYear"></p>
         </div>
         <div class="flex items-center gap-3">
-            <button @click="prevMonth()" class="p-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors">
+            <button @click="prevMonth()" class="p-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
             </button>
-            <button @click="goToday()" class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-white text-sm rounded-xl transition-colors">Bugün</button>
-            <button @click="nextMonth()" class="p-2 bg-dark-700 hover:bg-dark-600 text-white rounded-xl transition-colors">
+            <button @click="goToday()" class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white text-sm rounded-xl transition-colors">Bugün</button>
+            <button @click="nextMonth()" class="p-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
-            <a href="{{ route('admin.tasks.create') }}" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl transition-colors flex items-center">
+            <a href="{{ route('admin.tasks.create') }}" class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 Yeni Görev
             </a>
         </div>
     </div>
 
-    <div class="bg-dark-900 border border-dark-700/50 rounded-2xl overflow-hidden">
+    <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl overflow-hidden">
         <!-- Days header -->
-        <div class="grid grid-cols-7 border-b border-dark-700/50">
+        <div class="grid grid-cols-7 border-b border-gray-200 dark:border-dark-700/50">
             <template x-for="day in ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']">
-                <div class="py-3 text-center text-xs font-semibold text-dark-400 uppercase tracking-wider" x-text="day"></div>
+                <div class="py-3 text-center text-xs font-semibold text-gray-500 dark:text-dark-400 uppercase tracking-wider" x-text="day"></div>
             </template>
         </div>
 
         <!-- Calendar grid -->
         <div class="grid grid-cols-7">
             <template x-for="(day, index) in calendarDays" :key="index">
-                <div class="min-h-24 p-2 border-b border-r border-dark-700/30 last:border-r-0"
-                    :class="{ 'bg-dark-800/30': !day.currentMonth, 'bg-primary-500/5': day.isToday }">
+                <div class="min-h-24 p-2 border-b border-r border-gray-200 dark:border-dark-700/30 last:border-r-0"
+                    :class="{ 'bg-gray-100 dark:bg-dark-800/30': !day.currentMonth, 'bg-primary-500/5': day.isToday }">
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-sm font-medium"
                             :class="day.isToday ? 'w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-xs' : (day.currentMonth ? 'text-white' : 'text-dark-600')"
