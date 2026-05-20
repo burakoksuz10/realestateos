@@ -21,6 +21,41 @@ class TelegramServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'telegram');
 
         $this->registerRoutes();
+        $this->registerObservers();
+        $this->registerCommands();
+        $this->registerSchedules();
+    }
+
+    protected function registerObservers(): void
+    {
+        // Telegram observes CRM model changes directly (not via events),
+        // which sidesteps the half-wired event classes in modules/CRM.
+        \Modules\CRM\Models\Lead::observe(\Modules\Telegram\Observers\LeadObserver::class);
+        \Modules\CRM\Models\Deal::observe(\Modules\Telegram\Observers\DealObserver::class);
+    }
+
+    protected function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Modules\Telegram\Console\Commands\SendMorningBriefing::class,
+                \Modules\Telegram\Console\Commands\SendTaskReminders::class,
+            ]);
+        }
+    }
+
+    protected function registerSchedules(): void
+    {
+        $this->callAfterResolving(\Illuminate\Console\Scheduling\Schedule::class, function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+            $schedule->command('telegram:morning-briefing')
+                ->dailyAt('08:30')
+                ->timezone(config('app.timezone', 'Europe/Istanbul'))
+                ->withoutOverlapping();
+
+            $schedule->command('telegram:task-reminders')
+                ->everyFiveMinutes()
+                ->withoutOverlapping();
+        });
     }
 
     protected function registerRoutes(): void

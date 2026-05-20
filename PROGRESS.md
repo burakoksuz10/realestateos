@@ -15,14 +15,14 @@
 |-----|--------|-------|-----|
 | 0 | Altyapı | ✅ Tamam | OpenAI servis, kredi sistemi, ayarlar paneli, async jobs |
 | 1 | AI Lead & İlan Zekası | ✅ Tamam | Gerçek OpenAI bağlandı, sidebar Copilot çalışıyor |
-| 2 | Telegram Operasyon Merkezi | 🟡 İskelet hazır | Komutlar + bot token sonraki oturum |
+| 2 | Telegram Operasyon Merkezi | ✅ Kod tamam | Komutlar/bildirimler/brifing/foto-ses/butonlar canlı — sadece bot token + webhook URL bekliyor |
 | 3 | Sosyal Medya Motoru | ⏳ Bekliyor | Fal.ai entegrasyonu, kart üretici, takvim |
 | 4 | İletişim & Yaşam Döngüsü | ⏳ Bekliyor | WhatsApp/SMS/Çağrı/E-posta + drip campaigns |
 | 5 | Süreç Otomasyon | ⏳ Bekliyor | Workflow builder, takılan deal uyarıları |
 | 6 | İleri Özellikler | ⏳ Bekliyor | Portal sync, brochure, e-imza, TKGM, alıcı/satıcı portal |
 | 7 | Cila & Üretim | ⏳ Bekliyor | PWA, performans, test, güvenlik, çoklu dil |
 
-**İlerleme:** 2/8 faz tamamlandı, 1 faz iskelet seviyesinde.
+**İlerleme:** 3/8 faz tamamlandı (Faz 2'nin kodu hazır, sadece `.env` bot token + public webhook URL kullanıcı tarafında).
 
 ---
 
@@ -91,37 +91,39 @@ Amaç: CRM'in kalbini gerçek AI ile çalıştır.
 
 ---
 
-## 🟡 FAZ 2 — Telegram Operasyon Merkezi (İSKELET HAZIR)
+## ✅ FAZ 2 — Telegram Operasyon Merkezi (KOD TAMAM)
 
 Amaç: Saha danışmanları gerçek zamanlı operasyonda olsun.
 
-### Tamamlanan işler (iskelet)
+### Tamamlanan işler
 
-- [x] **`modules/Telegram/` yeni modül oluşturuldu**
+- [x] **`modules/Telegram/` modülü** — service provider, routes, migrations, observer + command registration
 - [x] **`telegram_users` tablosu** — kullanıcı-bot eşleştirme + pairing code akışı
-- [x] **TelegramService** — sendMessage, notifyUser, notifyOffice, setWebhook, generatePairingCode, completePairing
-- [x] **TelegramController** — /admin/telegram sayfası, pairing kod oluştur, bağlantı kaldır
-- [x] **WebhookController** — `/start KOD`, `/help` komutları
-- [x] **Bağlama akışı tam çalışıyor:** UI'dan kod al → Telegram'da bot'a `/start KOD` → bağlandı
+- [x] **TelegramService** — sendMessage, sendPhoto, sendMessageWithButtons, answerCallback, downloadFile, notifyUser, notifyOffice, setWebhook, generatePairingCode, completePairing
+- [x] **TelegramController** — `/admin/telegram` sayfası, pairing kod oluştur, bağlantı kaldır
+- [x] **WebhookController** — komutları + callback + media handler'lara delege ediyor
+- [x] **Bağlama akışı:** UI'dan kod al → Telegram'da bot'a `/start KOD` → bağlandı
+- [x] **CommandHandler** — komutlar bir yerde toplandı, yetkilendirme tek noktada
+  - `/start KOD`, `/help`
+  - `/today` — bugünkü görevler + sıcak lead özeti
+  - `/leads` — aktif lead listesi
+  - `/hot` — skor ≥ 80 olan lead'ler (kontakt + sinyaller dahil)
+  - `/search KRİTER` — `MatchingService::semanticSearch` ile doğal dil ilan arama
+  - `/listing REF` — ilan kartı (foto varsa caption ile fotoğraf, yoksa metin)
+- [x] **CallbackHandler** — interactive button'lar: `lead.assign`, `lead.task`, `lead.open`
+- [x] **MediaIngestService** — agent bot'a foto/ses/video/dosya gönderince son aktif lead'e activity olarak düşer; ses Whisper ile transkript edilir
+- [x] **Bildirim observer'ları (event'siz):**
+  - `LeadObserver` — yeni lead atama + hot lead alarmı (cold/warm → hot geçişi)
+  - `DealObserver` — stage değişimi + deal kazanıldı/kaybedildi (agent + ofis broadcast)
+- [x] **Sabah brifingi:** `telegram:morning-briefing` console command — her gün 08:30 (Europe/Istanbul), kişiselleştirilmiş (görevler + sıcak lead + uzun süredir hareketsiz lead)
+- [x] **Görev hatırlatması:** `telegram:task-reminders` — her 5 dk, `reminder_at` yaklaşan görevler
 
-### Sonraki oturuma kalan işler
+### Sonraki oturuma kalan ufak işler
 
-- [ ] **.env'e ekle:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` (BotFather'dan alın)
-- [ ] **Webhook public URL:** ngrok / cloudflare tunnel ile lokali expose et
-- [ ] **/leads komutu** — aktif lead'leri listele
-- [ ] **/today komutu** — bugün arayacaklar + görevler
-- [ ] **/hot komutu** — sıcak lead'ler (score >80)
-- [ ] **/search KRİTER** — doğal dil ilan arama (CopilotService::semanticSearch reuse)
-- [ ] **/listing REF** — ilan kartı (foto + bilgi)
-- [ ] **Bildirim event'leri:**
-  - Yeni lead atandığında otomatik mesaj
-  - Hot lead alarmı (score >80 olunca)
-  - Görev hatırlatması
-  - Deal kapandı/kapanmaya yakın
-- [ ] **Sabah brifingi (08:30)** — her agent için kişiselleştirilmiş özet (cron)
-- [ ] **Ofis kanalı** — manager view: günlük ofis özeti
-- [ ] **Foto/ses → CRM** — agent bot'a forward ederse lead aktivitesine düşsün
-- [ ] **Interactive buttons** — "Bu lead'i bana ata", "Görev olarak ekle"
+- [ ] **`.env`'e ekle (kullanıcı tarafı):** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` (BotFather'dan)
+- [ ] **Webhook public URL:** ngrok / cloudflare tunnel ile lokali expose et, `/admin/telegram` → "Webhook'u ayarla" butonuna bas
+- [ ] **Ofis kanalı (manager view)** — `notifyOffice` mevcut; cron'a "günlük ofis özeti" ekle (Faz 5'e bırakılabilir)
+- [ ] **Lead/Deal event class'ları** — `Modules\CRM\Events\LeadCreated/Updated/Converted` ve `DealCreated/StageChanged/DealClosed` boş stub'lar; `Lead::created`'da `event(new LeadCreated())` çağrısı runtime'da fail eder. Şu an observer akışı bağımsız çalışıyor ama broader CRM tarafı için bunlar bir gün doldurulmalı (kapsam dışı bug)
 
 ---
 
@@ -293,15 +295,27 @@ realestate/
 - **2026-05-20**: Master roadmap onaylandı. Faz 0 → 1 → 2 sırası seçildi. AI provider olarak yalnız OpenAI. Telegram bot bağlama sonraki oturuma ertelendi. `gpt-4o` varsayılan model (GPT-5.5 henüz yok, çıkınca config'den değiştir).
 - **2026-05-20**: AIService raw OpenAI client'a refactor edildi (`openai-php/laravel` paketi yüklü değildi, paket eklemek yerine raw client tercih edildi).
 - **2026-05-20**: Faz 1 cila — Lead detayda AI Analizi kartı + manuel "Yeniden Analiz Et" akışı; İlan detayda AI Değerleme kartı (komparable + trend + AI yorumu + fiyatlama senaryoları) + "AI ile Üret" açıklama butonu canlı. Tailwind dynamic class trap'i yüzünden tüm renk class'ları literal/match ile yazıldı (JIT safelist yok).
+- **2026-05-20**: Faz 2 kod tamamı — WebhookController küçük router'a indirildi, iş `CommandHandler` + `CallbackHandler` + `MediaIngestService`'e dağıtıldı. Bildirimler için **observer pattern** seçildi (event pattern değil), çünkü `Modules\CRM\Events\Lead*` ve `Deal*` class'ları stub değil — yani `event(new LeadCreated())` runtime'da `class not found` ile patlardı. Observer'lar `TelegramServiceProvider::boot()`'ta `Lead::observe()` / `Deal::observe()` ile bind. Schedule da aynı provider'dan `Schedule` resolve edip kuruldu (Kernel'a dokunulmadı). Whisper transkripsiyon `audio()->transcribe()` API'si — fail olursa activity yine yazılır, summary null kalır. Faz 2'nin geriye kalanı dışarıdan iş (bot token + public URL).
 
 ---
 
 ## 🎯 Şu An Yapılacaklar (En Yakın Hedef)
 
-1. `.env` dosyasına `OPENAI_API_KEY` ekle
-2. `php artisan queue:work` başlat
-3. Tarayıcıdan `/admin/ai/settings` → "Bağlantıyı Test Et"
-4. Yeni bir lead oluştur → AI analizinin geldiğini gör
-5. Floating Copilot widget'a soru sor
-6. Hazır olunca: Faz 2'yi bitirmek için Telegram bot token al (@BotFather)
+### Telegram'ı canlıya alma (Faz 2 kullanıcı tarafı)
+1. **BotFather'dan token al:** Telegram'da `@BotFather` → `/newbot` → ad ve username ver → token kopyala
+2. **`.env`'e ekle:**
+   ```
+   TELEGRAM_BOT_TOKEN=123456:ABC-DEF...
+   TELEGRAM_BOT_USERNAME=re_os_bot
+   ```
+3. **`php artisan config:clear`** ile config'i yenile
+4. **Public URL aç (lokal için):** `ngrok http 8000` veya `cloudflared tunnel`
+5. **Webhook'u ayarla:** `/admin/telegram` → "Webhook URL ayarla" butonunu kullan (URL: `https://YOUR-NGROK/api/telegram/webhook`)
+6. **Eşleştir:** `/admin/telegram` → "Eşleştirme kodu al" → Telegram'da bot'a `/start KOD`
+7. **Komutları test et:** `/today`, `/leads`, `/hot`, `/search Beşiktaş 2+1 kiralık`, `/listing REF`
+8. **Sabah brifingi:** sistem cron'una `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1` eklendiğinden emin ol — 08:30'da brifing düşmeli
+
+### Sonra: Faz 3 (Sosyal Medya Motoru)
+- Fal.ai entegrasyonu, markalı kart üretici, içerik takvimi
+- Veya: kapsam dışı bug — `Modules\CRM\Events\Lead*` ve `Deal*` event stub'larını oluştur (broader CRM tarafı şu an `event(new LeadCreated())`'ta runtime hatası verebilir)
 

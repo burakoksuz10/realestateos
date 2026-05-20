@@ -48,6 +48,96 @@ class TelegramService
     }
 
     /**
+     * Send a photo by URL with an optional caption.
+     */
+    public function sendPhoto(string $chatId, string $photoUrl, ?string $caption = null, array $options = []): bool
+    {
+        if (!$this->isConfigured()) {
+            Log::warning('Telegram bot not configured; skipping sendPhoto');
+            return false;
+        }
+
+        try {
+            $payload = array_merge([
+                'chat_id' => $chatId,
+                'photo'   => $photoUrl,
+            ], $options);
+
+            if ($caption !== null) {
+                $payload['caption']    = mb_substr($caption, 0, 1024);
+                $payload['parse_mode'] = $options['parse_mode'] ?? 'HTML';
+            }
+
+            $res = Http::timeout(15)->post("{$this->apiBase}/bot{$this->botToken}/sendPhoto", $payload);
+            return $res->ok();
+        } catch (\Throwable $e) {
+            Log::error('Telegram sendPhoto failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Download a file the user sent to the bot. Returns local path or null.
+     */
+    public function downloadFile(string $fileId, string $destinationDir): ?string
+    {
+        if (!$this->isConfigured()) return null;
+
+        try {
+            $info = Http::timeout(10)->get("{$this->apiBase}/bot{$this->botToken}/getFile", ['file_id' => $fileId])->json();
+            $filePath = $info['result']['file_path'] ?? null;
+            if (!$filePath) return null;
+
+            $contents = Http::timeout(30)->get("{$this->apiBase}/file/bot{$this->botToken}/{$filePath}")->body();
+            if (!$contents) return null;
+
+            if (!is_dir($destinationDir)) {
+                @mkdir($destinationDir, 0775, true);
+            }
+
+            $name = basename($filePath);
+            $full = rtrim($destinationDir, '/') . '/' . uniqid() . '_' . $name;
+            file_put_contents($full, $contents);
+
+            return $full;
+        } catch (\Throwable $e) {
+            Log::error('Telegram downloadFile failed', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Send a message with an inline keyboard (interactive buttons).
+     */
+    public function sendMessageWithButtons(string $chatId, string $text, array $buttons, array $options = []): bool
+    {
+        $options['reply_markup'] = json_encode([
+            'inline_keyboard' => $buttons,
+        ]);
+        return $this->sendMessage($chatId, $text, $options);
+    }
+
+    /**
+     * Answer a callback query (the "loading" spinner that appears when a button is tapped).
+     */
+    public function answerCallback(string $callbackQueryId, ?string $text = null, bool $showAlert = false): bool
+    {
+        if (!$this->isConfigured()) return false;
+
+        try {
+            $payload = ['callback_query_id' => $callbackQueryId];
+            if ($text !== null)  $payload['text']       = mb_substr($text, 0, 200);
+            if ($showAlert)      $payload['show_alert'] = true;
+
+            $res = Http::timeout(10)->post("{$this->apiBase}/bot{$this->botToken}/answerCallbackQuery", $payload);
+            return $res->ok();
+        } catch (\Throwable $e) {
+            Log::error('Telegram answerCallback failed', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
      * Send a message to all linked Telegram users of a given CRM user.
      */
     public function notifyUser(int $userId, string $text, array $options = []): int
