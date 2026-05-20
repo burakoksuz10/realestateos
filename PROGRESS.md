@@ -17,12 +17,12 @@
 | 1 | AI Lead & İlan Zekası | ✅ Tamam | Gerçek OpenAI bağlandı, sidebar Copilot çalışıyor |
 | 2 | Telegram Operasyon Merkezi | ✅ Kod tamam | Komutlar/bildirimler/brifing/foto-ses/butonlar canlı — sadece bot token + webhook URL bekliyor |
 | 3 | Sosyal Medya Motoru | ✅ Çekirdek tamam | Fal.ai (sky/twilight/declutter/staging/enhance), markalı kart üretici (4 şablon × 3 boyut), ilandan içerik akışı, takvim, hashtag intelligence |
-| 4 | İletişim & Yaşam Döngüsü | ⏳ Bekliyor | WhatsApp/SMS/Çağrı/E-posta + drip campaigns |
+| 4 | İletişim & Yaşam Döngüsü | 🟡 4.1 yarım | Unified Inbox backend tamam (conv+msg tabloları, 4 kanal abstraksiyonu, controller, route'lar). View + Telegram ingest refactor + sidebar bekliyor. Drip + çağrı özet sonraki dilim |
 | 5 | Süreç Otomasyon | ⏳ Bekliyor | Workflow builder, takılan deal uyarıları |
 | 6 | İleri Özellikler | ⏳ Bekliyor | Portal sync, brochure, e-imza, TKGM, alıcı/satıcı portal |
 | 7 | Cila & Üretim | ⏳ Bekliyor | PWA, performans, test, güvenlik, çoklu dil |
 
-**İlerleme:** 4/8 faz tamamlandı (Faz 2 kodu hazır — bot token + webhook URL bekliyor; Faz 3 çekirdek özellikler canlı — yayın API'leri Faz 4 ile birlikte).
+**İlerleme:** 3.5/8 faz (Faz 2 kodu hazır — bot token + webhook URL bekliyor; Faz 3 çekirdek özellikler canlı; Faz 4.1 Unified Inbox backend tamam, UI yarım kaldı).
 
 ---
 
@@ -175,22 +175,57 @@ Amaç: Pazarlama otomasyonu — AI ilanları sosyal medyaya hazır hale getirsin
 
 ---
 
-## ⏳ FAZ 4 — İletişim & Yaşam Döngüsü (BEKLEYEN)
+## 🟡 FAZ 4 — İletişim & Yaşam Döngüsü (4.1 YARIM)
 
 Amaç: Tüm iletişim kanalları tek inbox'ta, müşteri yaşam döngüsü otomatik.
 
-### Planlanan işler
+### 4.1 Unified Inbox — backend TAMAM, UI YARIM
 
-- [ ] **WhatsApp Business API** — gerçek mesaj gönderme/alma (mevcut routes var, içleri boş)
-- [ ] **SMS provider** — Netgsm / İletimerkezi (Twilio yedek)
-- [ ] **Twilio çağrı** — initiate + recording + auto-transcription (Whisper API)
-- [ ] **AI çağrı özetleme** — transcript → activity log + AI özet + intent + buying signals
-- [ ] **E-posta entegrasyonu** — IMAP fetch + SMTP send + activity threading
-- [ ] **Drip campaign engine** — nurture sequence (Mevcut `CopilotService::generateFollowUpPlan` baz alınabilir)
-  - Cold lead reactivation (60+ gün hareket yok)
-  - Yeni lead onboarding (5 günlük seri)
-  - Açık ev davetiyesi
-- [ ] **Unified inbox UI** — guzllik'in Sohbetler.tsx pattern'i
+**Tamamlanan (backend):**
+- [x] `database/migrations/2026_05_20_200000_create_conversations_table.php` — kanal-agnostik thread tablosu (office, contact, lead, channel, channel_thread_id, status, unread_count, last_message_*, meta)
+- [x] `database/migrations/2026_05_20_200001_create_messages_table.php` — direction, channel, external_id, body, attachments, sent_by_user_id, AI alanları (summary/sentiment/intent), status, read_at
+- [x] `modules/CRM/Models/Conversation.php` — messages/contact/lead/assignee relations + `markAsRead()` + `touchLastMessage(Message)` + `scopeOpen`/`scopeForChannel`
+- [x] `modules/CRM/Models/Message.php` — conversation/sentByUser relations + isInbound/isOutbound
+- [x] `modules/Integrations/Channels/ChannelInterface.php` — `name()`, `isEnabled()`, `send(Conversation, body, attachments, userId)`
+- [x] `modules/Integrations/Channels/ChannelManager.php` — singleton register/get/all (Application container'dan resolve)
+- [x] `modules/Integrations/Channels/TelegramChannel.php` — TelegramService'i sarmalar (text + foto, ilk attachment)
+- [x] `modules/Integrations/Channels/WhatsAppChannel.php` — WhatsAppConnector sarmalar
+- [x] `modules/Integrations/Channels/SmsChannel.php` — SMSConnector sarmalar
+- [x] `modules/Integrations/Channels/EmailChannel.php` — Mail::raw ile minimal SMTP
+- [x] `IntegrationsServiceProvider::register()` — ChannelManager singleton + 4 kanal register
+- [x] `modules/CRM/Http/Controllers/InboxController.php` — index (filtreler: channel, status), show (markAsRead), send, assign, updateStatus, authorizeView (office isolation)
+- [x] CRM `Routes/web.php` — `GET /admin/inbox`, `GET /admin/inbox/{conv}`, `POST .../send`, `.../assign`, `.../status`
+
+**Yarım kalan — sonraki oturum bunlardan devam:**
+- [ ] **Inbox view'ları:** `modules/CRM/Resources/views/inbox/index.blade.php` (sol conversation list — kanal ikonu, kontak adı, son mesaj preview, unread badge, durum filtresi; sağ panel boş state) + `inbox/show.blade.php` (üst conversation header — kanal/kontak/lead/assignee/durum; orta scroll'lu mesaj listesi — in/out balon; alt mesaj yaz + gönder formu)
+- [ ] **Telegram ingest refactor:** `WebhookController` text mesajları artık MediaIngest'e değil, **Conversation+Message**'a da yazsın. Mevcut Activity yazımı korunmalı (geriye uyumlu). `TelegramUser`'dan office_id + linked_contact_id çekilip Conversation `channel='telegram'`, `channel_thread_id=chat_id` ile eşleştirilir; varsa `firstOrCreate`
+- [ ] **MediaIngestService update:** foto/ses geldiğinde Conversation+Message'a attachment olarak yazılsın (mevcut activity akışı korunur)
+- [ ] **Sidebar'a "Gelen Kutusu" linki** — `resources/views/layouts/partials/sidebar.blade.php`, unread count badge ile
+- [ ] **Conversations index empty-state aksiyonu:** "Yeni Conversation" butonu (manuel kontakt + kanal seç + ilk mesaj) — opsiyonel ama UX için iyi
+
+### 4.2 Drip Campaign engine (BEKLİYOR)
+
+- [ ] `campaigns` + `campaign_steps` + `campaign_enrollments` tabloları
+- [ ] Step executor: `send_message` (channel param), `wait` (saat/gün), `branch` (condition), `create_task`
+- [ ] `Lead::created` → `OnboardingCampaign` enrollment (5 günlük seri)
+- [ ] Cold lead reactivation: cron — 60+ gün hareket yok olan lead'leri reactivation campaign'e al
+- [ ] `CopilotService::generateFollowUpPlan` ile AI öneri (lead detayda "Bu lead için kampanya öner" butonu)
+
+### 4.3 AI çağrı özetleme (BEKLİYOR)
+
+- [ ] POST `/admin/calls/transcribe` — audio dosya yükle veya call_recording_url
+- [ ] Whisper transkript → `Activity::call_transcript`
+- [ ] GPT özet → `ai_summary` + `ai_sentiment` + `ai_intent` + buying signals (mevcut Activity alanlarını doldur)
+- [ ] CallConnector mevcut, transcribe pipeline'ı bağla
+
+### Faz 4 dışı (gelecekte)
+
+- [ ] **WhatsApp Business API gerçek bağlantı** — `WhatsAppConnector` kodu yazılı, sadece access token + phone_number_id gerek
+- [ ] **SMS provider gerçek bağlantı** — Netgsm key, `SMSConnector` mevcut
+- [ ] **Twilio çağrı initiate + recording** — `CallConnector` mevcut
+- [ ] **E-posta entegrasyonu** — IMAP fetch + SMTP threading (`EmailChannel` şu an sadece SMTP out)
+- [ ] **Çoklu sosyal medya yayın** (Faz 3'ten devir): Meta Graph / X / LinkedIn — unified inbox ile birlikte mantıklı
+- [ ] **Instagram DM + Facebook Messenger** kanal — Meta Graph API ile
 
 ---
 
@@ -320,6 +355,7 @@ realestate/
 - **2026-05-20**: Faz 2 kod tamamı — WebhookController küçük router'a indirildi, iş `CommandHandler` + `CallbackHandler` + `MediaIngestService`'e dağıtıldı. Bildirimler için **observer pattern** seçildi (event pattern değil), çünkü `Modules\CRM\Events\Lead*` ve `Deal*` class'ları stub değil — yani `event(new LeadCreated())` runtime'da `class not found` ile patlardı. Observer'lar `TelegramServiceProvider::boot()`'ta `Lead::observe()` / `Deal::observe()` ile bind. Schedule da aynı provider'dan `Schedule` resolve edip kuruldu (Kernel'a dokunulmadı). Whisper transkripsiyon `audio()->transcribe()` API'si — fail olursa activity yine yazılır, summary null kalır. Faz 2'nin geriye kalanı dışarıdan iş (bot token + public URL).
 - **2026-05-20**: CRM Event stub'ları yazıldı — `LeadCreated`, `LeadUpdated`, `LeadConverted`, `DealCreated`, `DealStageChanged`, `DealClosed`. `Lead.php`'deki `event(new LeadCreated())` çağrısı artık runtime'da `class not found` ile patlamıyor.
 - **2026-05-20**: Faz 3 çekirdek — Fal.ai foto iyileştirme (5 op), markalı sosyal kart üretici (4 şablon × 3 boyut, Intervention v3 GD), `ContentService::generateSocialContent`/`generateReelsScript` UI'a bağlandı, aylık takvim view, hashtag intelligence (JSON mode). Tek "İlandan Oluştur" modal'ında 3 sekme. Card için **Intervention v3** seçildi (browser-shot/headless Chrome alternatifi yerine — sunucu kurulumu basit, GD zaten var, dompdf vendor'undan DejaVuSans TTF ile Türkçe destekli). Fal.ai için sync `fal.run/{model}` endpoint'i (queue API kullanmadık — UX için bloklayıcı ama timeout 90s yeterli). Yayın API'leri (Meta Graph / X / LinkedIn) bilinçli olarak ertelendi — gerçek inbox ve OAuth Faz 4 ile birlikte gelir.
+- **2026-05-20**: Faz 4.1 Unified Inbox **backend tamam, UI yarım**. Kullanıcı oturumu duraklatmaya karar verdi — view'ler yazılmadan commit atıldı (kasıtlı checkpoint). Tasarım kararları: (1) **Conversations + Messages** yeni tablolar — Activity'den ayrı çünkü Activity geniş bir CRM event modeli, conversation thread'i daha dar bir kanal-bazlı mesajlaşma soyutlaması. İki sistem paralel çalışacak (Activity = "ne oldu" defter, Conversations = "kim ne yazdı" sohbet); ingest noktaları her ikisine yazacak. (2) **ChannelInterface + ChannelManager** singleton pattern — Telegram/WhatsApp/SMS/Email tek arayüz arkasında, mevcut connector'lar `*Channel` sınıfında sarmalandı, controller kanal adına göre `$manager->get('telegram')` ile çözüyor. Yeni kanal eklemek = yeni class + provider'a register. (3) Inbox CRM modülü altına konuldu (`admin/inbox`), ayrı modül açmadık — conversations CRM concept ve sidebar'da CRM grubuna doğal düşüyor. (4) Office isolation `InboxController::authorizeView()` ile tek noktada, controller seviyesinde.
 
 ---
 
@@ -345,9 +381,17 @@ realestate/
 2. **Modelleri test et:** `/admin/social-media` → "İlandan Oluştur" → bir ilan seç, "Sosyal Kart Üret" sekmesinde şablonu/boyutu seç, "Kartı Üret"e bas → PNG döner, "Gönderi Olarak Kullan" ile yeni gönderiye aktarılır.
 3. **Takvim:** `/admin/social-media/calendar` — aylık görünüm, ileri/geri.
 
-### Sonra: Faz 4 (İletişim & Yaşam Döngüsü)
-- WhatsApp Business API, SMS provider (Netgsm), Twilio çağrı, e-posta IMAP/SMTP
-- Drip campaign engine (CopilotService::generateFollowUpPlan baz alınabilir)
-- Unified inbox (guzllik Sohbetler pattern'i)
-- Faz 3'ten devir: gerçek sosyal medya yayın API'leri (Meta Graph / X / LinkedIn) — unified inbox ile birlikte gelir mantıklı.
+### Sonraki oturum başlangıcı — buradan devam (Faz 4.1 finalize)
+
+**Hemen yapılacak (Inbox UI):**
+
+1. **`modules/CRM/Resources/views/inbox/index.blade.php`** — `crm::inbox.index`. Layout: `@extends('layouts.admin')`. Sol panel (~360px): durum tab'ları (Açık/Arşiv/Kapalı + Okunmamış filtresi), kanal filtresi (chip'ler: tümü/telegram/whatsapp/sms/email), conversation list (`@foreach($conversations)` — kanal ikonu, kontak adı veya `channel_thread_id`, last_message_preview, unread badge, `last_message_at` diff_for_humans). Sağ panel: boş state — "Bir sohbet seçin" mesajı.
+2. **`modules/CRM/Resources/views/inbox/show.blade.php`** — `crm::inbox.show`. Üst: conversation header (kanal ikonu + kontak + lead linki + assignee dropdown + status dropdown — `admin.inbox.assign`/`status` POST). Orta: scroll'lu mesaj listesi, `$messages` üzerinde foreach — `direction=='in'` sol balon (gri), `direction=='out'` sağ balon (mavi), zaman + status badge. Alt: form `action="admin.inbox.send"`, `<textarea name="body">` + ek dosya alanı (opsiyonel, ilk versiyonda `attachments` boş gönder), "Gönder" butonu.
+3. **Telegram ingest refactor:** `modules/Telegram/Http/Controllers/WebhookController.php`'da text mesaj handler — `CommandHandler` çağırdıktan sonra (veya komut değilse), `Conversation::firstOrCreate(['channel'=>'telegram','channel_thread_id'=>$chatId], [...defaults: office_id from TelegramUser, contact_id null])` ve `Message::create(['direction'=>'in','channel'=>'telegram','external_id'=>message_id,'body'=>$text,'status'=>'received'])` + `$conversation->touchLastMessage($message)`. Activity yazımı korunur (paralel).
+4. **MediaIngestService update:** foto/ses geldiğinde Message'a attachment olarak da yaz — `attachments` JSON kolonu `[{type:'photo'|'voice','url'|'path','duration'?}]`. Whisper transcript varsa `ai_summary`'e koy.
+5. **Sidebar:** `resources/views/layouts/partials/sidebar.blade.php` — CRM grubuna "Gelen Kutusu" linki (`route('admin.inbox.index')`), `Conversation::open()->where('unread_count','>',0)->count()` badge'ı.
+
+**Sonra (4.2 + 4.3):**
+- 4.2 Drip Campaign engine — campaigns/steps/enrollments + executor
+- 4.3 AI çağrı özetleme — Whisper → GPT pipeline, mevcut Activity alanlarına yaz
 

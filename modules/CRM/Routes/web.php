@@ -7,6 +7,7 @@ use Modules\CRM\Http\Controllers\DealController;
 use Modules\CRM\Http\Controllers\PipelineController;
 use Modules\CRM\Http\Controllers\TaskController;
 use Modules\CRM\Http\Controllers\ActivityController;
+use Modules\CRM\Http\Controllers\InboxController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,3 +55,10 @@ Route::get('tasks/calendar', [TaskController::class, 'calendar'])->name('tasks.c
 // Activities
 Route::resource('activities', ActivityController::class)->only(['index', 'store', 'show', 'destroy']);
 Route::get('activities/timeline/{type}/{id}', [ActivityController::class, 'timeline'])->name('activities.timeline');
+
+// Unified Inbox
+Route::get('inbox', [InboxController::class, 'index'])->name('inbox.index');
+Route::get('inbox/{conversation}', [InboxController::class, 'show'])->name('inbox.show');
+Route::post('inbox/{conversation}/send', [InboxController::class, 'send'])->name('inbox.send');
+Route::post('inbox/{conversation}/assign', [InboxController::class, 'assign'])->name('inbox.assign');
+Route::post('inbox/{conversation}/status', [InboxController::class, 'updateStatus'])->name('inbox.status');

@@ -18,6 +18,16 @@ class IntegrationsServiceProvider extends ServiceProvider
         $this->app->singleton(\Modules\Integrations\Connectors\WhatsAppConnector::class);
         $this->app->singleton(\Modules\Integrations\Connectors\CallConnector::class);
         $this->app->singleton(\Modules\Integrations\Connectors\PaymentConnector::class);
+
+        // Unified Inbox kanal kayıt merkezi
+        $this->app->singleton(\Modules\Integrations\Channels\ChannelManager::class, function ($app) {
+            $manager = new \Modules\Integrations\Channels\ChannelManager($app);
+            $manager->register('telegram', \Modules\Integrations\Channels\TelegramChannel::class);
+            $manager->register('whatsapp', \Modules\Integrations\Channels\WhatsAppChannel::class);
+            $manager->register('sms', \Modules\Integrations\Channels\SmsChannel::class);
+            $manager->register('email', \Modules\Integrations\Channels\EmailChannel::class);
+            return $manager;
+        });
     }
 
     /**
