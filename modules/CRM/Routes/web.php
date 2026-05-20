@@ -8,6 +8,8 @@ use Modules\CRM\Http\Controllers\PipelineController;
 use Modules\CRM\Http\Controllers\TaskController;
 use Modules\CRM\Http\Controllers\ActivityController;
 use Modules\CRM\Http\Controllers\InboxController;
+use Modules\CRM\Http\Controllers\CampaignController;
+use Modules\CRM\Http\Controllers\CallController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,3 +64,15 @@ Route::get('inbox/{conversation}', [InboxController::class, 'show'])->name('inbo
 Route::post('inbox/{conversation}/send', [InboxController::class, 'send'])->name('inbox.send');
 Route::post('inbox/{conversation}/assign', [InboxController::class, 'assign'])->name('inbox.assign');
 Route::post('inbox/{conversation}/status', [InboxController::class, 'updateStatus'])->name('inbox.status');
+
+// Calls — AI transcription
+Route::post('calls/transcribe', [CallController::class, 'transcribe'])->name('calls.transcribe');
+Route::post('calls/activities/{activity}/transcribe', [CallController::class, 'transcribeActivity'])->name('calls.activity.transcribe');
+
+// Drip Campaigns
+Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
+Route::get('campaigns/{campaign}', [CampaignController::class, 'show'])->name('campaigns.show');
+Route::post('campaigns/{campaign}/toggle', [CampaignController::class, 'toggleActive'])->name('campaigns.toggle');
+Route::post('campaigns/{campaign}/enroll', [CampaignController::class, 'enroll'])->name('campaigns.enroll');
+Route::post('campaigns/enrollments/{enrollment}/cancel', [CampaignController::class, 'cancelEnrollment'])->name('campaigns.enrollments.cancel');
+Route::post('campaigns/tick', [CampaignController::class, 'tick'])->name('campaigns.tick');

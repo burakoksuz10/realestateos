@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Telegram\Models\TelegramUser;
 use Modules\Telegram\Services\CallbackHandler;
 use Modules\Telegram\Services\CommandHandler;
+use Modules\Telegram\Services\ConversationIngestService;
 use Modules\Telegram\Services\MediaIngestService;
 use Modules\Telegram\Services\TelegramService;
 
@@ -18,6 +19,7 @@ class WebhookController extends Controller
         protected CommandHandler $commands,
         protected CallbackHandler $callbacks,
         protected MediaIngestService $media,
+        protected ConversationIngestService $ingest,
     ) {}
 
     /**
@@ -40,9 +42,10 @@ class WebhookController extends Controller
             return response()->json(['ok' => true]);
         }
 
-        $chatId   = (string) ($message['chat']['id'] ?? '');
-        $text     = trim((string) ($message['text'] ?? $message['caption'] ?? ''));
-        $username = $message['from']['username'] ?? null;
+        $chatId    = (string) ($message['chat']['id'] ?? '');
+        $text      = trim((string) ($message['text'] ?? $message['caption'] ?? ''));
+        $username  = $message['from']['username'] ?? null;
+        $messageId = isset($message['message_id']) ? (string) $message['message_id'] : null;
 
         if (!$chatId) {
             return response()->json(['ok' => true]);
@@ -52,15 +55,32 @@ class WebhookController extends Controller
             ->where('is_active', true)
             ->first();
 
-        // 2) Media uploads (photo / voice / audio / video / document) → CRM activity
-        if ($linkedUser && (isset($message['photo']) || isset($message['voice']) || isset($message['audio']) || isset($message['video']) || isset($message['document']))) {
+        $hasMedia = isset($message['photo'])
+            || isset($message['voice'])
+            || isset($message['audio'])
+            || isset($message['video'])
+            || isset($message['document']);
+
+        // 2) Media uploads → CRM activity + Inbox conversation
+        if ($linkedUser && $hasMedia) {
             $this->media->ingest($message, $linkedUser, $text ?: null);
             return response()->json(['ok' => true]);
         }
 
         // 3) Text / commands
         if ($text !== '') {
+            // Komut dispatch (mevcut akış — Activity yazımı, hot lead vs. burada)
             $this->commands->handle($chatId, $text, $username, $linkedUser);
+
+            // Unified Inbox kaydı — sadece bağlı kullanıcılar için
+            // (anonim chat'ler henüz contact'a bağlı değil; pairing sonrası dolar)
+            if ($linkedUser) {
+                try {
+                    $this->ingest->recordIncomingText($chatId, $text, $messageId, $linkedUser);
+                } catch (\Throwable $e) {
+                    Log::warning('Telegram inbox ingest failed', ['error' => $e->getMessage()]);
+                }
+            }
         }
 
         return response()->json(['ok' => true]);

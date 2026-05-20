@@ -3,6 +3,7 @@
 namespace Modules\Telegram\Services;
 
 use Illuminate\Support\Facades\Log;
+use Modules\AI\Services\ElevenLabsService;
 use Modules\CRM\Models\Activity;
 use Modules\CRM\Models\Lead;
 use Modules\Telegram\Models\TelegramUser;
@@ -10,11 +11,15 @@ use OpenAI\Client as OpenAIClient;
 
 class MediaIngestService
 {
-    public function __construct(protected TelegramService $telegram) {}
+    public function __construct(
+        protected TelegramService $telegram,
+        protected ConversationIngestService $inbox,
+    ) {}
 
     /**
      * When an agent forwards a photo/voice/document to the bot, attach it
-     * to the agent's most recently active lead as an activity.
+     * to the agent's most recently active lead as an activity AND
+     * record it as a Message in the agent's telegram conversation thread.
      */
     public function ingest(array $message, TelegramUser $tu, ?string $caption = null): void
     {
@@ -40,6 +45,8 @@ class MediaIngestService
 
         $description = $caption ?: $this->autoDescription($kind);
         $aiSummary   = null;
+        $duration    = $message['voice']['duration'] ?? $message['audio']['duration'] ?? $message['video']['duration'] ?? null;
+        $messageId   = isset($message['message_id']) ? (string) $message['message_id'] : null;
 
         // Voice → transcribe via Whisper if AI is enabled.
         if ($kind === 'voice' && $localPath && config('reos.ai.enabled', true)) {
@@ -62,6 +69,22 @@ class MediaIngestService
             ],
             'is_automated' => true,
         ]);
+
+        // Unified Inbox kaydı — paralel
+        try {
+            $this->inbox->recordIncomingMedia(
+                chatId: $tu->telegram_chat_id,
+                kind: $kind,
+                caption: $caption,
+                localPath: $localPath,
+                externalMessageId: $messageId,
+                tu: $tu,
+                aiSummary: $aiSummary,
+                duration: $duration,
+            );
+        } catch (\Throwable $e) {
+            Log::warning('MediaIngest → inbox failed', ['error' => $e->getMessage()]);
+        }
 
         $lead->last_activity_at = now();
         $lead->save();
@@ -143,18 +166,32 @@ class MediaIngestService
     }
 
     /**
-     * Transcribe a voice message via OpenAI Whisper.
+     * Transcribe a voice message — provider-aware (ElevenLabs default, Whisper fallback).
      * Returns null on failure (we log silently — the activity is still created).
      */
     protected function transcribeVoice(string $localPath): ?string
     {
+        $provider = config('reos.ai.transcription_provider', 'elevenlabs');
+
+        if ($provider === 'elevenlabs') {
+            $eleven = app(ElevenLabsService::class);
+            if ($eleven->isConfigured()) {
+                $result = $eleven->transcribe($localPath, ['language' => 'tr']);
+                if ($result && !empty($result['text'])) {
+                    return $result['text'];
+                }
+                Log::info('Telegram voice: ElevenLabs returned empty, falling back to Whisper');
+            }
+        }
+
         try {
             /** @var OpenAIClient $client */
             $client = app(OpenAIClient::class);
 
             $response = $client->audio()->transcribe([
-                'model' => config('reos.ai.transcription_model', 'whisper-1'),
-                'file'  => fopen($localPath, 'r'),
+                'model'    => config('reos.ai.whisper_model', config('reos.ai.transcription_model', 'whisper-1')),
+                'file'     => fopen($localPath, 'r'),
+                'language' => 'tr',
             ]);
 
             return $response->text ?? null;

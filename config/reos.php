@@ -33,6 +33,12 @@ return [
         'openai_key' => env('OPENAI_API_KEY'),
         'openai_organization' => env('OPENAI_ORGANIZATION'),
 
+        // Speech-to-text — Faz 4.3
+        'transcription_provider' => env('AI_TRANSCRIPTION_PROVIDER', 'elevenlabs'), // elevenlabs | whisper
+        'transcription_model'    => env('AI_TRANSCRIPTION_MODEL', 'whisper-1'),     // legacy alias (Whisper)
+        'whisper_model'          => env('AI_WHISPER_MODEL', 'whisper-1'),
+        'summary_model'          => env('AI_SUMMARY_MODEL', 'gpt-4o-mini'),
+
         // Pricing per 1K tokens (USD, used for cost estimation)
         'pricing' => [
             'gpt-4o' => ['input' => 0.0025, 'output' => 0.01],
@@ -202,6 +208,17 @@ return [
             'enabled' => env('WHATSAPP_ENABLED', false),
             'auto_reply' => false,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Voice / Telekom — Faz 4.3 (ElevenLabs + Netgsm)
+    |--------------------------------------------------------------------------
+    */
+
+    'voice' => [
+        'provider' => env('VOICE_PROVIDER', 'netgsm'), // netgsm | bulutfon | twilio
+        'enabled'  => env('VOICE_ENABLED', false),
     ],
 
     /*

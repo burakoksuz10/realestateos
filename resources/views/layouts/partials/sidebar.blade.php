@@ -105,7 +105,7 @@
         </a>
 
         <!-- Tasks -->
-        <a href="{{ route('admin.tasks.index') }}" 
+        <a href="{{ route('admin.tasks.index') }}"
            class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
                   {{ request()->routeIs('admin.tasks.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,6 +113,38 @@
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">Görevler</span>
             <span x-show="sidebarOpen" x-cloak class="ml-auto bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ \Modules\CRM\Models\Task::pending()->where('assigned_to', auth()->id())->count() }}</span>
+        </a>
+
+        <!-- Inbox -->
+        @php
+            $inboxUnread = \Schema::hasTable('conversations')
+                ? \Modules\CRM\Models\Conversation::query()
+                    ->where('status', 'open')
+                    ->where('unread_count', '>', 0)
+                    ->when(auth()->user()->office_id, fn ($q, $oid) => $q->where('office_id', $oid))
+                    ->count()
+                : 0;
+        @endphp
+        <a href="{{ route('admin.inbox.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.inbox.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Gelen Kutusu</span>
+            @if($inboxUnread > 0)
+                <span x-show="sidebarOpen" x-cloak class="ml-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ $inboxUnread > 99 ? '99+' : $inboxUnread }}</span>
+            @endif
+        </a>
+
+        <!-- Campaigns -->
+        <a href="{{ route('admin.campaigns.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.campaigns.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Otomasyonlar</span>
         </a>
 
         <!-- Divider -->
@@ -163,6 +195,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">Telegram</span>
+        </a>
+
+        <!-- Voice AI Secretary -->
+        <a href="{{ route('admin.voice-agent.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.voice-agent.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v3m-4 0h8m-12-9V8a4 4 0 118 0v3" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Sesli AI</span>
         </a>
 
         <!-- AI Settings -->

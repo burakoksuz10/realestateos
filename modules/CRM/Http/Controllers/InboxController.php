@@ -3,6 +3,7 @@
 namespace Modules\CRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Modules\CRM\Models\Conversation;
 use Modules\CRM\Models\Message;
@@ -56,9 +57,16 @@ class InboxController extends Controller
         $conversation->load(['messages.sentByUser', 'contact', 'lead', 'assignee']);
         $conversation->markAsRead();
 
+        $agentsQuery = User::query()->where('is_active', true)->orderBy('name');
+        if ($officeId = $request->user()->office_id ?? null) {
+            $agentsQuery->where('office_id', $officeId);
+        }
+        $agents = $agentsQuery->get(['id', 'name']);
+
         return view('crm::inbox.show', [
             'conversation' => $conversation,
             'messages' => $conversation->messages,
+            'agents' => $agents,
         ]);
     }
 

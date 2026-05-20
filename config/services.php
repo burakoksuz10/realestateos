@@ -46,4 +46,27 @@ return [
         'base_url' => env('FAL_BASE_URL', 'https://fal.run'),
     ],
 
+    'elevenlabs' => [
+        'api_key'          => env('ELEVENLABS_API_KEY'),
+        'base_url'         => env('ELEVENLABS_BASE_URL', 'https://api.elevenlabs.io/v1'),
+        'stt_model'        => env('ELEVENLABS_STT_MODEL', 'scribe_v1'),
+        'stt_language'     => env('ELEVENLABS_STT_LANGUAGE', 'tr'),
+        'tts_model'        => env('ELEVENLABS_TTS_MODEL', 'eleven_multilingual_v2'),
+        'default_voice_id' => env('ELEVENLABS_DEFAULT_VOICE_ID'),
+        'timeout'          => (int) env('ELEVENLABS_TIMEOUT', 120),
+    ],
+
+    'netgsm' => [
+        'usercode'          => env('NETGSM_USERCODE'),
+        'password'          => env('NETGSM_PASSWORD'),
+        'sender_id'         => env('NETGSM_SENDER_ID'),
+        'default_audio_url' => env('NETGSM_DEFAULT_AUDIO_URL'),
+        'default_number'    => env('NETGSM_DEFAULT_NUMBER'),
+    ],
+
+    'voice_agent' => [
+        'shared_secret' => env('VOICE_AGENT_SHARED_SECRET'),
+        'webhook_url'   => env('VOICE_AGENT_WEBHOOK_URL'),
+    ],
+
 ];

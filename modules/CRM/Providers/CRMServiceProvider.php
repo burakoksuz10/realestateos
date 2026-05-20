@@ -23,8 +23,34 @@ class CRMServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->loadViewsFrom(__DIR__ . '/../Resources/views', 'crm');
         $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'crm');
-        
+
         $this->registerRoutes();
+        $this->registerCommands();
+        $this->registerSchedules();
+        $this->registerListeners();
+    }
+
+    protected function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \Modules\CRM\Console\Commands\TickCampaignsCommand::class,
+            ]);
+        }
+    }
+
+    protected function registerSchedules(): void
+    {
+        $this->callAfterResolving(\Illuminate\Console\Scheduling\Schedule::class, function (\Illuminate\Console\Scheduling\Schedule $schedule) {
+            $schedule->command('campaigns:tick')
+                ->everyFiveMinutes()
+                ->withoutOverlapping();
+        });
+    }
+
+    protected function registerListeners(): void
+    {
+        \Modules\CRM\Models\Lead::observe(\Modules\CRM\Observers\LeadCampaignObserver::class);
     }
 
     /**

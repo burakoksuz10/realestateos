@@ -17,12 +17,12 @@
 | 1 | AI Lead & İlan Zekası | ✅ Tamam | Gerçek OpenAI bağlandı, sidebar Copilot çalışıyor |
 | 2 | Telegram Operasyon Merkezi | ✅ Kod tamam | Komutlar/bildirimler/brifing/foto-ses/butonlar canlı — sadece bot token + webhook URL bekliyor |
 | 3 | Sosyal Medya Motoru | ✅ Çekirdek tamam | Fal.ai (sky/twilight/declutter/staging/enhance), markalı kart üretici (4 şablon × 3 boyut), ilandan içerik akışı, takvim, hashtag intelligence |
-| 4 | İletişim & Yaşam Döngüsü | 🟡 4.1 yarım | Unified Inbox backend tamam (conv+msg tabloları, 4 kanal abstraksiyonu, controller, route'lar). View + Telegram ingest refactor + sidebar bekliyor. Drip + çağrı özet sonraki dilim |
+| 4 | İletişim & Yaşam Döngüsü | ✅ Tamam | Unified Inbox + Drip Campaign engine + **Sesli AI Sekreter** (ElevenLabs Agents + Netgsm — bayi paketinin amiral özelliği). Drip cold-lead reactivation + görsel step builder Faz 5'e devir. |
 | 5 | Süreç Otomasyon | ⏳ Bekliyor | Workflow builder, takılan deal uyarıları |
 | 6 | İleri Özellikler | ⏳ Bekliyor | Portal sync, brochure, e-imza, TKGM, alıcı/satıcı portal |
 | 7 | Cila & Üretim | ⏳ Bekliyor | PWA, performans, test, güvenlik, çoklu dil |
 
-**İlerleme:** 3.5/8 faz (Faz 2 kodu hazır — bot token + webhook URL bekliyor; Faz 3 çekirdek özellikler canlı; Faz 4.1 Unified Inbox backend tamam, UI yarım kaldı).
+**İlerleme:** 4/8 faz (Faz 0+1+2+3+4 kod tam — Faz 2/4.3 sadece ENV key'leri bekliyor; Faz 5 (süreç otomasyon) sıradaki).
 
 ---
 
@@ -175,11 +175,11 @@ Amaç: Pazarlama otomasyonu — AI ilanları sosyal medyaya hazır hale getirsin
 
 ---
 
-## 🟡 FAZ 4 — İletişim & Yaşam Döngüsü (4.1 YARIM)
+## 🟡 FAZ 4 — İletişim & Yaşam Döngüsü (4.1 TAMAM)
 
 Amaç: Tüm iletişim kanalları tek inbox'ta, müşteri yaşam döngüsü otomatik.
 
-### 4.1 Unified Inbox — backend TAMAM, UI YARIM
+### 4.1 Unified Inbox — TAMAM ✅
 
 **Tamamlanan (backend):**
 - [x] `database/migrations/2026_05_20_200000_create_conversations_table.php` — kanal-agnostik thread tablosu (office, contact, lead, channel, channel_thread_id, status, unread_count, last_message_*, meta)
@@ -196,27 +196,88 @@ Amaç: Tüm iletişim kanalları tek inbox'ta, müşteri yaşam döngüsü otoma
 - [x] `modules/CRM/Http/Controllers/InboxController.php` — index (filtreler: channel, status), show (markAsRead), send, assign, updateStatus, authorizeView (office isolation)
 - [x] CRM `Routes/web.php` — `GET /admin/inbox`, `GET /admin/inbox/{conv}`, `POST .../send`, `.../assign`, `.../status`
 
-**Yarım kalan — sonraki oturum bunlardan devam:**
-- [ ] **Inbox view'ları:** `modules/CRM/Resources/views/inbox/index.blade.php` (sol conversation list — kanal ikonu, kontak adı, son mesaj preview, unread badge, durum filtresi; sağ panel boş state) + `inbox/show.blade.php` (üst conversation header — kanal/kontak/lead/assignee/durum; orta scroll'lu mesaj listesi — in/out balon; alt mesaj yaz + gönder formu)
-- [ ] **Telegram ingest refactor:** `WebhookController` text mesajları artık MediaIngest'e değil, **Conversation+Message**'a da yazsın. Mevcut Activity yazımı korunmalı (geriye uyumlu). `TelegramUser`'dan office_id + linked_contact_id çekilip Conversation `channel='telegram'`, `channel_thread_id=chat_id` ile eşleştirilir; varsa `firstOrCreate`
-- [ ] **MediaIngestService update:** foto/ses geldiğinde Conversation+Message'a attachment olarak yazılsın (mevcut activity akışı korunur)
-- [ ] **Sidebar'a "Gelen Kutusu" linki** — `resources/views/layouts/partials/sidebar.blade.php`, unread count badge ile
-- [ ] **Conversations index empty-state aksiyonu:** "Yeni Conversation" butonu (manuel kontakt + kanal seç + ilk mesaj) — opsiyonel ama UX için iyi
+**Tamamlanan (UI + ingest):**
+- [x] **`modules/CRM/Resources/views/inbox/index.blade.php`** — sol panel: durum tab'ları (Açık/Arşiv/Kapalı) + count, kanal chip'leri (tümü/telegram/whatsapp/sms/email/instagram_dm/facebook_messenger), conversation list (avatar + kanal rozeti, kontak adı, son mesaj preview, unread badge, last_message_at diffForHumans); sağ panel: boş state — "Bir sohbet seçin"
+- [x] **`modules/CRM/Resources/views/inbox/show.blade.php`** — üst conversation header (kanal rozeti + kontak adı + tel/email + lead linki + assignee dropdown + status dropdown — onchange submit); orta scroll'lu mesaj listesi (in/out balon, gradient out, ai_summary alt notu, attachments — photo/voice/audio/document); alt composer (textarea + gönder, kanal infosu)
+- [x] **`modules/Telegram/Services/ConversationIngestService.php`** — `recordIncomingText()` + `recordIncomingMedia()` + `resolveConversation()` (firstOrCreate by chat_id, office/lead/contact TelegramUser'dan)
+- [x] **WebhookController refactor** — text mesajları için `CommandHandler` çağrısına ek olarak `ConversationIngestService::recordIncomingText()`; media için MediaIngest aracılığıyla. Activity yazımı korundu (paralel)
+- [x] **MediaIngestService update** — `ConversationIngestService` constructor inject, foto/ses/video/doküman Message attachment'ına yazılır (type, path, url, duration), Whisper transcript ai_summary'e
+- [x] **Sidebar Gelen Kutusu linki** — CRM grubuna Görevler altında, `Schema::hasTable('conversations')` guard'lı unread count badge
+- [x] **InboxController::show** — `$agents` (office filter + is_active) view'a geçilir (assignee dropdown için)
 
-### 4.2 Drip Campaign engine (BEKLİYOR)
+### 4.2 Drip Campaign engine ✅ TAMAM
 
-- [ ] `campaigns` + `campaign_steps` + `campaign_enrollments` tabloları
-- [ ] Step executor: `send_message` (channel param), `wait` (saat/gün), `branch` (condition), `create_task`
-- [ ] `Lead::created` → `OnboardingCampaign` enrollment (5 günlük seri)
-- [ ] Cold lead reactivation: cron — 60+ gün hareket yok olan lead'leri reactivation campaign'e al
-- [ ] `CopilotService::generateFollowUpPlan` ile AI öneri (lead detayda "Bu lead için kampanya öner" butonu)
+- [x] `drip_campaigns` + `drip_steps` + `drip_enrollments` tabloları (table prefix `drip_` — Advertising `campaigns` ile collision'ı önlemek için)
+- [x] **Modeller:** `Campaign`, `CampaignStep`, `CampaignEnrollment` (CRM namespace, drip_* table'lara bound)
+- [x] **DripExecutor servisi** — step type executor: `send_message` (channel param + template render), `wait` (saat/gün/dk), `create_task` (Task tablosuna yaz), `branch` (lead_status_in/score_gte/...), `ai_action` placeholder. ChannelManager üzerinden 4 kanal gönderimi. Conversation auto-resolve (email/sms/whatsapp için contact phone/email'den firstOrCreate; telegram için mevcut conversation bul).
+- [x] **Template render** — `{{contact.first_name}}`, `{{lead.score}}`, `{{agent.name}}`, `{{office.name}}` vb. nested path desteği
+- [x] **`campaigns:tick` console command** — her 5 dk schedule (CRMServiceProvider'da kayıtlı), `--limit=50` opsiyonu
+- [x] **`LeadCampaignObserver`** — `Lead::created`'ta `trigger='lead_created'` aktif kampanyalara enroll (audience_filter: status_in, source_in, score_gte destekli)
+- [x] **`OnboardingCampaignSeeder`** — 5 günlük 7-adımlı varsayılan kampanya (e-posta karşılama → 1 gün bekle → görev oluştur → 2 gün bekle → SMS hatırlatma → 2 gün bekle → e-posta kapanış)
+- [x] **`CampaignController` + routes** — `/admin/campaigns` (index), `/admin/campaigns/{id}` (show: steps timeline + enrollments list + stats), `toggle`, `enroll`, `enrollments/{id}/cancel`, `tick`
+- [x] **Views** — `campaigns/index.blade.php` (3 stat kart + tablo + toggle/incele butonu), `campaigns/show.blade.php` (steps timeline ikonlu + enrollment tablosu + iptal butonu + 4 stat kart)
+- [x] **Sidebar "Otomasyonlar" linki** — Gelen Kutusu altında
 
-### 4.3 AI çağrı özetleme (BEKLİYOR)
+### 4.2 — Geriye kalan / Faz 5'e devir
 
-- [ ] POST `/admin/calls/transcribe` — audio dosya yükle veya call_recording_url
-- [ ] Whisper transkript → `Activity::call_transcript`
-- [ ] GPT özet → `ai_summary` + `ai_sentiment` + `ai_intent` + buying signals (mevcut Activity alanlarını doldur)
-- [ ] CallConnector mevcut, transcribe pipeline'ı bağla
+- [ ] **Cold lead reactivation** — 60+ gün hareket yok olan lead'leri reactivation campaign'e al (cron)
+- [ ] **AI campaign suggestion** — `CopilotService::generateFollowUpPlan` ile lead detayında "Bu lead için kampanya öner" butonu
+- [ ] **No-code step builder UI** — şu an campaign + step'ler sadece seeder/manuel SQL ile oluşur, görsel akış editörü Faz 5
+
+### 4.3 + 4.4 Sesli AI Sekreter ✅ TAMAM (ElevenLabs Agents + Netgsm)
+
+**Faz 4.3 başlangıçta sadece "çağrı özetleme" olarak planlandı; Burak'ın iş vizyonu (Netgsm bayisi + bayi-paket teklif) ile gerçek zamanlı AI sekreter olarak genişletildi (2026-05-20).**
+
+- [x] **`voice_agent_configs` tablosu + `VoiceAgentConfig` model** — ofis bazlı yapılandırma (routing_mode, secretary/default_agent phone, ring_timeout, mesai saatleri+timezone, system_prompt, greeting, ElevenLabs agent_id+voice_id, Telegram office channel, language). `isWithinBusinessHours()` helper.
+- [x] **4 routing modu** (`VoiceAgentConfig::MODE_*`):
+  - `listing_owner_first` (default) — önce ilan danışmanı, açmazsa sekreter, o da açmazsa randevu
+  - `secretary_only` — klasik santral
+  - `listing_owner_only` — direkt ilan danışmanına
+  - `callback_only` — kimseye bağlama, sadece randevu (düşük tier paket)
+- [x] **Tool API'leri** (`/api/voice-agent/tools/...`) — ElevenLabs Agent dashboard'dan çağrılır:
+  - `search_listing` — yapısal + fallback semantic search, "spoken summary" döner
+  - `create_lead` — kontak dedup (telefon+ofis), açık lead'i tekrar kullan, listing ref'ten agent atama
+  - `request_transfer` — `TransferRouter` ile mode-aware karar (transfer/callback/voicemail)
+  - `pre_call_brief` — `PreCallBriefService` ile çağrı ÖNCESI danışmana Telegram brifing
+  - `book_callback` — Task oluştur + ofis kanalına bildirim
+- [x] **`VerifyAgentToken` middleware** — `X-Voice-Agent-Token` shared-secret doğrulaması (header veya Bearer)
+- [x] **Post-call webhook** (`/api/voice-agent/webhook`) — ElevenLabs konuşma sonu payload'undan Activity oluşturur (transcript flatten, recording_url, summary/sentiment/intent, tool_calls'tan lead_id ayıkla), danışmana/ofis kanalına özet Telegram
+- [x] **Admin UI** `/admin/ai/voice-agent` — yayın toggle, 4 routing seçeneği (radio), transfer numaraları, mesai saatleri + hafta sonu, ElevenLabs Agent ID + voice ID, sistem promptu + Türkçe varsayılan template, Telegram kanal ID, tool URL'leri + shared secret göstergesi
+- [x] **Sidebar "Sesli AI" linki** — AI & Araçlar grubunda, AI Settings'in üstünde
+- [x] **`config/services.php`** — `voice_agent.shared_secret` + `voice_agent.webhook_url`
+- [x] **`docs/voice-agent-setup.md`** — ElevenLabs dashboard kurulum rehberi: agent oluşturma, 5 tool tanımlama (JSON spec'leri), post-call webhook, Netgsm SIP routing notları, test akışı, sorun giderme tablosu, maliyet özeti
+
+### 4.3 — Eski "ses dosyası yükleme → özetleme" özelliği
+
+CallTranscriptionService + Lead detayındaki "Çağrı Özetleme (AI)" partial **korundu** — sesli AI sekretere PARALEL olarak çalışıyor. Geçmiş telefon kayıtlarını sonradan yüklemek için hâlâ değerli.
+
+- [x] **`ElevenLabsService`** — STT (`scribe_v1`, Türkçe odaklı `language_code=tr`) + TTS (`eleven_multilingual_v2`); multipart upload, configurable timeout, fail → null + log
+- [x] **`CallTranscriptionService`** — pipeline kalbi: `fromFile()` / `fromUrl()` → STT (provider switch, ElevenLabs default + Whisper fallback) → GPT JSON (özet + sentiment + intent + next_actions + buying_signals) → Activity yaz/güncelle
+- [x] **CallConnector → Netgsm voice** — `callViaNetgsm()` (sesli arama, audio URL ile), `getNetgsmRecording()` (job report → recording URL), `transcribe()` artık CallTranscriptionService'e delege ediyor (Whisper hard-code'u kaldırıldı)
+- [x] **`CallController` + route'lar** — `POST /admin/calls/transcribe` (lead_id + audio veya recording_url), `POST /admin/calls/activities/{activity}/transcribe` (var olan webhook activity'yi sonradan özetle)
+- [x] **Lead detay partial** — `leads.partials.call-transcribe-card.blade.php` (audio upload + URL field + STT provider badge); `leads/show.blade.php` ai-analysis-card'ın altına include
+- [x] **Config** — `config/services.php`'a `elevenlabs` (api_key, base_url, stt_model, language, tts_model, voice_id, timeout) + `netgsm` (usercode, password, sender_id, default_audio_url, default_number). `config/reos.php`'a `ai.transcription_provider` (eleven/whisper switch) + `voice` (provider) bölümleri
+- [x] **`MediaIngestService::transcribeVoice` provider switch** — Telegram sesli notlar da ElevenLabs default'a düştü, fail → Whisper fallback
+
+### 4.3 — Kullanıcı tarafı kurulum
+
+`.env`'e eklenmesi gerekenler:
+```
+ELEVENLABS_API_KEY=sk_...
+ELEVENLABS_DEFAULT_VOICE_ID=...   # TTS için (opsiyonel — şu an sadece STT kullanılıyor)
+NETGSM_USERCODE=...
+NETGSM_PASSWORD=...
+NETGSM_SENDER_ID=...               # Netgsm onaylı caller ID (SMS başlığı ile aynı olabilir)
+NETGSM_DEFAULT_AUDIO_URL=https://... # Netgsm voice çağrılarında çalınacak varsayılan ses dosyası
+AI_TRANSCRIPTION_PROVIDER=elevenlabs # opsiyonel; default elevenlabs
+VOICE_PROVIDER=netgsm
+```
+
+Test akışı:
+1. `.env`'ye key'leri ekle → `php artisan config:clear`
+2. `/admin/leads/{id}` aç → "Çağrı Özetleme (AI)" kartına git
+3. Mp3/wav dosya yükle veya recording URL ver → "Özetle"
+4. Activity oluşur — transcript + summary + sentiment + intent + next_actions + buying_signals dolu
 
 ### Faz 4 dışı (gelecekte)
 
@@ -356,6 +417,10 @@ realestate/
 - **2026-05-20**: CRM Event stub'ları yazıldı — `LeadCreated`, `LeadUpdated`, `LeadConverted`, `DealCreated`, `DealStageChanged`, `DealClosed`. `Lead.php`'deki `event(new LeadCreated())` çağrısı artık runtime'da `class not found` ile patlamıyor.
 - **2026-05-20**: Faz 3 çekirdek — Fal.ai foto iyileştirme (5 op), markalı sosyal kart üretici (4 şablon × 3 boyut, Intervention v3 GD), `ContentService::generateSocialContent`/`generateReelsScript` UI'a bağlandı, aylık takvim view, hashtag intelligence (JSON mode). Tek "İlandan Oluştur" modal'ında 3 sekme. Card için **Intervention v3** seçildi (browser-shot/headless Chrome alternatifi yerine — sunucu kurulumu basit, GD zaten var, dompdf vendor'undan DejaVuSans TTF ile Türkçe destekli). Fal.ai için sync `fal.run/{model}` endpoint'i (queue API kullanmadık — UX için bloklayıcı ama timeout 90s yeterli). Yayın API'leri (Meta Graph / X / LinkedIn) bilinçli olarak ertelendi — gerçek inbox ve OAuth Faz 4 ile birlikte gelir.
 - **2026-05-20**: Faz 4.1 Unified Inbox **backend tamam, UI yarım**. Kullanıcı oturumu duraklatmaya karar verdi — view'ler yazılmadan commit atıldı (kasıtlı checkpoint). Tasarım kararları: (1) **Conversations + Messages** yeni tablolar — Activity'den ayrı çünkü Activity geniş bir CRM event modeli, conversation thread'i daha dar bir kanal-bazlı mesajlaşma soyutlaması. İki sistem paralel çalışacak (Activity = "ne oldu" defter, Conversations = "kim ne yazdı" sohbet); ingest noktaları her ikisine yazacak. (2) **ChannelInterface + ChannelManager** singleton pattern — Telegram/WhatsApp/SMS/Email tek arayüz arkasında, mevcut connector'lar `*Channel` sınıfında sarmalandı, controller kanal adına göre `$manager->get('telegram')` ile çözüyor. Yeni kanal eklemek = yeni class + provider'a register. (3) Inbox CRM modülü altına konuldu (`admin/inbox`), ayrı modül açmadık — conversations CRM concept ve sidebar'da CRM grubuna doğal düşüyor. (4) Office isolation `InboxController::authorizeView()` ile tek noktada, controller seviyesinde.
+- **2026-05-20**: **Sesli AI Sekreter** canlı — Faz 4.3 başlangıçta "çağrı özetleme" idi, Burak'ın iş vizyonu (Netgsm bayisi → paket satış) ile **gerçek zamanlı AI sekreter**'e büyütüldü. Tasarım kararları: (1) **Yeni modül `modules/VoiceAgent/`** — CRM altında değil, ayrı bir bounded context (çünkü tool API + webhook + agent config + admin UI hepsi bir araya gelir, RealEstate ve Telegram modüllerinin servislerini consume ediyor). (2) **ElevenLabs Conversational AI Agents** (sadece STT değil) — bizim Laravel sadece tool API + webhook yazıyor, agent'in beyin/ses/SIP tarafı ElevenLabs dashboard'da yapılandırılıyor. Bizim kod ElevenLabs spesifikasyonuna bağımlı değil — webhook payload normalize ediliyor. (3) **4-modlu routing** ofis bazlı seçilebilir — `TransferRouter` mode + mesai saati + lead/listing context'i ile karar verir. `callback_only` modu özellikle bayi paketinin **düşük tier** seçeneği (ofis hiç telefon açmıyor). (4) **`pre_call_brief` ayrı tool** — agent transfer'den ÖNCE çağırmalı: danışmana "X arıyor, Y ilanı, Z bütçe, 5sn'de bağlanıyor" Telegram'dan düşer. Bu fark yaratıyor — danışman ne konuşacağını bilerek açar. (5) **`VerifyAgentToken` middleware** shared secret + `hash_equals` (timing-safe) — `.env`'de boşsa dev mode (auth off). (6) **Eski `CallTranscriptionService` korundu** — paralel akış, geçmiş ses dosyası yüklemeleri için hâlâ değerli. (7) **`docs/voice-agent-setup.md`** — 6 adımlı operatör kurulum rehberi, dashboard adımları, 5 tool JSON spec, Netgsm SIP notları, test akışı, maliyet özeti. Buradaki en kritik nokta: Netgsm SIP → ElevenLabs SIP eşleşmesi olgun değil, Twilio middleware veya outbound callback alternatifi gerekebilir — bunu kullanıcı kendi telekom kurulumunda halledecek.
+- **2026-05-20**: Faz 4.3 AI çağrı özetleme **canlı** — ElevenLabs (STT/TTS) + Netgsm (voice) entegrasyonu. Tasarım kararları: (1) **Provider switch katmanı** — `CallTranscriptionService::transcribe()` `reos.ai.transcription_provider` config'ine bakarak ElevenLabs'a gidiyor, başarısız olursa Whisper fallback. Aynı switch `MediaIngestService::transcribeVoice`'da da var (Telegram sesli notlar için). Whisper hiç kaldırılmadı — fallback olarak duruyor. (2) **`CallTranscriptionService` üst seviyede tek pipeline** — STT + GPT analiz + Activity yazımı tek class'ta. `CallConnector::transcribe()` ona delege ediyor (eski Whisper kodu kaldırıldı). (3) **Netgsm voice basit ilk versiyon** — pre-recorded `audio_url` ile dial, gerçek IVR (TTS-driven, interactive call) sonraki dilim. `callViaNetgsm()` Netgsm SMS connector pattern'ini takip ediyor (response code 00/01/02 başarı, format `00 jobid`). (4) **GPT analiz JSON-mode** — system prompt strict JSON istiyor (`summary`, `sentiment`, `intent`, `next_actions[]`, `buying_signals[]`), `AIService::chatJson` ile parse. (5) **Activity'ye yazma** mevcut `call_transcript`, `ai_summary`, `ai_sentiment`, `ai_intent`, `ai_next_actions`, `call_sentiment` alanlarını dolduruyor — şema değişikliği yok, mevcut Activity model'i yeterince zengin. (6) **Lead show'da yeni partial** — `call-transcribe-card`, ai-analysis-card'ın altına include edildi. STT provider rozeti gösteriyor (kullanıcı hangi sağlayıcının aktif olduğunu görsün).
+- **2026-05-20**: Faz 4.2 Drip Campaign engine **canlı**. Tasarım kararları: (1) **Tablo prefix `drip_`** — Advertising modülünde zaten bir `campaigns` tablosu var (ad campaigns — `hedef`, `durum`, `budget`, `health_score`), collision'ı `drip_campaigns`/`drip_steps`/`drip_enrollments` ile çözdük. Model namespace farklı (`Modules\CRM\Models\Campaign` vs `Modules\Advertising\Models\Campaign`) ama tablo adları collide. Model'lere `protected $table = 'drip_*'` eklendi. (2) **Executor processing loop** — bir tick'te bir enrollment'ı `wait` step'ine ya da tamamlanmaya kadar zincirleme step çalıştırır (`maxStepsPerTick=10` safety cap). Böylece `send_message → create_task → wait` üçlüsü tek tick'te ilk iki step'i koşar, wait'e kadar gelir. (3) **Conversation auto-resolve** — `send_message` step'i Conversation'ı firstOrCreate ediyor (phone/email'den). Telegram için bu mümkün değil (chat_id pairing gerekir) — sadece mevcut conversation aranır. (4) **Template render** basit regex `{{path.to.value}}` ile nested context (`contact`, `lead`, `agent`, `office`). (5) **Observer pattern** kullanıldı (yine event yerine) — `LeadCampaignObserver` direkt `Lead::observe()` ile bind edildi (mevcut `Telegram\LeadObserver` ile aynı pattern). (6) **OnboardingCampaign seeder** idempotent — `firstOrCreate` ile slug bazlı, step'ler her seed'de yeniden kuruluyor (silinip yazılıyor) çünkü step config'i kod tarafında evolve edebilir.
+- **2026-05-20**: Faz 4.1 Unified Inbox **finalize edildi** — UI + Telegram ingest + sidebar bağlandı. Tasarım kararları: (1) **`ConversationIngestService`** ayrı bir servis olarak yazıldı — hem WebhookController hem MediaIngestService bunu çağırıyor, böylece text/media ingest tek noktada (DRY). Resolve mantığı: `Conversation::firstOrCreate(['channel'=>'telegram','channel_thread_id'=>$chatId])`, office/lead/contact TelegramUser'ın user_id'sinin son aktif lead'inden çıkarılır. (2) **Activity + Conversation paralel** — MediaIngest hem `Activity::create` hem `recordIncomingMedia` çağırır, biri patlasa diğeri geçer (try/catch). Geriye uyumlu — eski activity timeline ekranı bozulmaz. (3) **Inbox layout 2-kolonlu sayfalar** olarak yazıldı, SPA değil — show.blade.php ayrı route'ta, sol panel yine görünür. Bunu seçtim çünkü mevcut admin layout (sidebar + content area) zaten "ayrı sayfa" pattern'iyle uyumlu, Alpine.js/Livewire reactivity eklemeden çalışıyor. SPA hisse uzun versiyonu Livewire ile ileride kolayca eklenebilir. (4) **Attachment data shape**: `[{type:'photo'|'voice'|'audio'|'video'|'document', path:..., url:..., duration?}]`. URL sadece `storage/app/public/` altındaki path'lerden türetiliyor; `telegram-ingest/` özel klasörü public değil, sadece path tutuluyor (gelecekte signed URL ekleyebiliriz). (5) Sidebar unread badge `Schema::hasTable('conversations')` guard'lı çünkü ilk migrate çalıştırılmadan sidebar render edilirse hata vermesin.
 
 ---
 
@@ -381,17 +446,33 @@ realestate/
 2. **Modelleri test et:** `/admin/social-media` → "İlandan Oluştur" → bir ilan seç, "Sosyal Kart Üret" sekmesinde şablonu/boyutu seç, "Kartı Üret"e bas → PNG döner, "Gönderi Olarak Kullan" ile yeni gönderiye aktarılır.
 3. **Takvim:** `/admin/social-media/calendar` — aylık görünüm, ileri/geri.
 
-### Sonraki oturum başlangıcı — buradan devam (Faz 4.1 finalize)
+### Sonraki oturum başlangıcı — Faz 5 (Süreç Otomasyon)
 
-**Hemen yapılacak (Inbox UI):**
+**Faz 4 tamam ✅** — Inbox + Drip + AI çağrı özetleme canlı.
 
-1. **`modules/CRM/Resources/views/inbox/index.blade.php`** — `crm::inbox.index`. Layout: `@extends('layouts.admin')`. Sol panel (~360px): durum tab'ları (Açık/Arşiv/Kapalı + Okunmamış filtresi), kanal filtresi (chip'ler: tümü/telegram/whatsapp/sms/email), conversation list (`@foreach($conversations)` — kanal ikonu, kontak adı veya `channel_thread_id`, last_message_preview, unread badge, `last_message_at` diff_for_humans). Sağ panel: boş state — "Bir sohbet seçin" mesajı.
-2. **`modules/CRM/Resources/views/inbox/show.blade.php`** — `crm::inbox.show`. Üst: conversation header (kanal ikonu + kontak + lead linki + assignee dropdown + status dropdown — `admin.inbox.assign`/`status` POST). Orta: scroll'lu mesaj listesi, `$messages` üzerinde foreach — `direction=='in'` sol balon (gri), `direction=='out'` sağ balon (mavi), zaman + status badge. Alt: form `action="admin.inbox.send"`, `<textarea name="body">` + ek dosya alanı (opsiyonel, ilk versiyonda `attachments` boş gönder), "Gönder" butonu.
-3. **Telegram ingest refactor:** `modules/Telegram/Http/Controllers/WebhookController.php`'da text mesaj handler — `CommandHandler` çağırdıktan sonra (veya komut değilse), `Conversation::firstOrCreate(['channel'=>'telegram','channel_thread_id'=>$chatId], [...defaults: office_id from TelegramUser, contact_id null])` ve `Message::create(['direction'=>'in','channel'=>'telegram','external_id'=>message_id,'body'=>$text,'status'=>'received'])` + `$conversation->touchLastMessage($message)`. Activity yazımı korunur (paralel).
-4. **MediaIngestService update:** foto/ses geldiğinde Message'a attachment olarak da yaz — `attachments` JSON kolonu `[{type:'photo'|'voice','url'|'path','duration'?}]`. Whisper transcript varsa `ai_summary`'e koy.
-5. **Sidebar:** `resources/views/layouts/partials/sidebar.blade.php` — CRM grubuna "Gelen Kutusu" linki (`route('admin.inbox.index')`), `Conversation::open()->where('unread_count','>',0)->count()` badge'ı.
+**Hemen denemek için (kullanıcı tarafı):**
+1. `.env`'e `ELEVENLABS_API_KEY=...` + `NETGSM_USERCODE/PASSWORD/SENDER_ID=...` ekle
+2. `php artisan config:clear`
+3. `/admin/leads/{id}` aç → "Çağrı Özetleme (AI)" kartı → mp3/wav yükle → özet düşer
+4. `/admin/campaigns` → onboarding kampanyasını aktifleştir, yeni lead oluştur → enrollment otomatik
 
-**Sonra (4.2 + 4.3):**
-- 4.2 Drip Campaign engine — campaigns/steps/enrollments + executor
-- 4.3 AI çağrı özetleme — Whisper → GPT pipeline, mevcut Activity alanlarına yaz
+**Sonra (Faz 5 — Süreç Otomasyon):**
+- Pipeline auto-actions — `auto_actions` JSON kolonu var, stage değişince trigger
+- No-code workflow builder UI — Drip step builder + pipeline action builder ortak görsel editör
+- Takılan deal uyarıları — 14 gündür stage değişmemiş deal → Telegram bildirimi
+- Smart task suggestions — günlük "şunu yap" listesi (CopilotService)
+- Performans dashboard — agent leaderboard, lead source ROI, time-to-close
+- AI Emlak Uzmanı — prensip tabanlı karar destek (guzllik pattern)
+
+**Faz 4'ün opsiyonel geri kalanları:**
+- Cold lead reactivation cron (60+ gün inactive → reactivation campaign'e al)
+- AI campaign suggestion butonu — lead detayında "Bu lead için kampanya öner"
+- Görsel campaign step builder UI
+
+**4.1'in opsiyonel iyileştirmeleri (Faz 7 / cila):**
+- Inbox SPA hissi — Livewire/Alpine ile sayfa yenilenmeden mesaj akışı
+- Composer'a foto/dosya yükleme — şu an boş `attachments` gönderiyor
+- "Yeni Conversation" butonu — manuel kontakt + kanal seç + ilk mesaj
+- Mesaj real-time refresh — broadcasting / polling
+- Inbox arama — kontak/içerik/lead bazlı
 

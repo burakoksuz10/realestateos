@@ -15,22 +15,80 @@ class CallConnector
 
     public function __construct()
     {
-        $this->provider = config('services.voip.provider', 'bulutfon');
+        $this->provider = config('reos.voice.provider', config('services.voip.provider', 'netgsm'));
         $this->config = config("services.{$this->provider}", []);
+    }
+
+    public function isConfigured(): bool
+    {
+        return match ($this->provider) {
+            'netgsm'   => !empty($this->config['usercode']) && !empty($this->config['password']),
+            'bulutfon' => !empty($this->config['api_key']),
+            'twilio'   => !empty($this->config['sid']) && !empty($this->config['token']),
+            default    => false,
+        };
     }
 
     /**
      * Initiate outbound call
      */
-    public function call(string $to, string $from = null): array
+    public function call(string $to, ?string $from = null): array
     {
-        $from = $from ?? $this->config['default_number'];
+        $from = $from ?? ($this->config['default_number'] ?? $this->config['sender_id'] ?? null);
 
         return match($this->provider) {
+            'netgsm'   => $this->callViaNetgsm($to, $from),
             'bulutfon' => $this->callViaBulutfon($to, $from),
-            'twilio' => $this->callViaTwilio($to, $from),
-            default => throw new \Exception("Unknown VoIP provider: {$this->provider}"),
+            'twilio'   => $this->callViaTwilio($to, $from),
+            default    => throw new \Exception("Unknown VoIP provider: {$this->provider}"),
         };
+    }
+
+    /**
+     * Netgsm sesli arama — pre-recorded ses dosyası ile arar.
+     * Doğrudan TTS-driven canlı çağrı için Netgsm IVR API ayrı bir entegrasyon gerektirir;
+     * şimdilik kayıtlı ses URL'si ile dial pattern.
+     *
+     * @param  string  $to        E.164 numara (905...)
+     * @param  ?string $from      Caller ID (Netgsm onaylı)
+     * @param  ?string $audioUrl  Çalınacak ses dosyası URL'si (null → varsayılan ofis mesajı)
+     */
+    protected function callViaNetgsm(string $to, ?string $from, ?string $audioUrl = null): array
+    {
+        $audioUrl = $audioUrl
+            ?? $this->config['default_audio_url']
+            ?? config('services.netgsm.default_audio_url');
+
+        if (!$audioUrl) {
+            throw new \Exception('Netgsm voice call requires an audio URL.');
+        }
+
+        $response = Http::asForm()
+            ->timeout(30)
+            ->post('https://api.netgsm.com.tr/voice/send/post/', [
+                'usercode'  => $this->config['usercode'] ?? null,
+                'password'  => $this->config['password'] ?? null,
+                'gsmno'     => $to,
+                'audio_url' => $audioUrl,
+                'msgheader' => $from ?? ($this->config['sender_id'] ?? null),
+            ]);
+
+        $body = trim($response->body());
+        // Netgsm "00 jobid" formatında döner — başarı kodları: 00, 01, 02
+        $parts = preg_split('/\s+/', $body);
+        $code  = $parts[0] ?? '';
+        $jobId = $parts[1] ?? null;
+
+        if (!in_array($code, ['00', '01', '02'], true)) {
+            throw new \Exception("Netgsm voice error: {$body}");
+        }
+
+        return [
+            'provider' => 'netgsm',
+            'call_id'  => $jobId,
+            'status'   => 'queued',
+            'raw'      => $body,
+        ];
     }
 
     /**
@@ -144,10 +202,35 @@ class CallConnector
     public function getRecording(string $callId): ?string
     {
         return match($this->provider) {
+            'netgsm'   => $this->getNetgsmRecording($callId),
             'bulutfon' => $this->getBulutfonRecording($callId),
-            'twilio' => $this->getTwilioRecording($callId),
-            default => null,
+            'twilio'   => $this->getTwilioRecording($callId),
+            default    => null,
         };
+    }
+
+    protected function getNetgsmRecording(string $callId): ?string
+    {
+        // Netgsm voice job report endpoint — recording URL job rapor cevabında döner.
+        $response = Http::asForm()
+            ->timeout(15)
+            ->post('https://api.netgsm.com.tr/voice/report/get/', [
+                'usercode' => $this->config['usercode'] ?? null,
+                'password' => $this->config['password'] ?? null,
+                'jobid'    => $callId,
+            ]);
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        // Netgsm XML/JSON döner — basit regex ile URL ayıkla
+        $body = $response->body();
+        if (preg_match('#<recording[^>]*>([^<]+)</recording>#i', $body, $m)) {
+            return $m[1];
+        }
+        $data = $response->json();
+        return $data['recording_url'] ?? null;
     }
 
     protected function getBulutfonRecording(string $callId): ?string
@@ -174,26 +257,13 @@ class CallConnector
     }
 
     /**
-     * Transcribe call recording
+     * Transcribe call recording — provider-aware (ElevenLabs default, Whisper fallback).
      */
     public function transcribe(string $recordingUrl): ?string
     {
-        // Use OpenAI Whisper for transcription
-        try {
-            $audioContent = Http::get($recordingUrl)->body();
-            
-            $response = Http::withToken(config('services.openai.api_key'))
-                ->attach('file', $audioContent, 'recording.mp3')
-                ->post('https://api.openai.com/v1/audio/transcriptions', [
-                    'model' => 'whisper-1',
-                    'language' => 'tr',
-                ]);
-
-            return $response->json()['text'] ?? null;
-        } catch (\Exception $e) {
-            Log::error('Transcription failed: ' . $e->getMessage());
-            return null;
-        }
+        $service = app(\Modules\CRM\Services\CallTranscriptionService::class);
+        $result = $service->fromUrl($recordingUrl);
+        return $result['text'] ?? null;
     }
 
     /**

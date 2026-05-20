@@ -17,4 +17,5 @@ return [
     Modules\SocialMedia\Providers\SocialMediaServiceProvider::class,
     Modules\Advertising\Providers\AdvertisingServiceProvider::class,
     Modules\Telegram\Providers\TelegramServiceProvider::class,
+    Modules\VoiceAgent\Providers\VoiceAgentServiceProvider::class,
 ];
