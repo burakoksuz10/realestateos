@@ -89,8 +89,8 @@ class AnalyticsService
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->selectRaw('assigned_to, COUNT(*) as total, SUM(CASE WHEN status = "converted" THEN 1 ELSE 0 END) as converted')
             ->groupBy('assigned_to')
-            ->pluck(null, 'assigned_to')
-            ->all();
+            ->get()
+            ->keyBy('assigned_to');
 
         // Tek query: agent başına deal sayısı + kazanılan + revenue + komisyon
         $dealStats = Deal::query()
@@ -104,8 +104,8 @@ class AnalyticsService
                 SUM(CASE WHEN status = "won" THEN commission_amount ELSE 0 END) as commission
             ')
             ->groupBy('assigned_to')
-            ->pluck(null, 'assigned_to')
-            ->all();
+            ->get()
+            ->keyBy('assigned_to');
 
         // Tek query: agent başına activity sayısı + showing sayısı
         $activityStats = \Modules\CRM\Models\Activity::query()
@@ -113,8 +113,8 @@ class AnalyticsService
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->selectRaw('user_id, COUNT(*) as total, SUM(CASE WHEN type = "showing" THEN 1 ELSE 0 END) as showings')
             ->groupBy('user_id')
-            ->pluck(null, 'user_id')
-            ->all();
+            ->get()
+            ->keyBy('user_id');
 
         return $agents->map(function ($agent) use ($leadStats, $dealStats, $activityStats) {
             $l = $leadStats[$agent->id] ?? null;
