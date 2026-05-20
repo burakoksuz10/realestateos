@@ -1,0 +1,41 @@
+{
+  "name": "RE-OS Emlak Operasyon Platformu",
+  "short_name": "RE-OS",
+  "description": "AI destekli emlak CRM, sosyal medya ve operasyon platformu",
+  "lang": "tr-TR",
+  "dir": "ltr",
+  "start_url": "/admin",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Bugünkü Plan",
+      "short_name": "Plan",
+      "description": "AI günlük yapılacaklar",
+      "url": "/admin/ai/copilot/daily-plan"
+    },
+    {
+      "name": "Gelen Kutusu",
+      "short_name": "Inbox",
+      "description": "Mesajlar",
+      "url": "/admin/inbox"
+    },
+    {
+      "name": "Yeni İlan",
+      "short_name": "İlan",
+      "url": "/admin/listings/create"
+    }
+  ]
+}

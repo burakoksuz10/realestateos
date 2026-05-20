@@ -11,12 +11,12 @@
 
     @if(session('success'))
         <div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
-            {!! session('success') !!}
+            {{ session('success') }}
         </div>
     @endif
     @if(session('warning'))
         <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-            {!! session('warning') !!}
+            {{ session('warning') }}
         </div>
     @endif
 

@@ -4,12 +4,15 @@ namespace Modules\CRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\CRM\Http\Controllers\Concerns\EnforcesOfficeIsolation;
 use Modules\CRM\Models\Lead;
 use Modules\CRM\Models\Contact;
 use Modules\CRM\Models\Pipeline;
 
 class LeadController extends Controller
 {
+    use EnforcesOfficeIsolation;
+
     /**
      * Display a listing of leads
      */
@@ -50,9 +53,12 @@ class LeadController extends Controller
             });
         }
 
-        // Sorting
-        $sortField = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('direction', 'desc');
+        // Sorting (whitelist — SQL injection önle)
+        $allowedSortFields = ['created_at', 'updated_at', 'title', 'score', 'ai_score', 'status', 'temperature', 'last_activity_at'];
+        $sortField = in_array($request->get('sort'), $allowedSortFields, true)
+            ? $request->get('sort')
+            : 'created_at';
+        $sortDirection = $request->get('direction') === 'asc' ? 'asc' : 'desc';
         $query->orderBy($sortField, $sortDirection);
 
         $leads = $query->paginate(20);
@@ -158,6 +164,8 @@ class LeadController extends Controller
      */
     public function show(Lead $lead)
     {
+        $this->ensureSameOffice($lead);
+
         $lead->load([
             'contact',
             'assignedTo',
@@ -175,6 +183,8 @@ class LeadController extends Controller
      */
     public function edit(Lead $lead)
     {
+        $this->ensureSameOffice($lead);
+
         $agents = \App\Models\User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['agent', 'office-manager', 'admin']);
         })->get();
@@ -203,6 +213,8 @@ class LeadController extends Controller
      */
     public function update(Request $request, Lead $lead)
     {
+        $this->ensureSameOffice($lead);
+
         $validated = $request->validate([
             'status' => 'required|in:new,contacted,qualified,proposal,negotiation,converted,lost',
             'priority' => 'nullable|in:low,medium,high,urgent',
@@ -250,6 +262,7 @@ class LeadController extends Controller
      */
     public function destroy(Lead $lead)
     {
+        $this->ensureSameOffice($lead);
         $lead->delete();
 
         return redirect()->route('admin.leads.index')

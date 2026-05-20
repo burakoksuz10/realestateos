@@ -32,11 +32,22 @@ class InboxController extends Controller
 
         $conversations = $query->limit(200)->get();
 
+        // Tek query ile 4 count'u al — N+1 önle
+        $countsQuery = Conversation::query()
+            ->when($officeId ?? null, fn ($q, $oid) => $q->where('office_id', $oid))
+            ->selectRaw('
+                SUM(CASE WHEN status = "open" THEN 1 ELSE 0 END) as open,
+                SUM(CASE WHEN status = "archived" THEN 1 ELSE 0 END) as archived,
+                SUM(CASE WHEN status = "closed" THEN 1 ELSE 0 END) as closed,
+                SUM(CASE WHEN status = "open" AND unread_count > 0 THEN 1 ELSE 0 END) as unread
+            ')
+            ->first();
+
         $counts = [
-            'open' => Conversation::where('status', 'open')->count(),
-            'archived' => Conversation::where('status', 'archived')->count(),
-            'closed' => Conversation::where('status', 'closed')->count(),
-            'unread' => Conversation::where('status', 'open')->where('unread_count', '>', 0)->count(),
+            'open'     => (int) ($countsQuery->open ?? 0),
+            'archived' => (int) ($countsQuery->archived ?? 0),
+            'closed'   => (int) ($countsQuery->closed ?? 0),
+            'unread'   => (int) ($countsQuery->unread ?? 0),
         ];
 
         $channels = app(ChannelManager::class)->all();

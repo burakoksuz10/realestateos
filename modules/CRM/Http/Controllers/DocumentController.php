@@ -85,7 +85,8 @@ class DocumentController extends Controller
         $owner = $this->resolveOwner($type, $id);
 
         $validated = $request->validate([
-            'file'            => 'required|file|max:20480',                   // 20 MB
+            // MIME whitelist — yürütülebilir dosya yüklenmesini önle
+            'file'            => 'required|file|max:20480|mimes:pdf,jpg,jpeg,png,webp,gif,doc,docx,xls,xlsx,txt,zip',
             'title'           => 'nullable|string|max:255',
             'category'        => 'nullable|string|in:contract,identity,deed,valuation,photo,other',
             'notes'           => 'nullable|string|max:1000',

@@ -59,6 +59,9 @@ class AnalyticsService
 
     /**
      * Get agent performance data
+     *
+     * N+1 sorgu sorununu önlemek için her metric tek bir GROUP BY query
+     * ile çekilip user_id'ye göre eşleştirilir. 10 agent için 41 → 5 query.
      */
     public function getAgentPerformance(array $filters = []): array
     {
@@ -66,47 +69,78 @@ class AnalyticsService
         $dateTo = $filters['date_to'] ?? now();
         $officeId = $filters['office_id'] ?? null;
 
-        $query = \App\Models\User::whereHas('roles', function ($q) {
-            $q->whereIn('name', ['agent', 'office-manager']);
-        });
+        $agentQuery = \App\Models\User::with('office')
+            ->whereHas('roles', function ($q) {
+                $q->whereIn('name', ['agent', 'office-manager']);
+            });
 
         if ($officeId) {
-            $query->where('office_id', $officeId);
+            $agentQuery->where('office_id', $officeId);
         }
 
-        $agents = $query->get();
+        $agents = $agentQuery->get();
+        if ($agents->isEmpty()) return [];
 
-        return $agents->map(function ($agent) use ($dateFrom, $dateTo) {
-            $leads = Lead::where('assigned_to', $agent->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo]);
-            
-            $deals = Deal::where('assigned_to', $agent->id)
-                ->whereBetween('created_at', [$dateFrom, $dateTo]);
+        $agentIds = $agents->pluck('id')->all();
 
-            $wonDeals = (clone $deals)->where('status', 'won');
+        // Tek query: agent başına lead sayısı + dönüşen sayısı
+        $leadStats = Lead::query()
+            ->whereIn('assigned_to', $agentIds)
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->selectRaw('assigned_to, COUNT(*) as total, SUM(CASE WHEN status = "converted" THEN 1 ELSE 0 END) as converted')
+            ->groupBy('assigned_to')
+            ->pluck(null, 'assigned_to')
+            ->all();
+
+        // Tek query: agent başına deal sayısı + kazanılan + revenue + komisyon
+        $dealStats = Deal::query()
+            ->whereIn('assigned_to', $agentIds)
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->selectRaw('
+                assigned_to,
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "won" THEN 1 ELSE 0 END) as won_count,
+                SUM(CASE WHEN status = "won" THEN value ELSE 0 END) as revenue,
+                SUM(CASE WHEN status = "won" THEN commission_amount ELSE 0 END) as commission
+            ')
+            ->groupBy('assigned_to')
+            ->pluck(null, 'assigned_to')
+            ->all();
+
+        // Tek query: agent başına activity sayısı + showing sayısı
+        $activityStats = \Modules\CRM\Models\Activity::query()
+            ->whereIn('user_id', $agentIds)
+            ->whereBetween('created_at', [$dateFrom, $dateTo])
+            ->selectRaw('user_id, COUNT(*) as total, SUM(CASE WHEN type = "showing" THEN 1 ELSE 0 END) as showings')
+            ->groupBy('user_id')
+            ->pluck(null, 'user_id')
+            ->all();
+
+        return $agents->map(function ($agent) use ($leadStats, $dealStats, $activityStats) {
+            $l = $leadStats[$agent->id] ?? null;
+            $d = $dealStats[$agent->id] ?? null;
+            $a = $activityStats[$agent->id] ?? null;
+
+            $leadTotal = (int) ($l->total ?? 0);
+            $leadConverted = (int) ($l->converted ?? 0);
 
             return [
-                'id' => $agent->id,
-                'name' => $agent->name,
+                'id'     => $agent->id,
+                'name'   => $agent->name,
                 'avatar' => $agent->avatar,
                 'office' => $agent->office?->name,
                 'metrics' => [
-                    'leads' => $leads->count(),
-                    'leads_converted' => (clone $leads)->where('status', 'converted')->count(),
-                    'deals' => $deals->count(),
-                    'deals_won' => $wonDeals->count(),
-                    'revenue' => $wonDeals->sum('value'),
-                    'commission' => $wonDeals->sum('commission_amount'),
-                    'activities' => \Modules\CRM\Models\Activity::where('user_id', $agent->id)
-                        ->whereBetween('created_at', [$dateFrom, $dateTo])
-                        ->count(),
-                    'showings' => \Modules\CRM\Models\Activity::where('user_id', $agent->id)
-                        ->where('type', 'showing')
-                        ->whereBetween('created_at', [$dateFrom, $dateTo])
-                        ->count(),
+                    'leads'           => $leadTotal,
+                    'leads_converted' => $leadConverted,
+                    'deals'           => (int) ($d->total ?? 0),
+                    'deals_won'       => (int) ($d->won_count ?? 0),
+                    'revenue'         => (float) ($d->revenue ?? 0),
+                    'commission'      => (float) ($d->commission ?? 0),
+                    'activities'      => (int) ($a->total ?? 0),
+                    'showings'        => (int) ($a->showings ?? 0),
                 ],
-                'conversion_rate' => $leads->count() > 0 
-                    ? round(((clone $leads)->where('status', 'converted')->count() / $leads->count()) * 100, 1) 
+                'conversion_rate' => $leadTotal > 0
+                    ? round(($leadConverted / $leadTotal) * 100, 1)
                     : 0,
             ];
         })->sortByDesc('metrics.revenue')->values()->toArray();

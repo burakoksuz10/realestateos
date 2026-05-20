@@ -4,13 +4,21 @@ namespace Modules\CRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\CRM\Http\Controllers\Concerns\EnforcesOfficeIsolation;
 use Modules\CRM\Models\Contact;
 
 class ContactController extends Controller
 {
+    use EnforcesOfficeIsolation;
+
     public function index(Request $request)
     {
         $query = Contact::query();
+
+        // Office isolation — kullanıcı sadece kendi ofisinin kontaklarını görür
+        if ($officeId = $request->user()?->office_id) {
+            $query->where('office_id', $officeId);
+        }
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -55,16 +63,20 @@ class ContactController extends Controller
 
     public function show(Contact $contact)
     {
+        $this->ensureSameOffice($contact);
         return view('crm::contacts.show', compact('contact'));
     }
 
     public function edit(Contact $contact)
     {
+        $this->ensureSameOffice($contact);
         return view('crm::contacts.edit', compact('contact'));
     }
 
     public function update(Request $request, Contact $contact)
     {
+        $this->ensureSameOffice($contact);
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -83,6 +95,7 @@ class ContactController extends Controller
 
     public function destroy(Contact $contact)
     {
+        $this->ensureSameOffice($contact);
         $contact->delete();
 
         return redirect()->route('admin.contacts.index')
@@ -91,6 +104,7 @@ class ContactController extends Controller
 
     public function toggleStatus(Contact $contact)
     {
+        $this->ensureSameOffice($contact);
         $contact->update(['is_active' => !$contact->is_active]);
         return back()->with('success', 'Durum güncellendi.');
     }

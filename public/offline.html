@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çevrimdışı — RE-OS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c4a6e 0%, #0ea5e9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container { max-width: 420px; }
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        h1 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+        p { font-size: 16px; opacity: 0.9; line-height: 1.5; margin-bottom: 24px; }
+        button {
+            background: white;
+            color: #0c4a6e;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📡</div>
+        <h1>İnternet bağlantısı yok</h1>
+        <p>RE-OS bu sayfayı şu an gösteremiyor. Bağlantın geri gelince tekrar dene.</p>
+        <button onclick="location.reload()">Tekrar Dene</button>
+    </div>
+    <script>
+        // Bağlantı geri gelince otomatik yenile
+        window.addEventListener('online', () => location.reload());
+    </script>
+</body>
+</html>

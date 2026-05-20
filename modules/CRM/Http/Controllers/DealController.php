@@ -4,11 +4,14 @@ namespace Modules\CRM\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\CRM\Http\Controllers\Concerns\EnforcesOfficeIsolation;
 use Modules\CRM\Models\Deal;
 use Modules\CRM\Models\Pipeline;
 
 class DealController extends Controller
 {
+    use EnforcesOfficeIsolation;
+
     public function index(Request $request)
     {
         $user = $request->user();
@@ -84,12 +87,15 @@ class DealController extends Controller
 
     public function show(Deal $deal)
     {
+        $this->ensureSameOffice($deal);
         $deal->load(['contact', 'assignedTo', 'stage', 'pipeline', 'activities', 'tasks']);
         return view('crm::deals.show', compact('deal'));
     }
 
     public function edit(Deal $deal)
     {
+        $this->ensureSameOffice($deal);
+
         $pipelines = Pipeline::with('stages')->get();
         $agents = \App\Models\User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['agent', 'office-manager', 'admin']);
@@ -100,6 +106,8 @@ class DealController extends Controller
 
     public function update(Request $request, Deal $deal)
     {
+        $this->ensureSameOffice($deal);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'value' => 'nullable|numeric|min:0',
@@ -117,6 +125,7 @@ class DealController extends Controller
 
     public function destroy(Deal $deal)
     {
+        $this->ensureSameOffice($deal);
         $deal->delete();
         return redirect()->route('admin.deals.index')
             ->with('success', 'Fırsat başarıyla silindi.');

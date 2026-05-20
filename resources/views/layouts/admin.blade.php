@@ -2,8 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {{-- PWA --}}
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RE-OS">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <title>@yield('title', 'Dashboard') - {{ config('app.name', 'ReCRM') }}</title>
 
@@ -229,6 +237,32 @@
                 Alpine.evaluate(document.body, 'showSearch = true; $nextTick(() => $refs.searchInput.focus())');
             }
         });
+
+        // PWA — service worker register
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .catch(err => console.warn('SW register failed:', err));
+            });
+        }
+
+        // PWA install prompt — kullanıcıya "Telefona Ekle" rozeti göster
+        let deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            // Custom install button göster (DOM'da #pwa-install-btn varsa)
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.style.display = 'inline-flex';
+        });
+        window.installPWA = async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) btn.style.display = 'none';
+        };
     </script>
 </body>
 </html>

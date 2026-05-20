@@ -1,5 +1,32 @@
+@php
+    // Sidebar count'larını her sayfa render'ında DB'ye gitmemek için 60sn cache.
+    // Anahtarı kullanıcıya bağlı — her agent kendi göstergelerini görür.
+    $sidebarCounts = \Illuminate\Support\Facades\Cache::remember(
+        'sidebar.counts.' . (auth()->id() ?? 'guest'),
+        60,
+        function () {
+            $userId = auth()->id();
+            $officeId = auth()->user()?->office_id;
+            return [
+                'listings_active' => \Modules\RealEstate\Models\Listing::active()->count(),
+                'leads_new'       => \Modules\CRM\Models\Lead::new()->count(),
+                'tasks_pending'   => $userId
+                    ? \Modules\CRM\Models\Task::pending()->where('assigned_to', $userId)->count()
+                    : 0,
+                'inbox_unread'    => \Schema::hasTable('conversations')
+                    ? \Modules\CRM\Models\Conversation::query()
+                        ->where('status', 'open')
+                        ->where('unread_count', '>', 0)
+                        ->when($officeId, fn ($q) => $q->where('office_id', $officeId))
+                        ->count()
+                    : 0,
+            ];
+        }
+    );
+@endphp
+
 <!-- Mobile Sidebar Backdrop -->
-<div x-show="sidebarMobileOpen" 
+<div x-show="sidebarMobileOpen"
      x-cloak
      class="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
      @click="sidebarMobileOpen = false"></div>
@@ -55,7 +82,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">İlanlar</span>
-            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ \Modules\RealEstate\Models\Listing::active()->count() }}</span>
+            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ $sidebarCounts['listings_active'] }}</span>
         </a>
 
         <!-- Projects -->
@@ -91,7 +118,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">Potansiyel Müşteriler</span>
-            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ \Modules\CRM\Models\Lead::new()->count() }}</span>
+            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ $sidebarCounts['leads_new'] }}</span>
         </a>
 
         <!-- Contacts -->
@@ -122,19 +149,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">Görevler</span>
-            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ \Modules\CRM\Models\Task::pending()->where('assigned_to', auth()->id())->count() }}</span>
+            <span x-show="sidebarOpen" x-cloak class="ml-auto bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-medium px-2 py-0.5 rounded-full">{{ $sidebarCounts['tasks_pending'] }}</span>
         </a>
 
         <!-- Inbox -->
-        @php
-            $inboxUnread = \Schema::hasTable('conversations')
-                ? \Modules\CRM\Models\Conversation::query()
-                    ->where('status', 'open')
-                    ->where('unread_count', '>', 0)
-                    ->when(auth()->user()->office_id, fn ($q, $oid) => $q->where('office_id', $oid))
-                    ->count()
-                : 0;
-        @endphp
+        @php $inboxUnread = $sidebarCounts['inbox_unread']; @endphp
         <a href="{{ route('admin.inbox.index') }}"
            class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
                   {{ request()->routeIs('admin.inbox.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
