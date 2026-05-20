@@ -16,13 +16,13 @@
 | 0 | Altyapı | ✅ Tamam | OpenAI servis, kredi sistemi, ayarlar paneli, async jobs |
 | 1 | AI Lead & İlan Zekası | ✅ Tamam | Gerçek OpenAI bağlandı, sidebar Copilot çalışıyor |
 | 2 | Telegram Operasyon Merkezi | ✅ Kod tamam | Komutlar/bildirimler/brifing/foto-ses/butonlar canlı — sadece bot token + webhook URL bekliyor |
-| 3 | Sosyal Medya Motoru | ⏳ Bekliyor | Fal.ai entegrasyonu, kart üretici, takvim |
+| 3 | Sosyal Medya Motoru | ✅ Çekirdek tamam | Fal.ai (sky/twilight/declutter/staging/enhance), markalı kart üretici (4 şablon × 3 boyut), ilandan içerik akışı, takvim, hashtag intelligence |
 | 4 | İletişim & Yaşam Döngüsü | ⏳ Bekliyor | WhatsApp/SMS/Çağrı/E-posta + drip campaigns |
 | 5 | Süreç Otomasyon | ⏳ Bekliyor | Workflow builder, takılan deal uyarıları |
 | 6 | İleri Özellikler | ⏳ Bekliyor | Portal sync, brochure, e-imza, TKGM, alıcı/satıcı portal |
 | 7 | Cila & Üretim | ⏳ Bekliyor | PWA, performans, test, güvenlik, çoklu dil |
 
-**İlerleme:** 3/8 faz tamamlandı (Faz 2'nin kodu hazır, sadece `.env` bot token + public webhook URL kullanıcı tarafında).
+**İlerleme:** 4/8 faz tamamlandı (Faz 2 kodu hazır — bot token + webhook URL bekliyor; Faz 3 çekirdek özellikler canlı — yayın API'leri Faz 4 ile birlikte).
 
 ---
 
@@ -127,29 +127,51 @@ Amaç: Saha danışmanları gerçek zamanlı operasyonda olsun.
 
 ---
 
-## ⏳ FAZ 3 — Sosyal Medya Motoru (BEKLEYEN)
+## ✅ FAZ 3 — Sosyal Medya Motoru (ÇEKİRDEK TAMAM)
 
 Amaç: Pazarlama otomasyonu — AI ilanları sosyal medyaya hazır hale getirsin.
 
-### Planlanan işler
+### Tamamlanan işler
 
-- [ ] **Fal.ai entegrasyonu** — gökyüzü değiştirme, twilight efekti, declutter, virtual staging
-- [ ] **Markalı sosyal kart üretici** (PHP imagick veya browser-shot)
-  - Listing card şablonları (4-5 stil): yeni ilan, az önce satıldı, açık ev, fiyat indirimi
-  - Otomatik logo/agent foto/iletişim bilgileri
-  - Instagram square / story / facebook landscape / X / linkedin boyutları
-- [ ] **AI caption üretici** — platform-spesifik (mevcut `ContentService::generateSocialContent` zaten var, UI'a bağla)
-- [ ] **Reels/TikTok script üretici** — `ContentService::generateReelsScript` zaten var
-- [ ] **İçerik takvimi** — drag-drop scheduler
-- [ ] **Çoklu platform yayın** — Instagram + Facebook (Graph API), X, LinkedIn
-- [ ] **Postiz entegrasyonu** (alternatif — siz postiz-app çalışıyorsunuz)
-- [ ] **Hashtag intelligence** — bölge bazlı, ilan tipi bazlı öneriler
-- [ ] **Performans takibi** — like, share, comment, conversion
-- [ ] **Unified inbox** — Instagram DM + Facebook Messenger + WhatsApp + Telegram tek yerden
+- [x] **Fal.ai entegrasyonu** — `modules/AI/Services/FalAiService.php`
+  - skyReplacement, twilight, declutter, virtualStaging, enhance
+  - Per-office usage logging (AiUsageLog feature=`image.{operation}`)
+  - Config: `config/services.php` (fal.api_key, base_url) + `config/reos.php` (ai.image.models, timeout)
+  - UI: Yeni gönderi modal'ında media URL girilince 5 buton (Gökyüzü / Twilight / Temizle / Staging / Netleştir)
+- [x] **Markalı sosyal kart üretici** — `modules/SocialMedia/Services/SocialCardService.php`
+  - Intervention/Image v3 (GD) ile
+  - 4 şablon: `yeni_ilan`, `satildi`, `acik_ev`, `fiyat_indirimi`
+  - 3 boyut: square 1080×1080, story 1080×1920, landscape 1200×630
+  - DejaVuSans TTF (dompdf vendor) — Türkçe karakter desteği
+  - Listing primary photo + gradient overlay + badge + başlık + lokasyon + fiyat + ofis adı
+  - `storage/app/public/social-cards/` altına JPG kaydeder, `/storage/...` URL döner
+- [x] **AI caption üretici (multiplatform)** — `ContentService::generateSocialContent` UI'a bağlı (instagram/facebook/twitter/linkedin/story)
+- [x] **Reels/TikTok script üretici** — `ContentService::generateReelsScript` aynı modal'da
+- [x] **İçerik takvimi** — `/admin/social-media/calendar` aylık grid view (Pzt başlangıç)
+  - Geri/ileri ay gezme
+  - Günde 3 post + count badge, status renk kodlu
+- [x] **Hashtag intelligence** — `/ai/hashtags` endpoint
+  - Bölge (city/district) + ilan tipi tabanlı
+  - 20 hashtag default, JSON mode (response_format: json_object)
+  - Caption'a inline ekleme / kopyalama UI
+- [x] **Listing Studio Modal** — header "İlandan Oluştur" butonu, 3 sekme (İçerik / Kart / Hashtag) tek yerden
+
+### Geriye kalan (Faz 4'e devir veya ayrı)
+
+- [ ] **Çoklu platform yayın** — gerçek Meta Graph API / X / LinkedIn entegrasyonu (Faz 4 İletişim ile birlikte)
+- [ ] **Postiz entegrasyonu** (alternatif — postiz-app çalışıyorsa)
+- [ ] **Drag-drop calendar** — şu an statik aylık grid, drag-drop ile rescheduling
+- [ ] **Performans takibi** — like, share, comment, conversion (yayın API'leri canlı olunca)
+- [ ] **Unified inbox** — Instagram DM + Messenger + WhatsApp + Telegram (Faz 4)
 
 ### Kullanılacak modüller
-- `modules/SocialMedia/` (mevcut iskelet) — bu fazda etini doldur
-- `modules/Advertising/` — Meta Ads entegrasyonu
+- `modules/SocialMedia/` — UI + servis + controller doldu
+- `modules/AI/` — FalAiService eklendi
+- `modules/Advertising/` — Meta Ads entegrasyonu (Faz 4/6'da)
+
+### Kurulum notu
+- Fal.ai için `.env`'e `FAL_API_KEY=...` ekle (https://fal.ai/dashboard/keys)
+- Sosyal kart için `php artisan storage:link` çalışmış olmalı (otomatik yapıldı)
 
 ---
 
@@ -296,6 +318,8 @@ realestate/
 - **2026-05-20**: AIService raw OpenAI client'a refactor edildi (`openai-php/laravel` paketi yüklü değildi, paket eklemek yerine raw client tercih edildi).
 - **2026-05-20**: Faz 1 cila — Lead detayda AI Analizi kartı + manuel "Yeniden Analiz Et" akışı; İlan detayda AI Değerleme kartı (komparable + trend + AI yorumu + fiyatlama senaryoları) + "AI ile Üret" açıklama butonu canlı. Tailwind dynamic class trap'i yüzünden tüm renk class'ları literal/match ile yazıldı (JIT safelist yok).
 - **2026-05-20**: Faz 2 kod tamamı — WebhookController küçük router'a indirildi, iş `CommandHandler` + `CallbackHandler` + `MediaIngestService`'e dağıtıldı. Bildirimler için **observer pattern** seçildi (event pattern değil), çünkü `Modules\CRM\Events\Lead*` ve `Deal*` class'ları stub değil — yani `event(new LeadCreated())` runtime'da `class not found` ile patlardı. Observer'lar `TelegramServiceProvider::boot()`'ta `Lead::observe()` / `Deal::observe()` ile bind. Schedule da aynı provider'dan `Schedule` resolve edip kuruldu (Kernel'a dokunulmadı). Whisper transkripsiyon `audio()->transcribe()` API'si — fail olursa activity yine yazılır, summary null kalır. Faz 2'nin geriye kalanı dışarıdan iş (bot token + public URL).
+- **2026-05-20**: CRM Event stub'ları yazıldı — `LeadCreated`, `LeadUpdated`, `LeadConverted`, `DealCreated`, `DealStageChanged`, `DealClosed`. `Lead.php`'deki `event(new LeadCreated())` çağrısı artık runtime'da `class not found` ile patlamıyor.
+- **2026-05-20**: Faz 3 çekirdek — Fal.ai foto iyileştirme (5 op), markalı sosyal kart üretici (4 şablon × 3 boyut, Intervention v3 GD), `ContentService::generateSocialContent`/`generateReelsScript` UI'a bağlandı, aylık takvim view, hashtag intelligence (JSON mode). Tek "İlandan Oluştur" modal'ında 3 sekme. Card için **Intervention v3** seçildi (browser-shot/headless Chrome alternatifi yerine — sunucu kurulumu basit, GD zaten var, dompdf vendor'undan DejaVuSans TTF ile Türkçe destekli). Fal.ai için sync `fal.run/{model}` endpoint'i (queue API kullanmadık — UX için bloklayıcı ama timeout 90s yeterli). Yayın API'leri (Meta Graph / X / LinkedIn) bilinçli olarak ertelendi — gerçek inbox ve OAuth Faz 4 ile birlikte gelir.
 
 ---
 
@@ -315,7 +339,15 @@ realestate/
 7. **Komutları test et:** `/today`, `/leads`, `/hot`, `/search Beşiktaş 2+1 kiralık`, `/listing REF`
 8. **Sabah brifingi:** sistem cron'una `* * * * * cd /path && php artisan schedule:run >> /dev/null 2>&1` eklendiğinden emin ol — 08:30'da brifing düşmeli
 
-### Sonra: Faz 3 (Sosyal Medya Motoru)
-- Fal.ai entegrasyonu, markalı kart üretici, içerik takvimi
-- Veya: kapsam dışı bug — `Modules\CRM\Events\Lead*` ve `Deal*` event stub'larını oluştur (broader CRM tarafı şu an `event(new LeadCreated())`'ta runtime hatası verebilir)
+### Faz 3 — kullanıcı tarafı kurulum
+
+1. **Fal.ai key (opsiyonel):** `.env`'e `FAL_API_KEY=...` (https://fal.ai/dashboard/keys). Yoksa kart üretici + ContentService çalışmaya devam eder, sadece foto iyileştirme butonları "Fal.ai yapılandırılmamış" döner.
+2. **Modelleri test et:** `/admin/social-media` → "İlandan Oluştur" → bir ilan seç, "Sosyal Kart Üret" sekmesinde şablonu/boyutu seç, "Kartı Üret"e bas → PNG döner, "Gönderi Olarak Kullan" ile yeni gönderiye aktarılır.
+3. **Takvim:** `/admin/social-media/calendar` — aylık görünüm, ileri/geri.
+
+### Sonra: Faz 4 (İletişim & Yaşam Döngüsü)
+- WhatsApp Business API, SMS provider (Netgsm), Twilio çağrı, e-posta IMAP/SMTP
+- Drip campaign engine (CopilotService::generateFollowUpPlan baz alınabilir)
+- Unified inbox (guzllik Sohbetler pattern'i)
+- Faz 3'ten devir: gerçek sosyal medya yayın API'leri (Meta Graph / X / LinkedIn) — unified inbox ile birlikte gelir mantıklı.
 

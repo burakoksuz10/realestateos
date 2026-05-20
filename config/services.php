@@ -41,4 +41,9 @@ return [
         'organization' => env('OPENAI_ORGANIZATION'),
     ],
 
+    'fal' => [
+        'api_key' => env('FAL_API_KEY'),
+        'base_url' => env('FAL_BASE_URL', 'https://fal.run'),
+    ],
+
 ];

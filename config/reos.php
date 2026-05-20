@@ -67,6 +67,20 @@ return [
             'auto_translate' => env('AI_AUTO_TRANSLATE', true),
             'supported_languages' => ['tr', 'en', 'ar', 'ru', 'de', 'fr'],
         ],
+
+        'image' => [
+            'enabled' => env('AI_IMAGE_ENABLED', true),
+            'provider' => env('AI_IMAGE_PROVIDER', 'fal'),
+            // Fal.ai model endpoints — değiştirilebilir
+            'models' => [
+                'sky_replacement' => env('FAL_MODEL_SKY', 'fal-ai/iclight-v2'),
+                'twilight' => env('FAL_MODEL_TWILIGHT', 'fal-ai/iclight-v2'),
+                'declutter' => env('FAL_MODEL_DECLUTTER', 'fal-ai/lama'),
+                'virtual_staging' => env('FAL_MODEL_STAGING', 'fal-ai/flux-pro/v1.1'),
+                'enhance' => env('FAL_MODEL_ENHANCE', 'fal-ai/clarity-upscaler'),
+            ],
+            'timeout' => env('FAL_TIMEOUT', 90),
+        ],
     ],
 
     /*

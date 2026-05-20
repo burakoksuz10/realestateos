@@ -12,11 +12,21 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Sosyal Medya</h1>
             <p class="text-gray-500 dark:text-dark-400 mt-1">Instagram ve Facebook gönderilerinizi planlayın ve yönetin</p>
         </div>
-        <div class="flex items-center gap-3">
-            <button @click="showPlanModal = true"
+        <div class="flex items-center gap-3 flex-wrap">
+            <a href="{{ route('admin.social-media.calendar') }}"
                 class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Takvim
+            </a>
+            <button @click="showPlanModal = true"
+                class="px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
                 AI İçerik Planı
+            </button>
+            <button @click="openListingStudio()"
+                class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2l2 3h6a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
+                İlandan Oluştur
             </button>
             <button @click="openCreateModal()"
                 class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white rounded-xl transition-colors flex items-center gap-2 text-sm">
@@ -199,6 +209,40 @@
                     <input type="url" x-model="form.media_url"
                         placeholder="https://..."
                         class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white placeholder-dark-500 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+
+                    <!-- Fal.ai görsel iyileştirme aksiyonları -->
+                    <div x-show="form.media_url" class="mt-3 p-3 bg-violet-50 dark:bg-violet-900/10 border border-violet-200 dark:border-violet-800/30 rounded-xl">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium text-violet-700 dark:text-violet-300">AI ile İyileştir (Fal.ai)</span>
+                            <span x-show="enhanceLoading" class="text-xs text-violet-500 flex items-center gap-1">
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                <span x-text="enhanceOp"></span>
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                            <button type="button" @click="enhanceImage('sky_replacement')" :disabled="enhanceLoading"
+                                class="px-2 py-1.5 bg-white dark:bg-dark-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs transition-colors disabled:opacity-50">
+                                Gökyüzü
+                            </button>
+                            <button type="button" @click="enhanceImage('twilight')" :disabled="enhanceLoading"
+                                class="px-2 py-1.5 bg-white dark:bg-dark-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs transition-colors disabled:opacity-50">
+                                Twilight
+                            </button>
+                            <button type="button" @click="enhanceImage('declutter')" :disabled="enhanceLoading"
+                                class="px-2 py-1.5 bg-white dark:bg-dark-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs transition-colors disabled:opacity-50">
+                                Temizle
+                            </button>
+                            <button type="button" @click="enhanceImage('virtual_staging')" :disabled="enhanceLoading"
+                                class="px-2 py-1.5 bg-white dark:bg-dark-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs transition-colors disabled:opacity-50">
+                                Staging
+                            </button>
+                            <button type="button" @click="enhanceImage('enhance')" :disabled="enhanceLoading"
+                                class="px-2 py-1.5 bg-white dark:bg-dark-800 hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs transition-colors disabled:opacity-50">
+                                Netleştir
+                            </button>
+                        </div>
+                        <p x-show="enhanceError" class="mt-2 text-xs text-red-500" x-text="enhanceError"></p>
+                    </div>
                 </div>
 
                 <!-- Status & Scheduled Date -->
@@ -228,6 +272,171 @@
                     <svg x-show="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     <span x-text="editingPost ? 'Güncelle' : 'Kaydet'"></span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listing Studio Modal — İlandan içerik + kart + hashtag tek yerden -->
+    <div x-show="showListingStudio" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/70" @click="showListingStudio = false"></div>
+        <div class="relative bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 dark:border-dark-700/50 flex items-center justify-between sticky top-0 bg-white dark:bg-dark-900 z-10">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">İlandan Sosyal İçerik</h2>
+                <button @click="showListingStudio = false" class="text-gray-500 dark:text-dark-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-5">
+                <!-- Listing seçici -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">İlan</label>
+                    <select x-model="studio.listingId" class="w-full px-4 py-2.5 bg-gray-100 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <option value="">— Seçin —</option>
+                        @foreach($listings as $l)
+                            <option value="{{ $l['id'] }}">{{ $l['label'] }} @if($l['location']) — {{ $l['location'] }}@endif</option>
+                        @endforeach
+                    </select>
+                    @if(count($listings) === 0)
+                        <p class="text-xs text-gray-500 mt-1">Listede ilan yok. Önce bir ilan ekleyin.</p>
+                    @endif
+                </div>
+
+                <!-- Aksiyon sekmeleri -->
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-dark-800 rounded-xl p-1">
+                    @foreach(['content' => 'İçerik', 'card' => 'Sosyal Kart', 'hashtag' => 'Hashtag'] as $tab => $tlabel)
+                        <button
+                            @click="studio.tab = '{{ $tab }}'"
+                            :class="studio.tab === '{{ $tab }}' ? 'bg-violet-600 text-white' : 'text-gray-500 dark:text-dark-400 hover:text-white'"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1">
+                            {{ $tlabel }}
+                        </button>
+                    @endforeach
+                </div>
+
+                <!-- İçerik tab -->
+                <div x-show="studio.tab === 'content'" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button @click="generateListingContent('social')" :disabled="studio.loading"
+                            class="px-4 py-2.5 bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 rounded-xl text-sm transition-colors disabled:opacity-50">
+                            Multi-platform Caption
+                        </button>
+                        <button @click="generateListingContent('reels')" :disabled="studio.loading"
+                            class="px-4 py-2.5 bg-pink-600/20 hover:bg-pink-600/30 text-pink-400 rounded-xl text-sm transition-colors disabled:opacity-50">
+                            Reels/TikTok Script
+                        </button>
+                    </div>
+
+                    <div x-show="studio.loading" class="py-6 text-center text-gray-500 dark:text-dark-400 text-sm">
+                        <svg class="w-6 h-6 animate-spin mx-auto mb-2 text-violet-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        AI içerik üretiyor...
+                    </div>
+
+                    <!-- Sonuç -->
+                    <template x-if="studio.contentResult && studio.contentKind === 'social'">
+                        <div class="space-y-3">
+                            <template x-for="(value, key) in studio.contentResult" :key="key">
+                                <div class="bg-gray-50 dark:bg-dark-800 rounded-xl p-3" x-show="value">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs uppercase tracking-wide font-semibold text-gray-500 dark:text-dark-400" x-text="contentLabel(key)"></span>
+                                        <button @click="useCaption(value); showListingStudio = false; openCreateModal()" class="text-xs px-2 py-1 bg-violet-600 hover:bg-violet-700 text-white rounded-md">Gönderiye Kullan</button>
+                                    </div>
+                                    <p class="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap" x-text="value"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template x-if="studio.contentResult && studio.contentKind === 'reels'">
+                        <div class="bg-gray-50 dark:bg-dark-800 rounded-xl p-3 space-y-2 text-sm">
+                            <div><strong>Hook:</strong> <span x-text="studio.contentResult.hook"></span></div>
+                            <div><strong>Voiceover:</strong> <span x-text="studio.contentResult.voiceover_script"></span></div>
+                            <div><strong>Müzik:</strong> <span x-text="studio.contentResult.music_suggestion"></span></div>
+                            <div><strong>CTA:</strong> <span x-text="studio.contentResult.cta"></span></div>
+                            <template x-if="studio.contentResult.scenes && studio.contentResult.scenes.length">
+                                <div>
+                                    <strong>Sahneler:</strong>
+                                    <ul class="list-disc list-inside text-xs mt-1">
+                                        <template x-for="(s, i) in studio.contentResult.scenes" :key="i">
+                                            <li x-text="typeof s === 'string' ? s : (s.description || JSON.stringify(s))"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div x-show="studio.error" class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm" x-text="studio.error"></div>
+                </div>
+
+                <!-- Card tab -->
+                <div x-show="studio.tab === 'card'" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Şablon</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            @foreach(['yeni_ilan' => 'Yeni İlan', 'satildi' => 'Satıldı', 'acik_ev' => 'Açık Ev', 'fiyat_indirimi' => 'Fiyat İndirimi'] as $tk => $tl)
+                                <button
+                                    @click="studio.cardTemplate = '{{ $tk }}'"
+                                    :class="studio.cardTemplate === '{{ $tk }}' ? 'border-violet-500 bg-violet-600/20 text-violet-400' : 'border-gray-200 dark:border-dark-700 text-gray-600 dark:text-dark-300'"
+                                    class="px-3 py-2 border rounded-xl text-sm transition-colors">
+                                    {{ $tl }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Boyut</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            @foreach(['square' => '1080×1080 (Post)', 'story' => '1080×1920 (Story)', 'landscape' => '1200×630 (FB/LI)'] as $sk => $sl)
+                                <button
+                                    @click="studio.cardSize = '{{ $sk }}'"
+                                    :class="studio.cardSize === '{{ $sk }}' ? 'border-violet-500 bg-violet-600/20 text-violet-400' : 'border-gray-200 dark:border-dark-700 text-gray-600 dark:text-dark-300'"
+                                    class="px-3 py-2 border rounded-xl text-xs transition-colors">
+                                    {{ $sl }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <button @click="generateCard()" :disabled="studio.loading || !studio.listingId"
+                        class="w-full px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm transition-colors disabled:opacity-50">
+                        <span x-show="!studio.loading">Kartı Üret</span>
+                        <span x-show="studio.loading">Üretiliyor...</span>
+                    </button>
+
+                    <template x-if="studio.cardResult">
+                        <div class="space-y-3">
+                            <img :src="studio.cardResult" class="w-full rounded-xl border border-gray-200 dark:border-dark-700" alt="Sosyal kart">
+                            <div class="flex gap-2">
+                                <a :href="studio.cardResult" target="_blank" download class="flex-1 px-4 py-2 bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-700 dark:text-white rounded-xl text-sm text-center">İndir</a>
+                                <button @click="useCardForPost()" class="flex-1 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm">Gönderi Olarak Kullan</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Hashtag tab -->
+                <div x-show="studio.tab === 'hashtag'" class="space-y-4">
+                    <button @click="generateHashtags()" :disabled="studio.loading"
+                        class="w-full px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm transition-colors disabled:opacity-50">
+                        <span x-show="!studio.loading">Hashtag Öner (20 adet)</span>
+                        <span x-show="studio.loading">Üretiliyor...</span>
+                    </button>
+
+                    <template x-if="studio.hashtags && studio.hashtags.length">
+                        <div class="space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="tag in studio.hashtags" :key="tag">
+                                    <span class="px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs rounded-md" x-text="tag"></span>
+                                </template>
+                            </div>
+                            <div class="flex gap-2">
+                                <button @click="copyHashtags()" class="flex-1 px-3 py-2 bg-gray-100 dark:bg-dark-700 text-gray-700 dark:text-white rounded-xl text-xs">Kopyala</button>
+                                <button @click="appendHashtagsToCaption()" class="flex-1 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs">Gönderi Caption'ına Ekle</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
@@ -298,6 +507,23 @@ function sosyalMedia() {
         planLoading: false,
         planResult: null,
         formError: null,
+        enhanceLoading: false,
+        enhanceOp: '',
+        enhanceError: null,
+        showListingStudio: false,
+        studio: {
+            listingId: '',
+            tab: 'content',
+            loading: false,
+            error: null,
+            contentResult: null,
+            contentKind: null,
+            cardTemplate: 'yeni_ilan',
+            cardSize: 'square',
+            cardResult: null,
+            hashtags: [],
+            pendingCaption: '',
+        },
         form: {
             platform: 'instagram',
             content_type: 'post',
@@ -448,6 +674,178 @@ function sosyalMedia() {
                 if (data.success) this.form.caption = data.caption;
             } finally {
                 this.aiCaptionLoading = false;
+            }
+        },
+
+        openListingStudio() {
+            this.studio.error = null;
+            this.studio.contentResult = null;
+            this.studio.cardResult = null;
+            this.studio.hashtags = [];
+            this.showListingStudio = true;
+        },
+
+        contentLabel(key) {
+            const map = {
+                instagram_caption: 'Instagram',
+                facebook_post: 'Facebook',
+                twitter_post: 'X (Twitter)',
+                linkedin_post: 'LinkedIn',
+                story_text: 'Story',
+            };
+            return map[key] || key;
+        },
+
+        useCaption(text) {
+            this.studio.pendingCaption = text;
+        },
+
+        async generateListingContent(kind) {
+            if (!this.studio.listingId) { this.studio.error = 'Önce ilan seçin.'; return; }
+            this.studio.loading = true;
+            this.studio.error = null;
+            this.studio.contentResult = null;
+            this.studio.contentKind = kind;
+            try {
+                const res = await fetch('/admin/social-media/ai/from-listing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ listing_id: this.studio.listingId, kind }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.studio.contentResult = data.data;
+                } else {
+                    this.studio.error = data.error || 'Üretim başarısız.';
+                }
+            } catch (e) {
+                this.studio.error = e.message;
+            } finally {
+                this.studio.loading = false;
+            }
+        },
+
+        async generateCard() {
+            if (!this.studio.listingId) { this.studio.error = 'Önce ilan seçin.'; return; }
+            this.studio.loading = true;
+            this.studio.error = null;
+            this.studio.cardResult = null;
+            try {
+                const res = await fetch('/admin/social-media/cards/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        listing_id: this.studio.listingId,
+                        template: this.studio.cardTemplate,
+                        size: this.studio.cardSize,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.studio.cardResult = data.image_url;
+                } else {
+                    this.studio.error = data.error || 'Kart üretimi başarısız.';
+                }
+            } catch (e) {
+                this.studio.error = e.message;
+            } finally {
+                this.studio.loading = false;
+            }
+        },
+
+        useCardForPost() {
+            if (!this.studio.cardResult) return;
+            this.showListingStudio = false;
+            this.openCreateModal();
+            this.form.media_url = this.studio.cardResult;
+            if (this.studio.pendingCaption) this.form.caption = this.studio.pendingCaption;
+        },
+
+        async generateHashtags() {
+            if (!this.studio.listingId) { this.studio.error = 'Önce ilan seçin.'; return; }
+            this.studio.loading = true;
+            this.studio.error = null;
+            this.studio.hashtags = [];
+            try {
+                const res = await fetch('/admin/social-media/ai/hashtags', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ listing_id: this.studio.listingId, count: 20 }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    this.studio.hashtags = data.hashtags || [];
+                } else {
+                    this.studio.error = data.error || 'Hashtag üretimi başarısız.';
+                }
+            } catch (e) {
+                this.studio.error = e.message;
+            } finally {
+                this.studio.loading = false;
+            }
+        },
+
+        copyHashtags() {
+            if (!this.studio.hashtags.length) return;
+            navigator.clipboard.writeText(this.studio.hashtags.join(' '));
+        },
+
+        appendHashtagsToCaption() {
+            if (!this.studio.hashtags.length) return;
+            const block = '\n\n' + this.studio.hashtags.join(' ');
+            this.showListingStudio = false;
+            this.openCreateModal();
+            this.form.caption = (this.form.caption || '') + block;
+        },
+
+        async enhanceImage(operation) {
+            if (!this.form.media_url) return;
+            const opLabels = {
+                sky_replacement: 'Gökyüzü değiştiriliyor...',
+                twilight: 'Twilight ışığı ekleniyor...',
+                declutter: 'Temizleniyor...',
+                virtual_staging: 'Sanal mobilya yerleştiriliyor...',
+                enhance: 'Netleştiriliyor...',
+            };
+            this.enhanceLoading = true;
+            this.enhanceOp = opLabels[operation] || 'İşleniyor...';
+            this.enhanceError = null;
+            try {
+                const res = await fetch('/admin/social-media/ai/enhance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image_url: this.form.media_url,
+                        operation,
+                    }),
+                });
+                const data = await res.json();
+                if (data.success && data.image_url) {
+                    this.form.media_url = data.image_url;
+                } else {
+                    this.enhanceError = data.error || 'İyileştirme başarısız oldu.';
+                }
+            } catch (e) {
+                this.enhanceError = 'Bağlantı hatası: ' + e.message;
+            } finally {
+                this.enhanceLoading = false;
+                this.enhanceOp = '';
             }
         },
 
