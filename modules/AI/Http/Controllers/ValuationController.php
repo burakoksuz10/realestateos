@@ -3,11 +3,20 @@
 namespace Modules\AI\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AI\ValuateListingJob;
 use Illuminate\Http\Request;
+use Modules\AI\Services\AIService;
+use Modules\AI\Services\ValuationService;
 use Modules\RealEstate\Models\Listing;
 
 class ValuationController extends Controller
 {
+    public function __construct(
+        protected ValuationService $valuation,
+        protected AIService $ai,
+    ) {
+    }
+
     public function index()
     {
         $listings = Listing::where('status', 'active')
@@ -24,24 +33,32 @@ class ValuationController extends Controller
 
     public function generate(Request $request, Listing $listing)
     {
-        // AI valuation placeholder
-        $valuation = [
-            'estimated_value' => $listing->price * 1.05,
-            'min_value' => $listing->price * 0.95,
-            'max_value' => $listing->price * 1.15,
-            'confidence' => 85,
-            'factors' => [
-                'location' => 'Konum değeri yüksek',
-                'size' => 'Ortalama metrekare fiyatı',
-                'condition' => 'İyi durumda',
-            ],
-        ];
+        $async = $request->boolean('async');
 
-        return response()->json($valuation);
+        if ($async) {
+            ValuateListingJob::dispatch($listing->id, auth()->id());
+            return response()->json([
+                'queued' => true,
+                'message' => 'Değerleme analizi kuyruğa alındı.',
+            ]);
+        }
+
+        $this->ai->withContext($listing->office_id, auth()->id(), 'listing.valuation');
+        $result = $this->valuation->valuate($listing);
+
+        $listing->ai_valuation = $result;
+        $listing->save();
+
+        return response()->json($result);
     }
 
     public function downloadReport(Listing $listing)
     {
-        return back()->with('info', 'Değerleme raporu özelliği yakında eklenecek.');
+        $valuation = $listing->ai_valuation;
+        if (!$valuation) {
+            return back()->with('warning', 'Önce bu ilan için AI değerleme oluşturun.');
+        }
+        // PDF report scaffold — Phase 6 will wire dompdf properly.
+        return response()->json($valuation)->header('Content-Disposition', 'inline; filename="valuation-' . $listing->reference_no . '.json"');
     }
 }

@@ -30,6 +30,7 @@ Route::post('leads/{lead}/move-stage', [LeadController::class, 'moveStage'])->na
 Route::post('leads/{lead}/mark-lost', [LeadController::class, 'markLost'])->name('leads.mark-lost');
 Route::post('leads/{lead}/qualify', [LeadController::class, 'qualify'])->name('leads.qualify');
 Route::get('leads/{lead}/suggestions', [LeadController::class, 'suggestions'])->name('leads.suggestions');
+Route::post('leads/{lead}/reanalyze', [LeadController::class, 'reanalyze'])->name('leads.reanalyze');
 
 // Deals
 Route::resource('deals', DealController::class);

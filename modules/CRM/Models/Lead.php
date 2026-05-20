@@ -137,11 +137,22 @@ class Lead extends Model
     }
 
     /**
-     * Get the listing
+     * Get the listing (legacy single FK)
      */
     public function listing()
     {
         return $this->belongsTo(\Modules\RealEstate\Models\Listing::class);
+    }
+
+    /**
+     * Listings this lead is interested in
+     */
+    public function interestedListings()
+    {
+        return $this->belongsToMany(
+            \Modules\RealEstate\Models\Listing::class,
+            'lead_listings'
+        );
     }
 
     /**
@@ -355,6 +366,15 @@ class Lead extends Model
 
         static::created(function ($lead) {
             event(new LeadCreated($lead));
+
+            // Fire AI analysis asynchronously when AI is enabled.
+            if (config('reos.ai.enabled', true) && config('reos.ai.copilot.lead_scoring', true)) {
+                try {
+                    \App\Jobs\AI\AnalyzeLeadJob::dispatch($lead->id, auth()->id());
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('AnalyzeLeadJob dispatch failed: ' . $e->getMessage());
+                }
+            }
         });
 
         static::updating(function ($lead) {

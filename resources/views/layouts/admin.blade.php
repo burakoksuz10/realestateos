@@ -205,6 +205,11 @@
         </div>
     </div>
 
+    {{-- Floating AI Copilot --}}
+    @auth
+        @include('components.ai-copilot-widget')
+    @endauth
+
     @stack('modals')
     @stack('scripts')
 

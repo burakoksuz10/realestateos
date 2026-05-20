@@ -155,6 +155,27 @@
             <span x-show="sidebarOpen" x-cloak class="ml-3">Emlak Haberleri</span>
         </a>
 
+        <!-- Telegram -->
+        <a href="{{ route('admin.telegram.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.telegram.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Telegram</span>
+        </a>
+
+        <!-- AI Settings -->
+        <a href="{{ route('admin.ai.settings.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.ai.settings.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">AI Ayarları</span>
+        </a>
+
         <!-- Divider -->
         <div class="pt-4 pb-2" x-show="sidebarOpen" x-cloak>
             <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Raporlar</p>

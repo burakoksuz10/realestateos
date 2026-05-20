@@ -6,6 +6,7 @@ use Modules\AI\Http\Controllers\ContentController;
 use Modules\AI\Http\Controllers\CopilotController;
 use Modules\AI\Http\Controllers\TranslationController;
 use Modules\AI\Http\Controllers\NewsController;
+use Modules\AI\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,15 @@ Route::get('copilot/lead/{lead}', [CopilotController::class, 'leadSuggestions'])
 Route::post('copilot/analyze-call', [CopilotController::class, 'analyzeCall'])->name('copilot.analyze-call');
 Route::get('copilot/appointments/{lead}', [CopilotController::class, 'suggestAppointments'])->name('copilot.appointments');
 Route::post('copilot/chat', [CopilotController::class, 'chat'])->name('copilot.chat');
+Route::post('copilot/search', [CopilotController::class, 'search'])->name('copilot.search');
+Route::get('copilot/suggestions', [CopilotController::class, 'suggestions'])->name('copilot.suggestions');
+
+// Settings
+Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+Route::post('settings/test', [SettingsController::class, 'testConnection'])->name('settings.test');
+Route::get('settings/clear-key', [SettingsController::class, 'clearKey'])->name('settings.clear-key');
+Route::post('settings/grant-bonus', [SettingsController::class, 'grantBonus'])->name('settings.grant-bonus');
 
 // Translation
 Route::post('translate', [TranslationController::class, 'translate'])->name('translate');

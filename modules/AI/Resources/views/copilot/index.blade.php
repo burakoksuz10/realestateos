@@ -132,43 +132,80 @@
 </div>
 
 <script>
-document.getElementById('chat-form').addEventListener('submit', function(e) {
+const copilotHistory = [];
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+function escapeHtml(str) { return (str || '').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function appendUser(div, m) {
+    div.insertAdjacentHTML('beforeend', `
+        <div class="flex items-start space-x-3 justify-end">
+            <div class="bg-primary-600 rounded-2xl rounded-tr-none p-4 max-w-[80%]">
+                <p class="text-white whitespace-pre-wrap">${escapeHtml(m)}</p>
+            </div>
+        </div>`);
+}
+
+function appendAssistant(div, m) {
+    div.insertAdjacentHTML('beforeend', `
+        <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <div class="bg-gray-100 dark:bg-dark-700 rounded-2xl rounded-tl-none p-4 max-w-[80%]">
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${escapeHtml(m)}</p>
+            </div>
+        </div>`);
+}
+
+function appendTyping(div) {
+    const id = 'typing-' + Date.now();
+    div.insertAdjacentHTML('beforeend', `
+        <div id="${id}" class="flex items-start space-x-3">
+            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center flex-shrink-0 animate-pulse">
+                <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3"/></svg>
+            </div>
+            <div class="bg-gray-100 dark:bg-dark-700 rounded-2xl rounded-tl-none p-4">
+                <p class="text-gray-500 dark:text-gray-400 text-sm italic">Düşünüyorum…</p>
+            </div>
+        </div>`);
+    return id;
+}
+
+document.getElementById('chat-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
     if (!message) return;
-    
-    const messagesDiv = document.getElementById('chat-messages');
-    
-    // Add user message
-    messagesDiv.innerHTML += `
-        <div class="flex items-start space-x-3 justify-end">
-            <div class="bg-primary-600 rounded-2xl rounded-tr-none p-4 max-w-[80%]">
-                <p class="text-white">${message}</p>
-            </div>
-        </div>
-    `;
-    
+
+    const div = document.getElementById('chat-messages');
+    appendUser(div, message);
     input.value = '';
-    
-    // Add AI response (placeholder)
-    setTimeout(() => {
-        messagesDiv.innerHTML += `
-            <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/20 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <div class="bg-gray-100 dark:bg-dark-700 rounded-2xl rounded-tl-none p-4 max-w-[80%]">
-                    <p class="text-gray-700 dark:text-gray-300">AI Copilot özelliği yakında aktif olacak. Şu anda geliştirme aşamasındadır.</p>
-                </div>
-            </div>
-        `;
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }, 500);
-    
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    div.scrollTop = div.scrollHeight;
+
+    const typingId = appendTyping(div);
+    div.scrollTop = div.scrollHeight;
+
+    try {
+        const res = await fetch('{{ route("admin.ai.copilot.chat") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+            body: JSON.stringify({ message, history: copilotHistory.slice(-10) }),
+        });
+        const data = await res.json();
+        document.getElementById(typingId)?.remove();
+        const reply = data.message || 'Şu an cevap üretemedim.';
+        appendAssistant(div, reply);
+        copilotHistory.push({ role: 'user', content: message });
+        copilotHistory.push({ role: 'assistant', content: reply });
+    } catch (err) {
+        document.getElementById(typingId)?.remove();
+        appendAssistant(div, 'Bağlantı hatası — tekrar deneyin.');
+        console.error(err);
+    }
+    div.scrollTop = div.scrollHeight;
 });
 </script>
 @endsection

@@ -13,7 +13,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind a configured OpenAI client as a singleton.
+        // Office-level overrides happen inside services (AIService) by re-resolving.
+        $this->app->singleton(\OpenAI\Client::class, function ($app) {
+            $apiKey = config('reos.ai.openai_key') ?: 'sk-placeholder-not-configured';
+            $org    = config('reos.ai.openai_organization') ?: null;
+
+            return \OpenAI::client($apiKey, $org);
+        });
     }
 
     /**

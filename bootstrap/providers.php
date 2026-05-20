@@ -16,4 +16,5 @@ return [
     Modules\BI\Providers\BIServiceProvider::class,
     Modules\SocialMedia\Providers\SocialMediaServiceProvider::class,
     Modules\Advertising\Providers\AdvertisingServiceProvider::class,
+    Modules\Telegram\Providers\TelegramServiceProvider::class,
 ];

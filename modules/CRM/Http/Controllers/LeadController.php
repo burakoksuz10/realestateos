@@ -74,6 +74,10 @@ class LeadController extends Controller
             $q->whereIn('name', ['agent', 'office-manager', 'admin']);
         })->get();
 
+        $listings = \Modules\RealEstate\Models\Listing::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'title', 'reference_no', 'type', 'price']);
+
         $sources = config('reos.leads.sources', [
             'website' => 'Website',
             'referral' => 'Referans',
@@ -84,7 +88,7 @@ class LeadController extends Controller
             'other' => 'Diğer',
         ]);
 
-        return view('crm::leads.create', compact('agents', 'sources'));
+        return view('crm::leads.create', compact('agents', 'sources', 'listings'));
     }
 
     /**
@@ -107,6 +111,8 @@ class LeadController extends Controller
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0',
             'preferred_locations' => 'nullable|string',
+            'interested_listings' => 'nullable|array',
+            'interested_listings.*' => 'exists:listings,id',
         ]);
 
         // Create or find contact
@@ -141,6 +147,8 @@ class LeadController extends Controller
             'preferred_locations' => $preferredLocations,
         ]);
 
+        $lead->interestedListings()->sync($request->input('interested_listings', []));
+
         return redirect()->route('admin.leads.show', $lead)
             ->with('success', 'Potansiyel müşteri başarıyla oluşturuldu.');
     }
@@ -153,6 +161,7 @@ class LeadController extends Controller
         $lead->load([
             'contact',
             'assignedTo',
+            'interestedListings',
             'activities' => fn($q) => $q->latest()->take(10),
             'tasks' => fn($q) => $q->where('status', '!=', 'completed')->orderBy('due_date'),
             'deals',
@@ -180,7 +189,13 @@ class LeadController extends Controller
             'other' => 'Diğer',
         ]);
 
-        return view('crm::leads.edit', compact('lead', 'agents', 'sources'));
+        $listings = \Modules\RealEstate\Models\Listing::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'title', 'reference_no', 'type', 'price']);
+
+        $lead->load('interestedListings');
+
+        return view('crm::leads.edit', compact('lead', 'agents', 'sources', 'listings'));
     }
 
     /**
@@ -200,6 +215,8 @@ class LeadController extends Controller
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0',
             'preferred_locations' => 'nullable|string',
+            'interested_listings' => 'nullable|array',
+            'interested_listings.*' => 'exists:listings,id',
         ]);
 
         // Parse preferred locations from comma-separated text
@@ -221,6 +238,8 @@ class LeadController extends Controller
             'budget_max' => $validated['budget_max'] ?? null,
             'preferred_locations' => $preferredLocations,
         ]);
+
+        $lead->interestedListings()->sync($request->input('interested_listings', []));
 
         return redirect()->route('admin.leads.show', $lead)
             ->with('success', 'Potansiyel müşteri başarıyla güncellendi.');
@@ -344,5 +363,22 @@ class LeadController extends Controller
         ];
 
         return response()->json(['success' => true, 'suggestions' => $suggestions]);
+    }
+
+    public function reanalyze(Lead $lead)
+    {
+        if (!config('reos.ai.enabled', true)) {
+            return response()->json([
+                'queued' => false,
+                'message' => 'AI özellikleri devre dışı. Ayarlar > AI üzerinden açın.',
+            ], 422);
+        }
+
+        \App\Jobs\AI\AnalyzeLeadJob::dispatch($lead->id, auth()->id());
+
+        return response()->json([
+            'queued' => true,
+            'message' => 'AI analizi başlatıldı. Birkaç saniye içinde sayfa yenilendiğinde görünecek.',
+        ]);
     }
 }

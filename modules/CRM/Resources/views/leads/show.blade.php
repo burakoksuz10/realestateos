@@ -31,7 +31,12 @@
     <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
         <div class="flex items-center justify-between mb-3">
             <span class="text-gray-500 dark:text-dark-400 text-sm">Müşteri Skoru</span>
-            <span class="text-white font-bold text-lg">{{ $lead->score ?? 0 }}/100</span>
+            <div class="flex items-center gap-3">
+                @if($lead->ai_score)
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">AI: {{ $lead->ai_score }}</span>
+                @endif
+                <span class="text-gray-900 dark:text-white font-bold text-lg">{{ $lead->score ?? 0 }}/100</span>
+            </div>
         </div>
         <div class="w-full bg-gray-200 dark:bg-dark-700 rounded-full h-2.5">
             <div class="h-2.5 rounded-full {{ $lead->score >= 70 ? 'bg-green-500' : ($lead->score >= 40 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $lead->score ?? 0 }}%"></div>
@@ -55,6 +60,8 @@
         </div>
     </div>
 
+    @include('crm::leads.partials.ai-analysis-card', ['lead' => $lead])
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             <!-- Activities -->
@@ -74,6 +81,31 @@
                 <p class="text-gray-500 dark:text-dark-400 text-sm">Henüz aktivite yok.</p>
                 @endforelse
             </div>
+
+            <!-- Interested Listings -->
+            @if($lead->interestedListings->count() > 0)
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">İlgilendiği İlanlar</h2>
+                <div class="space-y-3">
+                    @foreach($lead->interestedListings as $listing)
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-800 rounded-xl">
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ route('admin.listings.show', $listing) }}" class="text-primary-400 hover:text-primary-300 text-sm font-medium truncate block">
+                                {{ $listing->reference_no ? '#' . $listing->reference_no . ' · ' : '' }}{{ $listing->title }}
+                            </a>
+                            <p class="text-gray-500 dark:text-dark-400 text-xs mt-0.5">
+                                {{ ucfirst($listing->type ?? '') }}
+                                @if($listing->price)· ₺{{ number_format($listing->price, 0, ',', '.') }}@endif
+                            </p>
+                        </div>
+                        <a href="{{ route('admin.listings.show', $listing) }}" class="ml-3 flex-shrink-0 text-gray-400 hover:text-primary-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             <!-- Tasks -->
             @if($lead->tasks->count() > 0)

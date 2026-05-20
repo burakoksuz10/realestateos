@@ -23,10 +23,30 @@ return [
     'ai' => [
         'enabled' => env('AI_ENABLED', true),
         'provider' => env('AI_PROVIDER', 'openai'),
-        'model' => env('AI_MODEL', 'gpt-4-turbo-preview'),
-        'max_tokens' => env('AI_MAX_TOKENS', 4096),
+        'model' => env('AI_MODEL', 'gpt-4o'),
+        'mini_model' => env('AI_MINI_MODEL', 'gpt-4o-mini'),
+        'embedding_model' => env('AI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+        'max_tokens' => env('AI_MAX_TOKENS', 2048),
         'temperature' => env('AI_TEMPERATURE', 0.7),
-        
+        'timeout' => env('AI_TIMEOUT', 60),
+        'cache_ttl' => env('AI_CACHE_TTL', 3600),
+        'openai_key' => env('OPENAI_API_KEY'),
+        'openai_organization' => env('OPENAI_ORGANIZATION'),
+
+        // Pricing per 1K tokens (USD, used for cost estimation)
+        'pricing' => [
+            'gpt-4o' => ['input' => 0.0025, 'output' => 0.01],
+            'gpt-4o-mini' => ['input' => 0.00015, 'output' => 0.0006],
+            'gpt-4-turbo' => ['input' => 0.01, 'output' => 0.03],
+            'gpt-4-turbo-preview' => ['input' => 0.01, 'output' => 0.03],
+        ],
+
+        // Monthly credit defaults per office (1 credit = 1 AI call)
+        'credits' => [
+            'default_monthly_quota' => env('AI_DEFAULT_MONTHLY_QUOTA', 500),
+            'enforce' => env('AI_ENFORCE_CREDITS', true),
+        ],
+
         'copilot' => [
             'enabled' => env('AI_COPILOT_ENABLED', true),
             'auto_suggest' => env('AI_COPILOT_AUTO_SUGGEST', true),

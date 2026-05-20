@@ -110,6 +110,47 @@
                                 placeholder="Atakum, İlkadım, Canik">
                         </div>
 
+                        <!-- İlgilenilen İlanlar -->
+                        <div x-data="listingPicker({{ $listings->toJson() }}, {{ json_encode(old('interested_listings', [])) }})">
+                            <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">İlgilendiği İlanlar</label>
+                            <div class="relative">
+                                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input type="text" x-model="search" @focus="open=true" @click.outside="open=false"
+                                    placeholder="İlan ara (başlık veya ref. no)..."
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                <div x-show="open && filtered.length" x-cloak
+                                    class="absolute z-20 w-full mt-1 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+                                    <template x-for="l in filtered" :key="l.id">
+                                        <button type="button" @click="toggle(l)"
+                                            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors text-left">
+                                            <div :class="selected.includes(l.id) ? 'bg-primary-600 border-primary-600' : 'border-gray-300 dark:border-dark-600'"
+                                                class="w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors">
+                                                <svg x-show="selected.includes(l.id)" class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </div>
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="l.title"></p>
+                                                <p class="text-xs text-gray-400" x-text="'#' + l.reference_no + (l.price ? ' · ₺' + Number(l.price).toLocaleString('tr') : '')"></p>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- Selected chips -->
+                            <div class="flex flex-wrap gap-2 mt-2" x-show="selected.length">
+                                <template x-for="id in selected" :key="id">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400 text-xs rounded-lg border border-primary-200 dark:border-primary-500/30">
+                                        <span x-text="labelOf(id)"></span>
+                                        <button type="button" @click="toggle(byId(id))" class="hover:text-red-500 transition-colors">×</button>
+                                        <input type="hidden" name="interested_listings[]" :value="id">
+                                    </span>
+                                </template>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-600 dark:text-dark-300 mb-2">Notlar</label>
                             <textarea name="notes" rows="4"
@@ -196,4 +237,36 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+function listingPicker(listings, initial) {
+    return {
+        listings,
+        selected: initial.map(Number),
+        search: '',
+        open: false,
+        get filtered() {
+            if (!this.search) return this.listings.slice(0, 20);
+            const q = this.search.toLowerCase();
+            return this.listings.filter(l =>
+                l.title.toLowerCase().includes(q) ||
+                (l.reference_no && l.reference_no.toLowerCase().includes(q))
+            ).slice(0, 20);
+        },
+        toggle(l) {
+            const idx = this.selected.indexOf(l.id);
+            if (idx === -1) this.selected.push(l.id);
+            else this.selected.splice(idx, 1);
+            this.search = '';
+        },
+        byId(id) { return this.listings.find(l => l.id === id); },
+        labelOf(id) {
+            const l = this.byId(id);
+            return l ? (l.reference_no ? '#' + l.reference_no + ' ' : '') + l.title : id;
+        },
+    }
+}
+</script>
+@endpush
 @endsection
