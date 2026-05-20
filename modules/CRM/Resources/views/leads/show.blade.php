@@ -64,6 +64,8 @@
 
     @include('crm::leads.partials.call-transcribe-card', ['lead' => $lead])
 
+    @include('crm::partials.documents-card', ['documentableType' => 'lead', 'documentableId' => $lead->id])
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             <!-- Activities -->

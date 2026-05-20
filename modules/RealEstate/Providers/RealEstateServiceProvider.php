@@ -13,6 +13,14 @@ class RealEstateServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->register(EventServiceProvider::class);
+
+        $this->app->singleton(\Modules\RealEstate\Services\Portals\PortalManager::class, function ($app) {
+            $manager = new \Modules\RealEstate\Services\Portals\PortalManager($app);
+            $manager->register('sahibinden', \Modules\RealEstate\Services\Portals\SahibindenConnector::class);
+            $manager->register('hepsiemlak', \Modules\RealEstate\Services\Portals\HepsiemlakConnector::class);
+            $manager->register('emlakjet',   \Modules\RealEstate\Services\Portals\EmlakJetConnector::class);
+            return $manager;
+        });
     }
 
     /**

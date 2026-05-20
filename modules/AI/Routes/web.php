@@ -36,6 +36,8 @@ Route::get('copilot/appointments/{lead}', [CopilotController::class, 'suggestApp
 Route::post('copilot/chat', [CopilotController::class, 'chat'])->name('copilot.chat');
 Route::post('copilot/search', [CopilotController::class, 'search'])->name('copilot.search');
 Route::get('copilot/suggestions', [CopilotController::class, 'suggestions'])->name('copilot.suggestions');
+Route::get('copilot/daily-plan', [CopilotController::class, 'dailyPlan'])->name('copilot.daily-plan');
+Route::get('copilot/expert', [CopilotController::class, 'expert'])->name('copilot.expert');
 
 // Settings
 Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

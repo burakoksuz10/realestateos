@@ -21,6 +21,10 @@ Route::post('listings/{listing}/duplicate', [ListingController::class, 'duplicat
 Route::get('listings/{listing}/brochure', [ListingController::class, 'generateBrochure'])->name('listings.brochure');
 Route::post('listings/{listing}/restore-version/{version}', [ListingController::class, 'restoreVersion'])->name('listings.restore-version');
 
+// Portal URL'sinden ilan içe aktarma (AI parse)
+Route::post('listings-import/preview', [ListingController::class, 'importPreview'])->name('listings.import.preview');
+Route::post('listings-import', [ListingController::class, 'importStore'])->name('listings.import.store');
+
 // Projects
 Route::resource('projects', ProjectController::class);
 Route::post('projects/{project}/toggle-featured', [ProjectController::class, 'toggleFeatured'])->name('projects.toggle-featured');
@@ -34,4 +38,5 @@ Route::post('listings/{listing}/media/reorder', [MediaController::class, 'reorde
 Route::get('portal-sync', [PortalSyncController::class, 'index'])->name('portal-sync.index');
 Route::post('portal-sync/{listing}/sync', [PortalSyncController::class, 'sync'])->name('portal-sync.sync');
 Route::post('portal-sync/{listing}/sync-all', [PortalSyncController::class, 'syncAll'])->name('portal-sync.sync-all');
+Route::post('portal-sync/{listing}/remove', [PortalSyncController::class, 'remove'])->name('portal-sync.remove');
 Route::get('portal-sync/logs', [PortalSyncController::class, 'logs'])->name('portal-sync.logs');

@@ -140,5 +140,7 @@
             </div>
         </div>
     </div>
+
+    @include('crm::partials.documents-card', ['documentableType' => 'contact', 'documentableId' => $contact->id])
 </div>
 @endsection

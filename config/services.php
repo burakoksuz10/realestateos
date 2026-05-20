@@ -69,4 +69,22 @@ return [
         'webhook_url'   => env('VOICE_AGENT_WEBHOOK_URL'),
     ],
 
+    'sahibinden' => [
+        'api_key'    => env('SAHIBINDEN_API_KEY'),
+        'account_id' => env('SAHIBINDEN_ACCOUNT_ID'),
+        'base_url'   => env('SAHIBINDEN_BASE_URL', 'https://api.sahibinden.com/v1'),
+    ],
+
+    'hepsiemlak' => [
+        'api_key'    => env('HEPSIEMLAK_API_KEY'),
+        'partner_id' => env('HEPSIEMLAK_PARTNER_ID'),
+        'base_url'   => env('HEPSIEMLAK_BASE_URL', 'https://api.hepsiemlak.com/v2'),
+    ],
+
+    'emlakjet' => [
+        'api_key'    => env('EMLAKJET_API_KEY'),
+        'account_id' => env('EMLAKJET_ACCOUNT_ID'),
+        'base_url'   => env('EMLAKJET_BASE_URL', 'https://api.emlakjet.com/v1'),
+    ],
+
 ];

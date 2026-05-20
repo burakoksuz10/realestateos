@@ -35,6 +35,7 @@ class CRMServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Modules\CRM\Console\Commands\TickCampaignsCommand::class,
+                \Modules\CRM\Console\Commands\AlertStalledDealsCommand::class,
             ]);
         }
     }
@@ -45,12 +46,18 @@ class CRMServiceProvider extends ServiceProvider
             $schedule->command('campaigns:tick')
                 ->everyFiveMinutes()
                 ->withoutOverlapping();
+
+            $schedule->command('deals:stalled --days=14')
+                ->dailyAt('09:00')
+                ->timezone(config('app.timezone', 'Europe/Istanbul'))
+                ->withoutOverlapping();
         });
     }
 
     protected function registerListeners(): void
     {
         \Modules\CRM\Models\Lead::observe(\Modules\CRM\Observers\LeadCampaignObserver::class);
+        \Modules\CRM\Models\Deal::observe(\Modules\CRM\Observers\DealStageObserver::class);
     }
 
     /**

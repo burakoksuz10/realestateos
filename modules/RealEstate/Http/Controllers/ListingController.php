@@ -335,13 +335,20 @@ class ListingController extends Controller
     }
 
     /**
-     * Generate brochure
+     * Generate AI-powered brochure PDF.
      */
-    public function generateBrochure(Listing $listing)
+    public function generateBrochure(Listing $listing, \Illuminate\Http\Request $request, \Modules\RealEstate\Services\BrochureService $brochures)
     {
-        $pdf = \PDF::loadView('realestate::listings.brochure', compact('listing'));
-        
-        return $pdf->download("ilan-{$listing->reference_no}.pdf");
+        $regenerate = $request->boolean('regenerate');
+        $mode = $request->input('mode', 'download'); // download | preview
+
+        $pdf = $brochures->generate($listing, $regenerate);
+
+        $filename = "ilan-{$listing->reference_no}-" . now()->format('Ymd-Hi') . ".pdf";
+
+        return $mode === 'preview'
+            ? $pdf->stream($filename)
+            : $pdf->download($filename);
     }
 
     /**
@@ -352,5 +359,45 @@ class ListingController extends Controller
         $version->restore();
 
         return back()->with('success', "Versiyon {$version->version_number} geri yüklendi.");
+    }
+
+    /**
+     * Portal URL'sinden önizleme — AI parse, kaydetmeden döndürür.
+     */
+    public function importPreview(Request $request, \Modules\RealEstate\Services\ListingImportService $importer)
+    {
+        $validated = $request->validate([
+            'url' => 'required|url|max:512',
+        ]);
+
+        $result = $importer->preview($validated['url']);
+        return response()->json($result);
+    }
+
+    /**
+     * Önizleme verisini ilan olarak kaydet.
+     */
+    public function importStore(Request $request, \Modules\RealEstate\Services\ListingImportService $importer)
+    {
+        $validated = $request->validate([
+            'data'    => 'required|array',
+            'data.title' => 'required|string|max:255',
+        ]);
+
+        $listing = $importer->import(
+            $validated['data'],
+            auth()->user()?->office_id,
+            auth()->id(),
+        );
+
+        return response()->json([
+            'success'  => true,
+            'message'  => "İlan oluşturuldu (#{$listing->reference_no}). Fotoğraflar arka planda iniyor.",
+            'listing'  => [
+                'id'           => $listing->id,
+                'reference_no' => $listing->reference_no,
+                'url'          => route('admin.listings.edit', $listing),
+            ],
+        ]);
     }
 }

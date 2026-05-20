@@ -10,6 +10,7 @@ use Modules\CRM\Http\Controllers\ActivityController;
 use Modules\CRM\Http\Controllers\InboxController;
 use Modules\CRM\Http\Controllers\CampaignController;
 use Modules\CRM\Http\Controllers\CallController;
+use Modules\CRM\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,8 @@ Route::get('deals/{deal}/commission', [DealController::class, 'commission'])->na
 // Pipelines
 Route::resource('pipelines', PipelineController::class);
 Route::post('pipelines/{pipeline}/stages/reorder', [PipelineController::class, 'reorderStages'])->name('pipelines.stages.reorder');
+Route::get('pipelines/{pipeline}/stages/{stage}/auto-actions', [PipelineController::class, 'editStageAutoActions'])->name('pipelines.stages.auto-actions.edit');
+Route::put('pipelines/{pipeline}/stages/{stage}/auto-actions', [PipelineController::class, 'updateStageAutoActions'])->name('pipelines.stages.auto-actions.update');
 Route::resource('pipelines.stages', PipelineController::class)->shallow();
 
 // Tasks
@@ -68,6 +71,12 @@ Route::post('inbox/{conversation}/status', [InboxController::class, 'updateStatu
 // Calls — AI transcription
 Route::post('calls/transcribe', [CallController::class, 'transcribe'])->name('calls.transcribe');
 Route::post('calls/activities/{activity}/transcribe', [CallController::class, 'transcribeActivity'])->name('calls.activity.transcribe');
+
+// Documents (KVKK uyumlu)
+Route::get('documents/{type}/{id}', [DocumentController::class, 'index'])->name('documents.index');
+Route::post('documents/{type}/{id}', [DocumentController::class, 'store'])->name('documents.store');
+Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+Route::delete('documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 
 // Drip Campaigns
 Route::get('campaigns', [CampaignController::class, 'index'])->name('campaigns.index');

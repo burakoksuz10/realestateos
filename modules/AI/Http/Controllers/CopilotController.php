@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\AI\Services\AIService;
 use Modules\AI\Services\CopilotService;
+use Modules\AI\Services\DailyPlannerService;
 use Modules\AI\Services\MatchingService;
+use Modules\AI\Services\RealEstateExpertService;
 use Modules\CRM\Models\Lead;
 
 class CopilotController extends Controller
@@ -112,6 +114,39 @@ class CopilotController extends Controller
         $this->ai->withContext($lead->office_id, $user->id, 'copilot.appointments');
         $suggestions = $this->copilot->suggestAppointments($lead, $user);
         return response()->json($suggestions);
+    }
+
+    /**
+     * Bugün için AI tarafından öncelik sıralı yapılacaklar listesi.
+     */
+    public function dailyPlan(Request $request, DailyPlannerService $planner)
+    {
+        $user = Auth::user();
+        $force = (bool) $request->boolean('force');
+
+        if ($request->wantsJson()) {
+            $plan = $planner->generateForAgent($user, $force);
+            return response()->json($plan);
+        }
+
+        $plan = $planner->generateForAgent($user, $force);
+        return view('ai::copilot.daily', compact('plan'));
+    }
+
+    /**
+     * AI Emlak Uzmanı — prensip tabanlı ofis analizi.
+     */
+    public function expert(Request $request, RealEstateExpertService $expert)
+    {
+        $force = (bool) $request->boolean('force');
+        $officeId = auth()->user()?->office_id;
+
+        if ($request->wantsJson()) {
+            return response()->json($expert->analyze($officeId, $force));
+        }
+
+        $analysis = $expert->analyze($officeId, $force);
+        return view('ai::copilot.expert', compact('analysis'));
     }
 
     /**

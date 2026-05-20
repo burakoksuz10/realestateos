@@ -59,13 +59,23 @@
         </a>
 
         <!-- Projects -->
-        <a href="{{ route('admin.projects.index') }}" 
+        <a href="{{ route('admin.projects.index') }}"
            class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
                   {{ request()->routeIs('admin.projects.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <span x-show="sidebarOpen" x-cloak class="ml-3">Projeler</span>
+        </a>
+
+        <!-- Portal Sync -->
+        <a href="{{ route('admin.portal-sync.index') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.portal-sync.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Portal Senkron</span>
         </a>
 
         <!-- Divider -->
@@ -153,9 +163,9 @@
         </div>
 
         <!-- AI Copilot -->
-        <a href="{{ route('admin.ai.copilot.index') }}" 
+        <a href="{{ route('admin.ai.copilot.index') }}"
            class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
-                  {{ request()->routeIs('admin.ai.*') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+                  {{ request()->routeIs('admin.ai.copilot.index') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
@@ -166,6 +176,26 @@
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                 </span>
             </span>
+        </a>
+
+        <!-- Daily AI Plan -->
+        <a href="{{ route('admin.ai.copilot.daily-plan') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.ai.copilot.daily-plan') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">Bugünkü Plan</span>
+        </a>
+
+        <!-- AI Emlak Uzmanı -->
+        <a href="{{ route('admin.ai.copilot.expert') }}"
+           class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  {{ request()->routeIs('admin.ai.copilot.expert') ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-700' }}">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span x-show="sidebarOpen" x-cloak class="ml-3">AI Emlak Uzmanı</span>
         </a>
 
         <!-- Valuation -->

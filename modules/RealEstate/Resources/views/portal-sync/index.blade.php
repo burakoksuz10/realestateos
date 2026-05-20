@@ -7,12 +7,8 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Portal Senkronizasyonu</h1>
-            <p class="text-gray-500 dark:text-dark-400 mt-1">İlanlarınızı emlak portallarına senkronize edin</p>
+            <p class="text-gray-500 dark:text-dark-400 mt-1">İlanlarınızı Türkiye'nin emlak portallarına otomatik yayınlayın</p>
         </div>
-        <button @click="syncAll()" :disabled="syncing" class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-500 hover:to-blue-700 disabled:opacity-50 text-white rounded-xl transition-colors flex items-center">
-            <svg class="w-4 h-4 mr-2" :class="syncing ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            Tümünü Senkronize Et
-        </button>
     </div>
 
     <!-- Status Message -->
@@ -21,76 +17,96 @@
         <span x-text="statusMsg"></span>
     </div>
 
-    <!-- Portal Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        @foreach($portals as $key => $portal)
-        <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-white font-semibold text-sm">{{ $portal['name'] }}</span>
-                <span class="w-2.5 h-2.5 rounded-full bg-{{ $portal['color'] }}-400"></span>
+    <!-- Portal Status Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @foreach ($portalInfo as $key => $portal)
+            <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-white font-semibold">{{ $portal['name'] }}</span>
+                    @if ($portal['configured'])
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-300">Aktif</span>
+                    @else
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-300">Kurulum gerek</span>
+                    @endif
+                </div>
+                @if ($portal['configured'])
+                    <p class="text-gray-500 dark:text-dark-400 text-xs">
+                        Son senkron: {{ $portal['last_sync'] ? $portal['last_sync']->diffForHumans() : 'henüz yok' }}
+                    </p>
+                @else
+                    <p class="text-gray-500 dark:text-dark-400 text-xs">.env'e API anahtarı eklenmemiş.</p>
+                    <code class="text-xs text-gray-400">{{ strtoupper($key) }}_API_KEY=...</code>
+                @endif
             </div>
-            <p class="text-gray-500 dark:text-dark-400 text-xs mb-3">API entegrasyonu yapılandırılmamış</p>
-            <span class="px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-dark-700 text-gray-500 dark:text-dark-400">Demo Mod</span>
-        </div>
         @endforeach
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Listings Table -->
+        <!-- Listings -->
         <div class="lg:col-span-2 bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl overflow-hidden">
             <div class="p-5 border-b border-gray-200 dark:border-dark-700/50">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Aktif İlanlar</h2>
             </div>
-            <div class="divide-y divide-dark-700/50">
-                @forelse($listings as $listing)
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex-1 min-w-0">
-                        <a href="{{ route('admin.listings.show', $listing) }}" class="text-white text-sm font-medium hover:text-primary-400 truncate block">{{ $listing->title }}</a>
-                        <p class="text-gray-500 dark:text-dark-400 text-xs mt-0.5">{{ $listing->city }}{{ $listing->district ? ', ' . $listing->district : '' }} · ₺{{ number_format($listing->price ?? 0, 0, ',', '.') }}</p>
+            <div class="divide-y divide-gray-100 dark:divide-dark-700/50">
+                @forelse ($listings as $listing)
+                    <div class="flex items-center justify-between p-4">
+                        <div class="flex-1 min-w-0">
+                            <a href="{{ route('admin.listings.show', $listing) }}" class="text-white text-sm font-medium hover:text-primary-400 truncate block">{{ $listing->title }}</a>
+                            <p class="text-gray-500 dark:text-dark-400 text-xs mt-0.5">
+                                {{ $listing->city }}{{ $listing->district ? ', ' . $listing->district : '' }} ·
+                                ₺{{ number_format($listing->price ?? 0, 0, ',', '.') }} · {{ $listing->reference_no }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 ml-4">
+                            @foreach ($portalInfo as $key => $portal)
+                                <button @click="syncListing({{ $listing->id }}, '{{ $key }}')"
+                                        :disabled="busy[`{{ $listing->id }}-{{ $key }}`]"
+                                        class="px-2 py-1 text-xs rounded-lg transition-colors disabled:opacity-50
+                                               {{ $portal['configured'] ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300' : 'bg-gray-100 dark:bg-dark-700 text-gray-500 dark:text-dark-400' }}"
+                                        title="{{ $portal['name'] }}{{ $portal['configured'] ? '' : ' (yapılandırılmamış)' }}">
+                                    {{ strtoupper(substr($key, 0, 3)) }}
+                                </button>
+                            @endforeach
+                            <button @click="syncAll({{ $listing->id }})" :disabled="busy[`{{ $listing->id }}-all`]"
+                                    class="px-3 py-1 text-xs bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 rounded-lg transition-colors disabled:opacity-50">
+                                Tümü
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2 ml-4">
-                        @foreach($portals as $key => $portal)
-                        <button @click="syncListing({{ $listing->id }}, '{{ $key }}')"
-                                :disabled="syncingId === {{ $listing->id }}"
-                                class="px-2 py-1 text-xs bg-gray-100 dark:bg-dark-700 hover:bg-gray-200 dark:hover:bg-dark-600 text-gray-600 dark:text-dark-300 hover:text-white rounded-lg transition-colors disabled:opacity-50">
-                            {{ strtoupper(substr($key, 0, 3)) }}
-                        </button>
-                        @endforeach
-                    </div>
-                </div>
                 @empty
-                <div class="p-8 text-center">
-                    <p class="text-gray-500 dark:text-dark-400 text-sm">Aktif ilan bulunamadı.</p>
-                </div>
+                    <div class="p-8 text-center">
+                        <p class="text-gray-500 dark:text-dark-400 text-sm">Aktif ilan bulunamadı.</p>
+                    </div>
                 @endforelse
             </div>
-            @if($listings->hasPages())
-            <div class="p-4 border-t border-gray-200 dark:border-dark-700/50">
-                {{ $listings->links() }}
-            </div>
+            @if ($listings->hasPages())
+                <div class="p-4 border-t border-gray-200 dark:border-dark-700/50">
+                    {{ $listings->links() }}
+                </div>
             @endif
         </div>
 
-        <!-- Recent Logs -->
+        <!-- Logs -->
         <div class="bg-white dark:bg-dark-900 border border-gray-200 dark:border-dark-700/50 rounded-2xl p-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Son İşlemler</h2>
-            <div class="space-y-3">
-                @foreach($logs as $log)
-                <div class="flex items-start gap-3">
-                    <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {{ $log['status'] === 'success' ? 'bg-green-400' : 'bg-red-400' }}"></span>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-white text-xs font-medium">{{ $log['portal'] }}</p>
-                        <p class="text-gray-500 dark:text-dark-400 text-xs truncate">{{ $log['listing'] }}</p>
-                        <p class="text-dark-500 text-xs">{{ $log['message'] }}</p>
-                        <p class="text-dark-600 text-xs mt-0.5">{{ $log['time'] }}</p>
+            <div class="space-y-3 max-h-[600px] overflow-y-auto">
+                @forelse ($logs as $log)
+                    <div class="flex items-start gap-3 pb-3 border-b border-gray-100 dark:border-dark-800/50 last:border-0">
+                        <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {{ $log->status === 'success' ? 'bg-emerald-400' : 'bg-rose-400' }}"></span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white text-xs font-medium">{{ $log->portal_label }}</p>
+                            <p class="text-gray-500 dark:text-dark-400 text-xs truncate">
+                                {{ $log->listing?->title ?? "İlan #{$log->listing_id}" }}
+                            </p>
+                            <p class="text-gray-400 dark:text-dark-500 text-xs">
+                                {{ ucfirst($log->action) }} · {{ $log->error_message ? mb_strimwidth($log->error_message, 0, 60, '…') : 'OK' }}
+                            </p>
+                            <p class="text-gray-500 dark:text-dark-500 text-xs mt-0.5">{{ optional($log->synced_at)->diffForHumans() }}</p>
+                        </div>
                     </div>
-                </div>
-                @endforeach
-            </div>
-
-            <div class="mt-6 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-                <p class="text-yellow-400 text-xs font-medium mb-1">Demo Mod</p>
-                <p class="text-gray-500 dark:text-dark-400 text-xs">Gerçek portal entegrasyonu için ayarlar sayfasından API anahtarlarını ekleyin.</p>
+                @empty
+                    <p class="text-gray-500 dark:text-dark-400 text-sm text-center py-4">Henüz işlem yok.</p>
+                @endforelse
             </div>
         </div>
     </div>
@@ -99,48 +115,51 @@
 <script>
 function portalSync() {
     return {
-        syncing: false,
-        syncingId: null,
+        busy: {},
         statusMsg: '',
         statusType: 'success',
 
-        async syncAll() {
-            this.syncing = true;
+        async syncAll(listingId) {
+            const key = `${listingId}-all`;
+            this.busy[key] = true;
             try {
-                const res = await fetch('{{ route('admin.portal-sync.sync-all') }}', {
+                const res = await fetch(`/admin/portal-sync/${listingId}/sync-all`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
                 });
                 const data = await res.json();
                 this.showStatus(data.message, data.success ? 'success' : 'error');
+                if (data.success) setTimeout(() => window.location.reload(), 1500);
             } catch (e) {
-                this.showStatus('İşlem sırasında bir hata oluştu.', 'error');
+                this.showStatus('İşlem sırasında hata oluştu.', 'error');
             } finally {
-                this.syncing = false;
+                this.busy[key] = false;
             }
         },
 
-        async syncListing(id, portal) {
-            this.syncingId = id;
+        async syncListing(listingId, portal) {
+            const key = `${listingId}-${portal}`;
+            this.busy[key] = true;
             try {
-                const res = await fetch(`/admin/portal-sync/${id}/sync`, {
+                const res = await fetch(`/admin/portal-sync/${listingId}/sync`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ portal })
                 });
                 const data = await res.json();
                 this.showStatus(data.message, data.success ? 'success' : 'error');
+                if (data.success) setTimeout(() => window.location.reload(), 1500);
             } catch (e) {
                 this.showStatus('Senkronizasyon başarısız.', 'error');
             } finally {
-                this.syncingId = null;
+                this.busy[key] = false;
             }
         },
 
         showStatus(msg, type) {
             this.statusMsg = msg;
             this.statusType = type;
-            setTimeout(() => { this.statusMsg = ''; }, 4000);
+            setTimeout(() => { this.statusMsg = ''; }, 5000);
         }
     }
 }

@@ -24,6 +24,12 @@
             <a href="{{ route('admin.listings.index') }}" class="px-4 py-2 bg-gray-200 dark:bg-dark-700 text-gray-600 dark:text-dark-300 rounded-lg hover:bg-dark-600 transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>Geri
             </a>
+            <a href="{{ route('admin.listings.brochure', $listing) }}" target="_blank" class="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors">
+                <i class="fas fa-file-pdf mr-2"></i>Broşür İndir
+            </a>
+            <a href="{{ route('admin.listings.brochure', ['listing' => $listing, 'mode' => 'preview']) }}" target="_blank" class="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors" title="AI ile yeniden üret">
+                <i class="fas fa-eye mr-2"></i>Önizle
+            </a>
             <a href="{{ route('admin.listings.edit', $listing) }}" class="px-4 py-2 bg-gradient-to-r from-sky-400 to-blue-600 text-white rounded-lg hover:from-sky-500 hover:to-blue-700 transition-colors">
                 <i class="fas fa-edit mr-2"></i>Düzenle
             </a>

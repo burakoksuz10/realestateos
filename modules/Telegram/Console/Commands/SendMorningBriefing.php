@@ -3,6 +3,7 @@
 namespace Modules\Telegram\Console\Commands;
 
 use Illuminate\Console\Command;
+use Modules\AI\Services\DailyPlannerService;
 use Modules\CRM\Models\Lead;
 use Modules\CRM\Models\Task;
 use Modules\Telegram\Models\TelegramUser;
@@ -13,7 +14,7 @@ class SendMorningBriefing extends Command
     protected $signature   = 'telegram:morning-briefing {--user=}';
     protected $description = 'Send each linked agent a personalised 08:30 daily briefing on Telegram.';
 
-    public function handle(TelegramService $telegram): int
+    public function handle(TelegramService $telegram, DailyPlannerService $planner): int
     {
         $query = TelegramUser::with('user')
             ->where('is_active', true)
@@ -25,7 +26,7 @@ class SendMorningBriefing extends Command
         }
 
         $sent = 0;
-        $query->each(function (TelegramUser $tu) use ($telegram, &$sent) {
+        $query->each(function (TelegramUser $tu) use ($telegram, $planner, &$sent) {
             $userId = $tu->user_id;
 
             $todayTasks = Task::where('assigned_to', $userId)
@@ -93,6 +94,25 @@ class SendMorningBriefing extends Command
                     $body .= "• #{$lead->id} " . e($lead->title ?: 'Lead') . " — {$last}\n";
                 }
                 $body .= "\n";
+            }
+
+            // AI günlük plan — en yüksek değerli 3 aksiyon
+            try {
+                $plan = $planner->generateForAgent($tu->user, force: false);
+                $priorities = array_slice($plan['priorities'] ?? [], 0, 3);
+                if (!empty($priorities)) {
+                    $body .= "⚡ <b>AI önerileri</b>\n";
+                    foreach ($priorities as $i => $p) {
+                        $action = e($p['action'] ?? '');
+                        $impact = e($p['impact'] ?? '');
+                        $body .= ($i + 1) . ". {$action}";
+                        if ($impact) $body .= " <i>({$impact})</i>";
+                        $body .= "\n";
+                    }
+                    $body .= "\n";
+                }
+            } catch (\Throwable $e) {
+                // AI yoksa veya patladıysa sessizce geç
             }
 
             $body .= "Komutlar: /today /leads /hot";

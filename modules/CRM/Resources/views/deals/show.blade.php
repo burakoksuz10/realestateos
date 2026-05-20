@@ -180,5 +180,7 @@
             </div>
         </form>
     </div>
+
+    @include('crm::partials.documents-card', ['documentableType' => 'deal', 'documentableId' => $deal->id])
 </div>
 @endsection

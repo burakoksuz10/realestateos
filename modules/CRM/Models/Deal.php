@@ -20,7 +20,8 @@ class Deal extends Model
         'listing_id',
         'pipeline_id',
         'stage_id',
-        
+        'stage_entered_at',
+
         // Deal Info
         'title',
         'status', // open, won, lost
@@ -81,6 +82,7 @@ class Deal extends Model
             'contract_signed_at' => 'datetime',
             'deposit_received_at' => 'datetime',
             'closed_at' => 'datetime',
+            'stage_entered_at' => 'datetime',
         ];
     }
 
@@ -291,6 +293,15 @@ class Deal extends Model
             }
             if (!$deal->probability) {
                 $deal->probability = 50;
+            }
+            if (!$deal->stage_entered_at) {
+                $deal->stage_entered_at = now();
+            }
+        });
+
+        static::updating(function ($deal) {
+            if ($deal->isDirty('stage_id')) {
+                $deal->stage_entered_at = now();
             }
         });
 

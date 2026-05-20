@@ -18,11 +18,11 @@
 | 2 | Telegram Operasyon Merkezi | ✅ Kod tamam | Komutlar/bildirimler/brifing/foto-ses/butonlar canlı — sadece bot token + webhook URL bekliyor |
 | 3 | Sosyal Medya Motoru | ✅ Çekirdek tamam | Fal.ai (sky/twilight/declutter/staging/enhance), markalı kart üretici (4 şablon × 3 boyut), ilandan içerik akışı, takvim, hashtag intelligence |
 | 4 | İletişim & Yaşam Döngüsü | ✅ Tamam | Unified Inbox + Drip Campaign engine + **Sesli AI Sekreter** (ElevenLabs Agents + Netgsm — bayi paketinin amiral özelliği). Drip cold-lead reactivation + görsel step builder Faz 5'e devir. |
-| 5 | Süreç Otomasyon | ⏳ Bekliyor | Workflow builder, takılan deal uyarıları |
-| 6 | İleri Özellikler | ⏳ Bekliyor | Portal sync, brochure, e-imza, TKGM, alıcı/satıcı portal |
+| 5 | Süreç Otomasyon | ✅ Tamam | Pipeline auto-actions executor (6 tip) + stage UI builder, takılan deal uyarıları (`deals:stalled` günlük 09:00), AI Günlük Plan (Copilot daily), Performans dashboard (BI), AI Emlak Uzmanı (prensip tabanlı) |
+| 6 | İleri Özellikler | ✅ Çekirdek tamam | AI Broşür PDF + Portal Sync (Sahibinden/Hepsiemlak/EmlakJet, per-office credentials altyapısı) + KVKK Doküman Yönetimi + **AI ile URL'den ilan içe aktarma** (yıldız özellik). E-imza/TKGM/müşteri portalı bilinçli olarak atlandı. |
 | 7 | Cila & Üretim | ⏳ Bekliyor | PWA, performans, test, güvenlik, çoklu dil |
 
-**İlerleme:** 4/8 faz (Faz 0+1+2+3+4 kod tam — Faz 2/4.3 sadece ENV key'leri bekliyor; Faz 5 (süreç otomasyon) sıradaki).
+**İlerleme:** 6/8 faz (Faz 0+1+2+3+4+5+6 kod tam — Faz 2/4.3/6 sadece ENV key'leri bekliyor; Faz 7 (cila & üretim) sıradaki).
 
 ---
 
@@ -290,41 +290,78 @@ Test akışı:
 
 ---
 
-## ⏳ FAZ 5 — Süreç Otomasyon (BEKLEYEN)
+## ✅ FAZ 5 — Süreç Otomasyon (TAMAM)
 
 Amaç: Operasyonel mükemmellik — manuel takip minimuma insin.
 
-### Planlanan işler
+### Tamamlanan işler
 
-- [ ] **Pipeline auto-actions** — stage değişince fire job (mevcut `auto_actions` JSON kolonu var)
-- [ ] **No-code workflow builder UI** — "Eğer X olursa Y yap"
-- [ ] **Takılan deal uyarıları** — 14 gündür stage'i değişmemiş deal'lar için bildirim
-- [ ] **Smart task suggestions** — AI günlük "şunu yap" listesi
-- [ ] **Performans dashboard** — agent leaderboard, lead source ROI, time-to-close, conversion funnel
-- [ ] **AI Emlak Uzmanı** — guzllik'in `ai-reklam-uzmani.md` pattern'i, prensip tabanlı karar destek
-  - "Bu portfoyde 5 ilan 60+ gündür satılmıyor, fiyat indirimi öner"
-  - "Bu agent yanıt süresi yavaşladı"
-  - "Şu kaynak ROI olarak zayıf"
+- [x] **`stage_entered_at` kolonu** — `deals` tablosuna eklendi (migration + backfill), Deal model'de `creating`/`updating` boot hook ile otomatik damgalama. Takılan deal tespiti için temel.
+- [x] **`PipelineAutoActionExecutor`** — `PipelineStage::auto_actions` JSON'unu okuyup deal o stage'e girdiğinde çalıştırır. 6 aksiyon tipi: `create_task`, `notify_agent`, `notify_office`, `set_field` (whitelist'li kolonlar), `enroll_campaign` (slug ile), `update_probability`. Template render `{{contact.first_name}}`, `{{deal.title}}` vb.
+- [x] **`DealStageObserver`** (CRM tarafı, Telegram observer'dan ayrı) — `created` ve `updated` (stage_id değiştiyse) eventinde executor'ı tetikler. CRMServiceProvider'da bind.
+- [x] **`deals:stalled` console command** — `--days=14 --limit=200 --dry` opsiyonları, won/lost stage'leri hariç, agent başına liste + ofis özeti Telegram'a düşer. Günlük 09:00 schedule.
+- [x] **Auto-actions builder UI** — `/admin/pipelines/{p}/stages/{s}/auto-actions` Alpine.js editör: 6 aksiyon tipi için tipo-spesifik formlar, yukarı/aşağı sıralama, sil. Show sayfasında her stage'in yanında "⚡ Aksiyonlar" butonu + aksiyon sayısı badge'i.
+- [x] **PipelineController stage save bug fix** — form `stages[*]` array gönderiyordu ama hiç process edilmiyordu, controller update'i baştan yazıldı (kept_ids ile mevcut update, yeni eklenenleri create, çıkanları sadece deal'sızsa sil).
+- [x] **`DailyPlannerService`** — kullanıcının açık iş yükünü (bugünkü görevler, hot leads, follow-up leads, açık deals) toplar, GPT'ye JSON mode'da öncelikli 5 aksiyon yazdırır. 1 saatlik cache. AI fallback olduğunda kural tabanlı sıralama. `/admin/ai/copilot/daily-plan` sayfası + sidebar "Bugünkü Plan" linki.
+- [x] **Sabah brifingine AI önerileri** — `SendMorningBriefing` artık `DailyPlannerService::generateForAgent` çağırıp top-3 aksiyonu Telegram brifingine ekliyor. AI patlasa sessizce geçer.
+- [x] **Performans dashboard (BI modül revize)** — `AnalyticsService` zaten implemented'dı ama controller/view boştu; tüm view'ler yazıldı: `dashboard` (KPI + revenue trend chart + funnel + top agents + lead sources), `agent-performance` (tarih filtreli leaderboard tablosu), `conversion-funnel` (huni + step rates), `lead-sources`, `portal-performance`, `listing-performance`, `revenue` (Chart.js bar + tablo). Route'lar düzeltildi (önceki `admin/reports/reports/...` double-nested junk temizlendi). BI provider `Resources` → `resources` case fix.
+- [x] **`RealEstateExpertService`** — guzllik ai-reklam-uzmani pattern: 7 yönetimsel prensip listesi (60+ gün satılmayan ilan, 30+ gün stuck deal, %5 altı conv. rate kaynak, 60dk+ yanıt süresi, skor 80+ ama 7+ gün hareketsiz lead, kalite skoru 40 altı ilan, agent yanıt süresi 2x ortalama). `buildSnapshot` veriyi toplar (Listing + Lead + Deal + AnalyticsService), GPT'ye JSON modunda { insights[], summary } yazdırır. 2 saatlik cache. AI fallback'te kural tabanlı insight üretir. `/admin/ai/copilot/expert` sayfası — kategori ikonları, severity renkleri, prensip listesi accordion.
+
+### Notlar
+
+- **Kaynak ROI** maliyet datası yok (ad spend portal'larından çekilmiyor) — `getPortalPerformance` `cost_per_lead` ve `roi`'yi 0 dönüyor. Faz 6'da Meta Ads / Google Ads connector bağlanınca gerçek ROI hesaplanabilir.
+- **Stage saving düzeltmesi** PipelineController::update'te yapıldı — eski form-only davranış silinerek yeni mantık eklendi. Mevcut deal'ı olan stage'ler silinmiyor.
+- **Schedule list** Telegram (08:30 brifing, /5dk task reminders) + CRM (`campaigns:tick` /5dk, `deals:stalled` günlük 09:00). Cron tek satır: `* * * * * php artisan schedule:run`.
 
 ---
 
-## ⏳ FAZ 6 — İleri Özellikler (BEKLEYEN)
+## ✅ FAZ 6 — İleri Özellikler (ÇEKİRDEK TAMAM)
 
 Amaç: Türkiye pazarına özel rekabet üstünlüğü.
 
-### Planlanan işler
+### Tamamlanan işler
 
-- [ ] **Portal sync** — Sahibinden, Hepsiemlak, Emlakjet
-  - Gerçek API entegrasyonu (mevcut routes var, içleri boş)
-  - Otomatik yayınla / güncelle / kaldır
-  - Stat çekme (görüntülenme, favori)
-- [ ] **Brochure PDF generator** — AI açıklama + foto + harita + agent kartı
-- [ ] **Doküman yönetimi** — KVKK uyumlu, soft delete, audit trail
-- [ ] **E-imza entegrasyonu** — onaylarim / DocuSign
-- [ ] **TKGM Tapu API** — tapu doğrulama, kadastro bilgi
-- [ ] **Alıcı/Satıcı portal** — ayrı frontend, müşteri kendi yolculuğunu görsün
+- [x] **AI Broşür PDF üretici** — `BrochureService` + 2 sayfalı şık template:
+  - Kapak (ofis logosu/markası + ilan başlığı + fiyat + ana foto)
+  - Detay (temel bilgiler, AI iyileştirilmiş açıklama)
+  - Galeri (5 ek foto), özellikler, harita (Google Static veya OpenStreetMap fallback), danışman kartı
+  - Endpoint: `/admin/listings/{id}/brochure` (?mode=preview ile tarayıcıda açılır, default indirir)
+  - Listing show'a "Broşür İndir" + "Önizle" butonları
+- [x] **Portal Sync altyapısı** — Sahibinden + Hepsiemlak + EmlakJet:
+  - `PortalConnectorInterface` + `AbstractPortalConnector` + 3 concrete connector
+  - `PortalManager` singleton — registry pattern
+  - `portal_sync_logs` tablosu, her sync (başarı/başarısızlık) kayıt altında
+  - `/admin/portal-sync` sayfası: 3 portal durumu, ilan başına tek tek/"Tümü" butonu, son işlem paneli
+  - `.env`'de credential yoksa "Kurulum gerek" rozeti + gerçek HTTP çağrısı atılmaz
+  - Sidebar "Portal Senkron" linki eklendi
+  - Sahibinden için kurumsal API başvuru gerekiyor — kullanıcı yetkisini alınca aktif (per-office credential ile de büyütülebilir altyapı hazır)
+- [x] **KVKK uyumlu Doküman Yönetimi**:
+  - Polimorfik `documents` tablosu (Lead/Deal/Contact/Listing'e bağlanır)
+  - `Document` model — LogsActivity + SoftDelete + is_confidential default true
+  - `DocumentController` — index/store/download/destroy, office isolation
+  - Reusable `documents-card.blade.php` partial — Lead/Deal/Contact show'lara include
+  - Alpine.js drag-drop yok, ama upload + kategori seçimi (sözleşme/kimlik/tapu/ekspertiz/foto/diğer) + gizli işareti
+  - Her indirme `activity_log`'a "downloaded" event'i (kim, hangi IP'den) — KVKK audit
+  - Dosyalar `local` (private) disk'te, sadece auth route üzerinden indirilir
+- [x] **AI ile URL'den İlan İçe Aktarma** ⭐ (yıldız özellik):
+  - `ListingImportService` — Sahibinden/Hepsiemlak/EmlakJet host detection + HTML scrape + AI JSON parse
+  - HTML temizleme (script/style/svg at), 30K char limit, GPT JSON mode
+  - Foto URL'leri AI'dan + meta tag/img src fallback
+  - `DownloadListingPhotosJob` — async foto indirme, MediaLibrary'ye photos collection'ına yazar
+  - Listings index'te "AI ile İçe Aktar" yeşil buton + Alpine.js 3-step modal (URL → önizleme → kaydet)
+  - Onboarding sürtünmesini büyük ölçüde kaldırıyor — danışman Sahibinden ilanını tek linkle bizim CRM'e taşıyor
+
+### Bilinçli olarak atlanan (Burak'la birlikte karar verildi 2026-05-20)
+
+- [ ] ~~E-imza entegrasyonu~~ — Türkiye'de gayrimenkul satışı için tapuda noter şartı var, e-imza yerine geçmiyor. Kullanım talebi yok.
+- [ ] ~~TKGM Tapu API~~ — Web Tapu emlakçı portalı sadece web arayüzü, REST/SOAP API yok. TAKPAS sadece avukatlar + resmi kurumlar için. SaaS olarak otomatik sorgu mümkün değil.
+- [ ] ~~Alıcı/Satıcı portal~~ — Türkiye emlak pazarında müşteri portal'a alışkın değil, WhatsApp tercih ediyor. Sahibinden zaten ilan görüntüleme arayüzünü sağlıyor. Tuzak olarak değerlendirilip atlandı.
+
+### Gelecekte yapılabilecekler (Faz 6 dışı)
+
 - [ ] **Property tour scheduling** — Google/Outlook calendar sync
 - [ ] **Satış sonrası** — bakım talepleri, yıldönümü takipleri, referans isteği
+- [ ] **Per-office portal credentials** — Sahibinden gibi resmi portallarda her ofisin kendi API anahtarı (UI + encrypted storage)
 
 ---
 
@@ -420,6 +457,7 @@ realestate/
 - **2026-05-20**: **Sesli AI Sekreter** canlı — Faz 4.3 başlangıçta "çağrı özetleme" idi, Burak'ın iş vizyonu (Netgsm bayisi → paket satış) ile **gerçek zamanlı AI sekreter**'e büyütüldü. Tasarım kararları: (1) **Yeni modül `modules/VoiceAgent/`** — CRM altında değil, ayrı bir bounded context (çünkü tool API + webhook + agent config + admin UI hepsi bir araya gelir, RealEstate ve Telegram modüllerinin servislerini consume ediyor). (2) **ElevenLabs Conversational AI Agents** (sadece STT değil) — bizim Laravel sadece tool API + webhook yazıyor, agent'in beyin/ses/SIP tarafı ElevenLabs dashboard'da yapılandırılıyor. Bizim kod ElevenLabs spesifikasyonuna bağımlı değil — webhook payload normalize ediliyor. (3) **4-modlu routing** ofis bazlı seçilebilir — `TransferRouter` mode + mesai saati + lead/listing context'i ile karar verir. `callback_only` modu özellikle bayi paketinin **düşük tier** seçeneği (ofis hiç telefon açmıyor). (4) **`pre_call_brief` ayrı tool** — agent transfer'den ÖNCE çağırmalı: danışmana "X arıyor, Y ilanı, Z bütçe, 5sn'de bağlanıyor" Telegram'dan düşer. Bu fark yaratıyor — danışman ne konuşacağını bilerek açar. (5) **`VerifyAgentToken` middleware** shared secret + `hash_equals` (timing-safe) — `.env`'de boşsa dev mode (auth off). (6) **Eski `CallTranscriptionService` korundu** — paralel akış, geçmiş ses dosyası yüklemeleri için hâlâ değerli. (7) **`docs/voice-agent-setup.md`** — 6 adımlı operatör kurulum rehberi, dashboard adımları, 5 tool JSON spec, Netgsm SIP notları, test akışı, maliyet özeti. Buradaki en kritik nokta: Netgsm SIP → ElevenLabs SIP eşleşmesi olgun değil, Twilio middleware veya outbound callback alternatifi gerekebilir — bunu kullanıcı kendi telekom kurulumunda halledecek.
 - **2026-05-20**: Faz 4.3 AI çağrı özetleme **canlı** — ElevenLabs (STT/TTS) + Netgsm (voice) entegrasyonu. Tasarım kararları: (1) **Provider switch katmanı** — `CallTranscriptionService::transcribe()` `reos.ai.transcription_provider` config'ine bakarak ElevenLabs'a gidiyor, başarısız olursa Whisper fallback. Aynı switch `MediaIngestService::transcribeVoice`'da da var (Telegram sesli notlar için). Whisper hiç kaldırılmadı — fallback olarak duruyor. (2) **`CallTranscriptionService` üst seviyede tek pipeline** — STT + GPT analiz + Activity yazımı tek class'ta. `CallConnector::transcribe()` ona delege ediyor (eski Whisper kodu kaldırıldı). (3) **Netgsm voice basit ilk versiyon** — pre-recorded `audio_url` ile dial, gerçek IVR (TTS-driven, interactive call) sonraki dilim. `callViaNetgsm()` Netgsm SMS connector pattern'ini takip ediyor (response code 00/01/02 başarı, format `00 jobid`). (4) **GPT analiz JSON-mode** — system prompt strict JSON istiyor (`summary`, `sentiment`, `intent`, `next_actions[]`, `buying_signals[]`), `AIService::chatJson` ile parse. (5) **Activity'ye yazma** mevcut `call_transcript`, `ai_summary`, `ai_sentiment`, `ai_intent`, `ai_next_actions`, `call_sentiment` alanlarını dolduruyor — şema değişikliği yok, mevcut Activity model'i yeterince zengin. (6) **Lead show'da yeni partial** — `call-transcribe-card`, ai-analysis-card'ın altına include edildi. STT provider rozeti gösteriyor (kullanıcı hangi sağlayıcının aktif olduğunu görsün).
 - **2026-05-20**: Faz 4.2 Drip Campaign engine **canlı**. Tasarım kararları: (1) **Tablo prefix `drip_`** — Advertising modülünde zaten bir `campaigns` tablosu var (ad campaigns — `hedef`, `durum`, `budget`, `health_score`), collision'ı `drip_campaigns`/`drip_steps`/`drip_enrollments` ile çözdük. Model namespace farklı (`Modules\CRM\Models\Campaign` vs `Modules\Advertising\Models\Campaign`) ama tablo adları collide. Model'lere `protected $table = 'drip_*'` eklendi. (2) **Executor processing loop** — bir tick'te bir enrollment'ı `wait` step'ine ya da tamamlanmaya kadar zincirleme step çalıştırır (`maxStepsPerTick=10` safety cap). Böylece `send_message → create_task → wait` üçlüsü tek tick'te ilk iki step'i koşar, wait'e kadar gelir. (3) **Conversation auto-resolve** — `send_message` step'i Conversation'ı firstOrCreate ediyor (phone/email'den). Telegram için bu mümkün değil (chat_id pairing gerekir) — sadece mevcut conversation aranır. (4) **Template render** basit regex `{{path.to.value}}` ile nested context (`contact`, `lead`, `agent`, `office`). (5) **Observer pattern** kullanıldı (yine event yerine) — `LeadCampaignObserver` direkt `Lead::observe()` ile bind edildi (mevcut `Telegram\LeadObserver` ile aynı pattern). (6) **OnboardingCampaign seeder** idempotent — `firstOrCreate` ile slug bazlı, step'ler her seed'de yeniden kuruluyor (silinip yazılıyor) çünkü step config'i kod tarafında evolve edebilir.
+- **2026-05-20**: **Faz 5 Süreç Otomasyon tamam** — 7 görev, hepsi canlı. Tasarım kararları: (1) **`stage_entered_at`** yeni kolon, Deal boot hook'larında `creating`/`updating` ile damgalanıyor. `updated_at` kullanmadık çünkü o her field edit'inde değişir (yanlış stalled tespiti olur). (2) **`PipelineAutoActionExecutor` ayrı servis** + **`DealStageObserver`** (CRM tarafı) Telegram'ın `DealObserver`'ından ayrı tutuldu — sorumluluk ayrımı, sıra önemli değil. (3) **6 aksiyon tipi**: create_task, notify_agent, notify_office, set_field (whitelist'li kolonlar — güvenlik), enroll_campaign (slug ile — campaign_id değişebilir), update_probability. (4) **Stage save bug fix** — PipelineController::update() form `stages[]` array'i gönderirken hiç process etmiyordu (pre-existing bug). Auto-actions feature'ı çalışsın diye minimal düzeltildi: keep_ids ile mevcut update, yeni eklenen create, çıkanlar sadece deal'sızsa sil. (5) **`deals:stalled` günlük 09:00** — won/lost stage'leri hariç tutuyor (`is_won_stage`/`is_lost_stage` flag'leri). Idempotent değil — her gün hatırlatma; çok rahatsız olursa eşik yükseltilir. (6) **`DailyPlannerService` + sabah brifing entegrasyonu** — kullanıcının açık iş yükünü AI'ya yazıp top-5 aksiyon istiyor. JSON mode. 1 saat cache. AI patlarsa kural tabanlı fallback. Brifinge ekstra section eklendi ama try/catch ile — AI yoksa sessizce geçer (brifing kırılmasın). (7) **BI dashboard revize** — AnalyticsService zaten implemented'dı ama controller/view'ler boştu. Tüm view'ler yazıldı. Önceki double-nested route'lar (`admin/reports/reports/...`) tek seviyeye düşürüldü. BI provider'da `Resources` → `resources` case fix (Linux production için). (8) **`RealEstateExpertService`** — guzllik ai-reklam-uzmani pattern uygulandı: PRENSİPLER sabit listesi GPT system prompt'una konuldu, snapshot ayrı toplandı, AI prensiplere göre veriyi yorumlasın istendi. 2 saat cache. Kategori ikonları + severity renkleri ile insight kartları. Prensip listesi accordion'da gizli (kullanıcı isterse görür).
 - **2026-05-20**: Faz 4.1 Unified Inbox **finalize edildi** — UI + Telegram ingest + sidebar bağlandı. Tasarım kararları: (1) **`ConversationIngestService`** ayrı bir servis olarak yazıldı — hem WebhookController hem MediaIngestService bunu çağırıyor, böylece text/media ingest tek noktada (DRY). Resolve mantığı: `Conversation::firstOrCreate(['channel'=>'telegram','channel_thread_id'=>$chatId])`, office/lead/contact TelegramUser'ın user_id'sinin son aktif lead'inden çıkarılır. (2) **Activity + Conversation paralel** — MediaIngest hem `Activity::create` hem `recordIncomingMedia` çağırır, biri patlasa diğeri geçer (try/catch). Geriye uyumlu — eski activity timeline ekranı bozulmaz. (3) **Inbox layout 2-kolonlu sayfalar** olarak yazıldı, SPA değil — show.blade.php ayrı route'ta, sol panel yine görünür. Bunu seçtim çünkü mevcut admin layout (sidebar + content area) zaten "ayrı sayfa" pattern'iyle uyumlu, Alpine.js/Livewire reactivity eklemeden çalışıyor. SPA hisse uzun versiyonu Livewire ile ileride kolayca eklenebilir. (4) **Attachment data shape**: `[{type:'photo'|'voice'|'audio'|'video'|'document', path:..., url:..., duration?}]`. URL sadece `storage/app/public/` altındaki path'lerden türetiliyor; `telegram-ingest/` özel klasörü public değil, sadece path tutuluyor (gelecekte signed URL ekleyebiliriz). (5) Sidebar unread badge `Schema::hasTable('conversations')` guard'lı çünkü ilk migrate çalıştırılmadan sidebar render edilirse hata vermesin.
 
 ---
@@ -446,23 +484,27 @@ realestate/
 2. **Modelleri test et:** `/admin/social-media` → "İlandan Oluştur" → bir ilan seç, "Sosyal Kart Üret" sekmesinde şablonu/boyutu seç, "Kartı Üret"e bas → PNG döner, "Gönderi Olarak Kullan" ile yeni gönderiye aktarılır.
 3. **Takvim:** `/admin/social-media/calendar` — aylık görünüm, ileri/geri.
 
-### Sonraki oturum başlangıcı — Faz 5 (Süreç Otomasyon)
+### Sonraki oturum başlangıcı — Faz 7 (Cila & Üretim)
 
-**Faz 4 tamam ✅** — Inbox + Drip + AI çağrı özetleme canlı.
+**Faz 6 tamam ✅** — Broşür + Portal Sync + Doküman + AI URL İçe Aktarma canlı.
 
-**Hemen denemek için (kullanıcı tarafı):**
-1. `.env`'e `ELEVENLABS_API_KEY=...` + `NETGSM_USERCODE/PASSWORD/SENDER_ID=...` ekle
-2. `php artisan config:clear`
-3. `/admin/leads/{id}` aç → "Çağrı Özetleme (AI)" kartı → mp3/wav yükle → özet düşer
-4. `/admin/campaigns` → onboarding kampanyasını aktifleştir, yeni lead oluştur → enrollment otomatik
+**Faz 6 hemen denemek için:**
+1. `php artisan migrate` (yeni `portal_sync_logs` ve `documents` tabloları)
+2. `php artisan queue:work --timeout=300` (foto indirme job'u için)
+3. `/admin/listings` → "AI ile İçe Aktar" yeşil butonu → bir Sahibinden ilan linki yapıştır → AI parse → kaydet
+4. Listing show → "Broşür İndir" → 2 sayfalı PDF
+5. Lead/Deal/Contact show'da "Dokümanlar" kartı → dosya yükle
+6. `/admin/portal-sync` → portal durumlarını gör (.env'e API key girince aktif olur)
 
-**Sonra (Faz 5 — Süreç Otomasyon):**
-- Pipeline auto-actions — `auto_actions` JSON kolonu var, stage değişince trigger
-- No-code workflow builder UI — Drip step builder + pipeline action builder ortak görsel editör
-- Takılan deal uyarıları — 14 gündür stage değişmemiş deal → Telegram bildirimi
-- Smart task suggestions — günlük "şunu yap" listesi (CopilotService)
-- Performans dashboard — agent leaderboard, lead source ROI, time-to-close
-- AI Emlak Uzmanı — prensip tabanlı karar destek (guzllik pattern)
+**Sonra (Faz 7 — Cila & Üretim):**
+- Mobile PWA optimizasyonu — install prompt, offline support
+- Performans audit — N+1 query temizliği, eager loading, cache stratejisi, DB index'leri
+- Pest test suite — feature + unit testler
+- Security review — XSS, SQLi, CSRF, IDOR taraması
+- Production deployment — env config rehberi, queue worker (supervisor), cache warmup, monitoring (Sentry?)
+- Yeni ofis için onboarding wizard (5 adımlı kurulum)
+- Çoklu dil UI — TR/EN
+- Backup & disaster recovery
 
 **Faz 4'ün opsiyonel geri kalanları:**
 - Cold lead reactivation cron (60+ gün inactive → reactivation campaign'e al)

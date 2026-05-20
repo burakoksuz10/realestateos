@@ -55,6 +55,13 @@ class PipelineController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_default' => 'boolean',
+            'is_active' => 'boolean',
+            'type' => 'nullable|in:deal,lead',
+            'stages' => 'nullable|array',
+            'stages.*.id' => 'nullable|integer',
+            'stages.*.name' => 'required|string|max:255',
+            'stages.*.color' => 'nullable|string|max:32',
+            'stages.*.probability' => 'nullable|integer|min:0|max:100',
         ]);
 
         if ($validated['is_default'] ?? false) {
@@ -63,10 +70,92 @@ class PipelineController extends Controller
                 ->update(['is_default' => false]);
         }
 
-        $pipeline->update($validated);
+        $pipeline->update([
+            'name'        => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'is_default'  => (bool) ($validated['is_default'] ?? false),
+            'is_active'   => (bool) ($validated['is_active'] ?? true),
+            'type'        => $validated['type'] ?? $pipeline->type ?? 'deal',
+        ]);
+
+        $stages = $validated['stages'] ?? [];
+        if (!empty($stages)) {
+            $keptIds = [];
+            foreach ($stages as $idx => $row) {
+                $payload = [
+                    'name'        => $row['name'],
+                    'color'       => $row['color'] ?? '#0ea5e9',
+                    'probability' => (int) ($row['probability'] ?? 50),
+                    'order'       => $idx,
+                ];
+                if (!empty($row['id'])) {
+                    PipelineStage::where('id', $row['id'])
+                        ->where('pipeline_id', $pipeline->id)
+                        ->update($payload);
+                    $keptIds[] = (int) $row['id'];
+                } else {
+                    $new = $pipeline->stages()->create($payload);
+                    $keptIds[] = $new->id;
+                }
+            }
+            // Sadece deal'ı olmayan eski stage'leri sil
+            $pipeline->stages()
+                ->whereNotIn('id', $keptIds)
+                ->whereDoesntHave('deals')
+                ->delete();
+        }
 
         return redirect()->route('admin.pipelines.show', $pipeline)
             ->with('success', 'Pipeline başarıyla güncellendi.');
+    }
+
+    /**
+     * Bir stage için auto_actions JSON düzenleme sayfası.
+     */
+    public function editStageAutoActions(Pipeline $pipeline, PipelineStage $stage)
+    {
+        abort_unless($stage->pipeline_id === $pipeline->id, 404);
+
+        $actions = $stage->auto_actions ?? [];
+
+        return view('crm::pipelines.auto-actions', [
+            'pipeline' => $pipeline,
+            'stage'    => $stage,
+            'actions'  => $actions,
+        ]);
+    }
+
+    /**
+     * Bir stage için auto_actions JSON kaydet.
+     */
+    public function updateStageAutoActions(Request $request, Pipeline $pipeline, PipelineStage $stage)
+    {
+        abort_unless($stage->pipeline_id === $pipeline->id, 404);
+
+        $validated = $request->validate([
+            'actions' => 'nullable|array',
+            'actions.*.type' => 'required|string|in:create_task,notify_agent,notify_office,set_field,enroll_campaign,update_probability',
+            'actions.*.title' => 'nullable|string|max:255',
+            'actions.*.description' => 'nullable|string',
+            'actions.*.due_in_hours' => 'nullable|integer|min:0|max:8760',
+            'actions.*.priority' => 'nullable|string|in:low,medium,high,urgent',
+            'actions.*.message' => 'nullable|string',
+            'actions.*.field' => 'nullable|string|max:64',
+            'actions.*.value' => 'nullable',
+            'actions.*.campaign_slug' => 'nullable|string|max:128',
+            'actions.*.probability' => 'nullable|integer|min:0|max:100',
+        ]);
+
+        $clean = [];
+        foreach ($validated['actions'] ?? [] as $a) {
+            $clean[] = array_filter($a, fn ($v) => $v !== null && $v !== '');
+        }
+
+        $stage->update(['auto_actions' => $clean]);
+
+        return redirect()
+            ->route('admin.pipelines.show', $pipeline)
+            ->with('success', "'{$stage->name}' için " . count($clean) . " aksiyon kaydedildi.");
     }
 
     public function destroy(Pipeline $pipeline)

@@ -5,15 +5,12 @@ namespace Modules\RealEstate\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\RealEstate\Models\Listing;
+use Modules\RealEstate\Models\PortalSyncLog;
+use Modules\RealEstate\Services\Portals\PortalManager;
 
 class PortalSyncController extends Controller
 {
-    private array $portals = [
-        'sahibinden' => ['name' => 'Sahibinden.com', 'color' => 'blue'],
-        'hepsiemlak' => ['name' => 'Hepsiemlak.com', 'color' => 'green'],
-        'emlakjet'   => ['name' => 'EmlakJet.com',   'color' => 'orange'],
-        'zingat'     => ['name' => 'Zingat.com',      'color' => 'purple'],
-    ];
+    public function __construct(protected PortalManager $portals) {}
 
     public function index()
     {
@@ -22,56 +19,83 @@ class PortalSyncController extends Controller
             ->latest()
             ->paginate(20);
 
-        $portals = $this->portals;
+        $portalInfo = [];
+        foreach ($this->portals->all() as $key => $connector) {
+            $portalInfo[$key] = [
+                'name'       => $connector->name(),
+                'configured' => $connector->isConfigured(),
+                'last_sync'  => PortalSyncLog::where('portal', $key)->latest('synced_at')->first()?->synced_at,
+            ];
+        }
 
-        $logs = $this->getRecentLogs();
+        $logs = PortalSyncLog::with('listing:id,reference_no,title')
+            ->latest('synced_at')
+            ->limit(50)
+            ->get();
 
-        return view('realestate::portal-sync.index', compact('listings', 'portals', 'logs'));
+        return view('realestate::portal-sync.index', compact('listings', 'portalInfo', 'logs'));
     }
 
-    public function sync(Listing $listing)
+    public function sync(Request $request, Listing $listing)
     {
-        // Stub: real portal API integration requires third-party credentials
-        $portal = request('portal', 'sahibinden');
-        $portalName = $this->portals[$portal]['name'] ?? $portal;
+        $portal = $request->input('portal', 'sahibinden');
+
+        if (!$this->portals->has($portal)) {
+            return response()->json(['success' => false, 'message' => "Bilinmeyen portal: {$portal}"], 422);
+        }
+
+        $result = $this->portals->syncTo($listing, $portal);
 
         return response()->json([
-            'success' => true,
-            'message' => "{$portalName} portalına senkronizasyon tamamlandı (demo).",
-            'listing_id' => $listing->id,
-            'portal' => $portal,
-            'synced_at' => now()->toISOString(),
+            'success'           => $result['success'] ?? false,
+            'message'           => $result['message'] ?? '',
+            'portal'            => $portal,
+            'listing_id'        => $listing->id,
+            'portal_listing_id' => $result['portal_listing_id'] ?? null,
+            'portal_url'        => $result['portal_url'] ?? null,
+            'synced_at'         => now()->toIso8601String(),
         ]);
     }
 
-    public function syncAll()
+    public function syncAll(Request $request, Listing $listing)
     {
-        $count = Listing::where('status', 'active')->count();
+        $results = $this->portals->syncToAll($listing);
+        $success = collect($results)->filter(fn ($r) => $r['success'] ?? false)->count();
+        $total = count($results);
 
         return response()->json([
-            'success' => true,
-            'message' => "{$count} aktif ilan tüm portallara senkronize edildi (demo).",
-            'synced_count' => $count,
-            'portals' => array_keys($this->portals),
-            'synced_at' => now()->toISOString(),
+            'success' => $success > 0,
+            'message' => "{$success}/{$total} portala yayınlandı.",
+            'results' => $results,
         ]);
     }
 
-    public function logs()
+    public function remove(Request $request, Listing $listing)
     {
+        $portal = $request->input('portal');
+        if (!$portal || !$this->portals->has($portal)) {
+            return response()->json(['success' => false, 'message' => 'Geçersiz portal.'], 422);
+        }
+
+        $result = $this->portals->removeFrom($listing, $portal);
+
         return response()->json([
-            'success' => true,
-            'data' => $this->getRecentLogs(),
+            'success' => $result['success'] ?? false,
+            'message' => $result['message'] ?? '',
         ]);
     }
 
-    private function getRecentLogs(): array
+    public function logs(Request $request)
     {
-        // Stub data — replace with DB log table when portal integrations are live
-        return [
-            ['portal' => 'Sahibinden.com', 'listing' => 'Demo İlan #1', 'status' => 'success', 'message' => 'Senkronize edildi', 'time' => now()->subMinutes(5)->format('d.m.Y H:i')],
-            ['portal' => 'Hepsiemlak.com', 'listing' => 'Demo İlan #2', 'status' => 'error',   'message' => 'API anahtarı eksik',  'time' => now()->subMinutes(15)->format('d.m.Y H:i')],
-            ['portal' => 'EmlakJet.com',   'listing' => 'Demo İlan #1', 'status' => 'success', 'message' => 'Senkronize edildi', 'time' => now()->subMinutes(30)->format('d.m.Y H:i')],
-        ];
+        $portal = $request->input('portal');
+        $logs = PortalSyncLog::with('listing:id,reference_no,title')
+            ->when($portal, fn ($q) => $q->where('portal', $portal))
+            ->latest('synced_at')
+            ->paginate(50);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $logs->items(),
+        ]);
     }
 }

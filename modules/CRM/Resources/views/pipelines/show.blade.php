@@ -27,15 +27,21 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Aşamalar</h2>
                 <div class="space-y-3">
                     @forelse($pipeline->stages->sortBy('order') as $stage)
+                    @php $actionCount = is_array($stage->auto_actions ?? null) ? count($stage->auto_actions) : 0; @endphp
                     <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-800/50 rounded-xl">
                         <div class="w-4 h-4 rounded-full flex-shrink-0" style="background-color: {{ $stage->color ?? '#0ea5e9' }}"></div>
                         <div class="flex-1">
                             <p class="text-white font-medium">{{ $stage->name }}</p>
-                            @if($stage->is_won_stage)
-                            <span class="text-xs text-green-400">Kazanıldı aşaması</span>
-                            @elseif($stage->is_lost_stage)
-                            <span class="text-xs text-red-400">Kaybedildi aşaması</span>
-                            @endif
+                            <div class="flex items-center gap-2 mt-0.5">
+                                @if($stage->is_won_stage)
+                                <span class="text-xs text-green-400">Kazanıldı aşaması</span>
+                                @elseif($stage->is_lost_stage)
+                                <span class="text-xs text-red-400">Kaybedildi aşaması</span>
+                                @endif
+                                @if($actionCount > 0)
+                                <span class="text-xs px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded-full">⚡ {{ $actionCount }} aksiyon</span>
+                                @endif
+                            </div>
                         </div>
                         <div class="text-right">
                             <p class="text-white font-semibold">%{{ $stage->probability }}</p>
@@ -45,6 +51,10 @@
                             <p class="text-white font-semibold">{{ $stage->deals_count ?? ($stage->deals->count() ?? 0) }}</p>
                             <p class="text-gray-500 dark:text-dark-400 text-xs">kayıt</p>
                         </div>
+                        <a href="{{ route('admin.pipelines.stages.auto-actions.edit', [$pipeline, $stage]) }}"
+                           class="px-3 py-1.5 bg-primary-600/20 hover:bg-primary-600/30 text-primary-400 text-sm rounded-lg transition-colors whitespace-nowrap">
+                            ⚡ Aksiyonlar
+                        </a>
                     </div>
                     @empty
                     <p class="text-gray-500 dark:text-dark-400 text-sm">Henüz aşama eklenmemiş.</p>
